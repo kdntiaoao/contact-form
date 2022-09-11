@@ -2,7 +2,8 @@ import { Header } from 'components/organisms/presentations/Header'
 import { useState } from 'react'
 
 export const HeaderContainer = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
+  const [admin, setAdmin] = useState<boolean>(false)
+
   const menuList = [
     [
       { text: 'ホーム', url: '/' },
@@ -26,16 +27,14 @@ export const HeaderContainer = () => {
       { text: 'Item4', url: '/' },
       { text: 'Item5', url: '/' },
     ],
-    [
-      { text: 'お問い合わせ一覧', url: '/' },
-      { text: 'ログアウト', url: '/' },
-    ],
   ]
 
-  const handleDrawerToggle = () => {
-    // console.log('handle drawer toggle!', isDrawerOpen)
-    setIsDrawerOpen((prev) => !prev)
+  if (admin) {
+    menuList.push([
+      { text: 'お問い合わせ一覧', url: '/' },
+      { text: 'ログアウト', url: '/' },
+    ])
   }
 
-  return <Header menuList={menuList} isDrawerOpen={isDrawerOpen} handleDrawerToggle={handleDrawerToggle} />
+  return <Header menuList={menuList} />
 }

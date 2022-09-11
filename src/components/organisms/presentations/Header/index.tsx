@@ -1,4 +1,4 @@
-import { memo, ReactElement } from 'react'
+import { memo, ReactElement, useState } from 'react'
 import { AppBar, Box, IconButton, Slide, Toolbar, Typography, useScrollTrigger } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 
@@ -10,8 +10,6 @@ type HideOnScrollProps = {
 
 type HeaderProps = {
   menuList: { text: string; url: string }[][]
-  isDrawerOpen: boolean
-  handleDrawerToggle: () => void
 }
 
 const HideOnScroll = ({ children }: HideOnScrollProps) => {
@@ -24,7 +22,13 @@ const HideOnScroll = ({ children }: HideOnScrollProps) => {
 }
 
 // eslint-disable-next-line react/display-name
-export const Header = memo(({ menuList, isDrawerOpen, handleDrawerToggle }: HeaderProps) => {
+export const Header = memo(({menuList}: HeaderProps) => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
+
+  const handleDrawerToggle = () => {
+    // console.log('handle drawer toggle!', isDrawerOpen)
+    setIsDrawerOpen((prev) => !prev)
+  }
   return (
     <>
       <HideOnScroll>
