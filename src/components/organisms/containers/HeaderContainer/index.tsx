@@ -1,7 +1,8 @@
 import { Header } from 'components/organisms/presentations/Header'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 
-export const HeaderContainer = () => {
+// eslint-disable-next-line react/display-name
+export const HeaderContainer = memo(() => {
   const [admin, setAdmin] = useState<boolean>(false)
 
   const menuList = [
@@ -37,4 +38,4 @@ export const HeaderContainer = () => {
   }
 
   return <Header menuList={menuList} />
-}
+})

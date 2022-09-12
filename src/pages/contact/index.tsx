@@ -1,22 +1,133 @@
 import { NextPage } from 'next'
+import { useForm, Controller, SubmitHandler } from 'react-hook-form'
+import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import SendIcon from '@mui/icons-material/Send'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { Box, Container } from '@mui/material'
+
+type FormInputs = {
+  name: string
+  email: string
+  tel: string
+  category: string
+  contents: string
+}
 
 const ContactPage: NextPage = () => {
+  const theme = useTheme()
+  const matches = useMediaQuery(theme.breakpoints.up('sm'))
+  const {
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting, isSubmitSuccessful },
+  } = useForm<FormInputs>({
+    mode: 'onBlur',
+    defaultValues: {
+      name: '',
+      email: 'メールアドレス',
+      tel: '012345689',
+      category: 'A001',
+      contents: 'Hello, world',
+    },
+  })
+
+  const onSubmit: SubmitHandler<FormInputs> = (data) => {
+    console.log(data)
+  }
+
   return (
     <>
       <DefaultLayout>
-        <Container>
-          <Box sx={{ my: 2 }}>
-            {[...new Array(40)]
-              .map(
-                () => `Cras mattis consectetur purus sit amet fermentum.
-Cras justo odio, dapibus ac facilisis in, egestas eget quam.
-Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`
-              )
-              .join('\n')}
+        <Container maxWidth="md">
+          <Box pt={{ xs: 6, sm: 10 }}>
+            <Box mb={{ xs: 2, sm: 4 }}>
+              <Typography variant={matches ? 'h4' : 'h5'} component="h1">
+                お問い合わせ
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body1" component="p">
+                商品に関するお問い合わせは下のフォームよりお願いいたします。
+              </Typography>
+            </Box>
+
+            <Stack
+              component="form"
+              noValidate
+              autoComplete="off"
+              onSubmit={handleSubmit(onSubmit)}
+              mt={{ xs: 6, sm: 10 }}
+              spacing={6}
+            >
+              <Box>
+                <Controller
+                  name="name"
+                  control={control}
+                  rules={{
+                    required: '入力してください',
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="お名前"
+                      variant="standard"
+                      error={!!errors.name}
+                      helperText={errors?.name?.message}
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+              <Box>
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField {...field} type="email" label="メールアドレス" variant="standard" fullWidth />
+                  )}
+                />
+              </Box>
+              <Box>
+                <Controller
+                  name="tel"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField {...field} type="tel" label="電話番号" variant="standard" fullWidth />
+                  )}
+                />
+              </Box>
+              <Box>
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField {...field} type="tel" label="商品種別" variant="standard" fullWidth />
+                  )}
+                />
+              </Box>
+              <Box>
+                <Controller
+                  name="contents"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField {...field} type="tel" label="お問い合わせ内容" variant="standard" fullWidth />
+                  )}
+                />
+              </Box>
+
+              <Box sx={{ width: 300, pt: { xs: 2, sm: 4 }, alignSelf: 'center' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  endIcon={<SendIcon />}
+                  disabled={isSubmitting || isSubmitSuccessful}
+                  fullWidth
+                >
+                  確認する
+                </Button>
+              </Box>
+            </Stack>
           </Box>
         </Container>
       </DefaultLayout>
