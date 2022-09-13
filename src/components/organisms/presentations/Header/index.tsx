@@ -1,6 +1,8 @@
+import Link from 'next/link'
 import { memo, ReactElement, useState } from 'react'
-import { AppBar, Box, IconButton, Slide, Toolbar, Typography, useScrollTrigger } from '@mui/material'
+
 import MenuIcon from '@mui/icons-material/Menu'
+import { AppBar, Box, IconButton, Slide, Toolbar, Typography, useScrollTrigger } from '@mui/material'
 
 import { MenuDrawer } from 'components/molecules/MenuDrawer'
 
@@ -22,7 +24,7 @@ const HideOnScroll = ({ children }: HideOnScrollProps) => {
 }
 
 // eslint-disable-next-line react/display-name
-export const Header = memo(({menuList}: HeaderProps) => {
+export const Header = memo(({ menuList }: HeaderProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
 
   const handleDrawerToggle = () => {
@@ -38,9 +40,11 @@ export const Header = memo(({menuList}: HeaderProps) => {
         <AppBar>
           <Toolbar>
             <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" component="div">
-                Company
-              </Typography>
+              <Link href="/">
+                <Typography variant="h6" component="h1">
+                  Company
+                </Typography>
+              </Link>
             </Box>
             <IconButton size="large" color="inherit" aria-label="メニューを開く" onClick={handleDrawerToggle}>
               <MenuIcon />

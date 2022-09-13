@@ -1,9 +1,12 @@
 import { NextPage } from 'next'
-import { useForm, Controller, SubmitHandler } from 'react-hook-form'
-import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { useRouter } from 'next/router'
+
 import SendIcon from '@mui/icons-material/Send'
+import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
+
 
 type FormInputs = {
   name: string
@@ -14,8 +17,7 @@ type FormInputs = {
 }
 
 const ContactPage: NextPage = () => {
-  const theme = useTheme()
-  const matches = useMediaQuery(theme.breakpoints.up('sm'))
+  const router = useRouter()
   const {
     handleSubmit,
     control,
@@ -30,16 +32,18 @@ const ContactPage: NextPage = () => {
       contents: 'Hello, world',
     },
   })
+  const theme = useTheme()
+  const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
-    console.log(data)
+    router.push({ pathname: '/contact/confirm', query: data })
   }
 
   return (
     <>
       <DefaultLayout>
         <Container maxWidth="md">
-          <Box pt={{ xs: 6, sm: 10 }}>
+          <Box py={{ xs: 6, sm: 10 }}>
             <Box mb={{ xs: 2, sm: 4 }}>
               <Typography variant={matches ? 'h4' : 'h5'} component="h1">
                 お問い合わせ
