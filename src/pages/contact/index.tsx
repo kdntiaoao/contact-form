@@ -7,7 +7,6 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
 
-
 type FormInputs = {
   name: string
   email: string
@@ -18,6 +17,11 @@ type FormInputs = {
 
 const ContactPage: NextPage = () => {
   const router = useRouter()
+  const queryName = router.query.name as string | undefined
+  const queryEmail = router.query.email as string | undefined
+  const queryTel = router.query.tel as string | undefined
+  const queryCategory = router.query.category as string | undefined
+  const queryContents = router.query.contents as string | undefined
   const {
     handleSubmit,
     control,
@@ -25,18 +29,18 @@ const ContactPage: NextPage = () => {
   } = useForm<FormInputs>({
     mode: 'onBlur',
     defaultValues: {
-      name: '',
-      email: 'メールアドレス',
-      tel: '012345689',
-      category: 'A001',
-      contents: 'Hello, world',
+      name: queryName || '',
+      email: queryEmail || 'メールアドレス',
+      tel: queryTel || '012345689',
+      category: queryCategory || 'A001',
+      contents: queryContents || 'Hello, world',
     },
   })
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
-    router.push({ pathname: '/contact/confirm', query: data })
+    router.push({ pathname: '/contact/confirm', query: data }, '/contact/confirm')
   }
 
   return (
@@ -86,8 +90,19 @@ const ContactPage: NextPage = () => {
                 <Controller
                   name="email"
                   control={control}
+                  rules={{
+                    required: '入力してください',
+                  }}
                   render={({ field }) => (
-                    <TextField {...field} type="email" label="メールアドレス" variant="standard" fullWidth />
+                    <TextField
+                      {...field}
+                      type="email"
+                      label="メールアドレス"
+                      variant="standard"
+                      error={!!errors.email}
+                      helperText={errors?.email?.message}
+                      fullWidth
+                    />
                   )}
                 />
               </Box>
@@ -95,8 +110,19 @@ const ContactPage: NextPage = () => {
                 <Controller
                   name="tel"
                   control={control}
+                  rules={{
+                    required: '入力してください',
+                  }}
                   render={({ field }) => (
-                    <TextField {...field} type="tel" label="電話番号" variant="standard" fullWidth />
+                    <TextField
+                      {...field}
+                      type="tel"
+                      label="電話番号"
+                      variant="standard"
+                      error={!!errors.tel}
+                      helperText={errors?.tel?.message}
+                      fullWidth
+                    />
                   )}
                 />
               </Box>
@@ -104,8 +130,19 @@ const ContactPage: NextPage = () => {
                 <Controller
                   name="category"
                   control={control}
+                  rules={{
+                    required: '入力してください',
+                  }}
                   render={({ field }) => (
-                    <TextField {...field} type="tel" label="商品種別" variant="standard" fullWidth />
+                    <TextField
+                      {...field}
+                      type="tel"
+                      label="商品種別"
+                      variant="standard"
+                      error={!!errors.category}
+                      helperText={errors?.category?.message}
+                      fullWidth
+                    />
                   )}
                 />
               </Box>
@@ -113,8 +150,20 @@ const ContactPage: NextPage = () => {
                 <Controller
                   name="contents"
                   control={control}
+                  rules={{
+                    required: '入力してください',
+                  }}
                   render={({ field }) => (
-                    <TextField {...field} type="tel" label="お問い合わせ内容" variant="standard" fullWidth />
+                    <TextField
+                      {...field}
+                      type="tel"
+                      label="お問い合わせ内容"
+                      variant="standard"
+                      error={!!errors.contents}
+                      helperText={errors?.contents?.message}
+                      fullWidth
+                      multiline
+                    />
                   )}
                 />
               </Box>

@@ -5,4 +5,4 @@ initializeApp({
   credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string)),
 })
 
-export const adminDB = getFirestore()
+export const adminDb = getFirestore()
