@@ -16,39 +16,57 @@ import {
   useTheme,
 } from '@mui/material'
 import { signInAnonymously } from 'firebase/auth'
-import { addDoc, collection } from 'firebase/firestore'
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
+import { useAuthState } from 'react-firebase-hooks/auth'
 
 import { auth, db } from '../../../firebase/client'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { Chat, ChatData, ContactInfo } from 'types/data'
 
 const ConfirmPage = () => {
   const router = useRouter()
-  const { name, email, tel, category, contents } = router.query
+  const queryName = router.query.name as string | undefined
+  const queryEmail = router.query.email as string | undefined
+  const queryTel = router.query.tel as string | undefined
+  const queryCategory = router.query.category as string | undefined
+  const queryContents = router.query.contents as string | undefined
   const [loading, setLoading] = useState<boolean>(false)
+  const [user] = useAuthState(auth)
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
   const handleSubmit = async () => {
-    const currentDate = Date.now()
-    const contactInfo = { name, email, tel, category, date: currentDate }
-    const chatData = { supporterId: '0', date: currentDate, contents: { text: contents } }
-    const status = 0
-    try {
-      setLoading(true)
-      signInAnonymously(auth)
-        .then(async () => {
-          const docRef = await addDoc(collection(db, 'contactData'), { contactInfo, chatData, status })
-          router.push(`/contact/${docRef}`)
-        })
-        .catch((error) => {
-          console.log('error')
-          throw new Error(error)
-        })
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
+    // 入力データがなければ処理をしない
+    if (
+      typeof queryName !== 'undefined' &&
+      typeof queryEmail !== 'undefined' &&
+      typeof queryTel !== 'undefined' &&
+      typeof queryCategory !== 'undefined' &&
+      typeof queryContents !== 'undefined'
+    ) {
+      const currentDate = Date.now()
+      const contactInfo: ContactInfo = {
+        name: queryName,
+        email: queryEmail,
+        tel: queryTel,
+        category: queryCategory,
+        submitTime: currentDate,
+      }
+      const chat: Chat = { contributor: '0', postTime: currentDate, contents: { text: queryContents } }
+      const chatData: ChatData = { chatHistory: [chat], currentStatus: 0 }
+
+      try {
+        setLoading(true)
+        if (!user) await signInAnonymously(auth)
+        const docRef = await addDoc(collection(db, 'contactInfo'), contactInfo)
+        await setDoc(doc(db, 'chatData', docRef.id), chatData)
+        router.push(`/contact/${docRef.id}`)
+      } catch (error) {
+        console.log(error)
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -58,8 +76,8 @@ const ConfirmPage = () => {
 
   useEffect(() => {
     // 入力されたデータがないとき、お問い合わせページへ遷移
-    if (!name) router.push('/contact')
-  }, [name, router])
+    if (!queryName) router.push('/contact')
+  }, [queryName, router])
 
   return (
     <DefaultLayout>
@@ -85,7 +103,7 @@ const ConfirmPage = () => {
               <TextField
                 label="お名前"
                 variant="standard"
-                defaultValue={name}
+                defaultValue={queryName}
                 InputProps={{ readOnly: true }}
                 fullWidth
               />
@@ -95,7 +113,7 @@ const ConfirmPage = () => {
                 type="email"
                 label="メールアドレス"
                 variant="standard"
-                defaultValue={email}
+                defaultValue={queryEmail}
                 InputProps={{ readOnly: true }}
                 fullWidth
               />
@@ -105,7 +123,7 @@ const ConfirmPage = () => {
                 type="tel"
                 label="電話番号"
                 variant="standard"
-                defaultValue={tel}
+                defaultValue={queryTel}
                 InputProps={{ readOnly: true }}
                 fullWidth
               />
@@ -114,7 +132,7 @@ const ConfirmPage = () => {
               <TextField
                 label="商品種別"
                 variant="standard"
-                defaultValue={category}
+                defaultValue={queryCategory}
                 InputProps={{ readOnly: true }}
                 fullWidth
               />
@@ -123,7 +141,7 @@ const ConfirmPage = () => {
               <TextField
                 label="お問い合わせ内容"
                 variant="standard"
-                defaultValue={contents}
+                defaultValue={queryContents}
                 fullWidth
                 InputProps={{ readOnly: true }}
                 multiline
