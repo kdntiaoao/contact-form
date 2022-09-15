@@ -22,15 +22,6 @@ type ContactChatPageProps = {
 const ContactChatPage: NextPage<ContactChatPageProps> = ({ id, contactInfo, chatData }: ContactChatPageProps) => {
   const router = useRouter()
   const [user] = useAuthState(auth)
-  // const { contactData } = useContactData(id, initialData)
-  // const {
-  //   contactInfo: { name },
-  //   chatData,
-  // } = contactData
-
-  // useEffect(() => {
-  //   console.log('contactData : ', contactData)
-  // }, [contactData])
 
   useEffect(() => {
     if (!user) signInAnonymously(auth).then(() => {

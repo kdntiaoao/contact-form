@@ -1,26 +1,17 @@
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
 import EditIcon from '@mui/icons-material/Edit'
 import SendIcon from '@mui/icons-material/Send'
-import {
-  Backdrop,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Stack,
-  TextField,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
+import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { signInAnonymously } from 'firebase/auth'
 import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 
 import { auth, db } from '../../../firebase/client'
 
+import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { Chat, ChatData, ContactInfo } from 'types/data'
 
@@ -61,17 +52,13 @@ const ConfirmPage = () => {
         if (!user) await signInAnonymously(auth)
         const docRef = await addDoc(collection(db, 'contactInfo'), contactInfo)
         await setDoc(doc(db, 'chatData', docRef.id), chatData)
-        router.push(`/contact/${docRef.id}`)
+        await router.push(`/contact/${docRef.id}`)
       } catch (error) {
         console.log(error)
       } finally {
         setLoading(false)
       }
     }
-  }
-
-  const handleEdit = () => {
-    router.push({ pathname: '/contact', query: router.query }, '/contact')
   }
 
   useEffect(() => {
@@ -81,9 +68,7 @@ const ConfirmPage = () => {
 
   return (
     <DefaultLayout>
-      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      <LoadingScreen loading={loading} />
 
       <Container>
         <Box py={{ xs: 6, sm: 10 }}>
@@ -99,54 +84,44 @@ const ConfirmPage = () => {
           </Box>
 
           <Stack mt={{ xs: 6, sm: 10 }} spacing={6}>
-            <Box>
-              <TextField
-                label="お名前"
-                variant="standard"
-                defaultValue={queryName}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-            </Box>
-            <Box>
-              <TextField
-                type="email"
-                label="メールアドレス"
-                variant="standard"
-                defaultValue={queryEmail}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-            </Box>
-            <Box>
-              <TextField
-                type="tel"
-                label="電話番号"
-                variant="standard"
-                defaultValue={queryTel}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-            </Box>
-            <Box>
-              <TextField
-                label="商品種別"
-                variant="standard"
-                defaultValue={queryCategory}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-            </Box>
-            <Box>
-              <TextField
-                label="お問い合わせ内容"
-                variant="standard"
-                defaultValue={queryContents}
-                fullWidth
-                InputProps={{ readOnly: true }}
-                multiline
-              />
-            </Box>
+            <TextField
+              label="お名前"
+              variant="standard"
+              defaultValue={queryName}
+              InputProps={{ readOnly: true }}
+              fullWidth
+            />
+            <TextField
+              type="email"
+              label="メールアドレス"
+              variant="standard"
+              defaultValue={queryEmail}
+              InputProps={{ readOnly: true }}
+              fullWidth
+            />
+            <TextField
+              type="tel"
+              label="電話番号"
+              variant="standard"
+              defaultValue={queryTel}
+              InputProps={{ readOnly: true }}
+              fullWidth
+            />
+            <TextField
+              label="商品種別"
+              variant="standard"
+              defaultValue={queryCategory}
+              InputProps={{ readOnly: true }}
+              fullWidth
+            />
+            <TextField
+              label="お問い合わせ内容"
+              variant="standard"
+              defaultValue={queryContents}
+              fullWidth
+              InputProps={{ readOnly: true }}
+              multiline
+            />
 
             <Stack
               direction={{ xs: 'column', sm: 'row-reverse' }}
@@ -168,17 +143,18 @@ const ConfirmPage = () => {
                 </Button>
               </Box>
               <Box sx={{ width: 300 }}>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  size="large"
-                  endIcon={<EditIcon />}
-                  disabled={false}
-                  onClick={handleEdit}
-                  fullWidth
-                >
-                  修正する
-                </Button>
+                <Link href={{ pathname: '/contact', query: router.query }} as="/contact">
+                  <Button
+                    component="a"
+                    variant="outlined"
+                    size="large"
+                    endIcon={<EditIcon />}
+                    disabled={false}
+                    fullWidth
+                  >
+                    修正する
+                  </Button>
+                </Link>
               </Box>
             </Stack>
           </Stack>
