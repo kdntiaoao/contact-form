@@ -2,24 +2,18 @@ import { doc, getDoc } from 'firebase/firestore'
 
 import { db } from '../../firebase/client'
 
-export const getContactData = async (id: string) => {
-  const docRef = doc(db, 'contactData', id)
-  const docSnap = await getDoc(docRef)
+import { ContactInfo } from 'types/data'
 
-  if (docSnap.exists()) {
-    console.log('contactData : ', docSnap.data())
-  } else {
-    console.log('No such document!')
-  }
-}
-
-export const getContactInfo = async (id: string) => {
-  const docRef = doc(db, 'contactData', id, 'contactInfo')
+export const getContactInfo = async (id: string): Promise<ContactInfo | undefined> => {
+  const docRef = doc(db, 'contactInfo', id)
   const snapshot = await getDoc(docRef)
 
   if (snapshot.exists()) {
-    console.log('contactInfo : ', snapshot.data())
+    const contactInfo = snapshot.data() as ContactInfo
+      console.log('contactInfo : ', contactInfo)
+      return contactInfo
   } else {
     console.log('No such document!')
+    return undefined
   }
 }
