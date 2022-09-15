@@ -1,5 +1,6 @@
-import { ReactNode } from 'react'
 import Head from 'next/head'
+import { ReactNode } from 'react'
+
 import { Stack } from '@mui/material'
 
 import { HeaderContainer } from 'components/organisms/containers/HeaderContainer'
