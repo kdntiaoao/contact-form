@@ -67,106 +67,96 @@ const ContactPage: NextPage = () => {
               mt={{ xs: 6, sm: 10 }}
               spacing={6}
             >
-              <Box>
-                <Controller
-                  name="name"
-                  control={control}
-                  rules={{
-                    required: '入力してください',
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="お名前"
-                      variant="standard"
-                      error={!!errors.name}
-                      helperText={errors?.name?.message}
-                      fullWidth
-                    />
-                  )}
-                />
-              </Box>
-              <Box>
-                <Controller
-                  name="email"
-                  control={control}
-                  rules={{
-                    required: '入力してください',
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      type="email"
-                      label="メールアドレス"
-                      variant="standard"
-                      error={!!errors.email}
-                      helperText={errors?.email?.message}
-                      fullWidth
-                    />
-                  )}
-                />
-              </Box>
-              <Box>
-                <Controller
-                  name="tel"
-                  control={control}
-                  rules={{
-                    required: '入力してください',
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      type="tel"
-                      label="電話番号"
-                      variant="standard"
-                      error={!!errors.tel}
-                      helperText={errors?.tel?.message}
-                      fullWidth
-                    />
-                  )}
-                />
-              </Box>
-              <Box>
-                <Controller
-                  name="category"
-                  control={control}
-                  rules={{
-                    required: '入力してください',
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      type="tel"
-                      label="商品種別"
-                      variant="standard"
-                      error={!!errors.category}
-                      helperText={errors?.category?.message}
-                      fullWidth
-                    />
-                  )}
-                />
-              </Box>
-              <Box>
-                <Controller
-                  name="contents"
-                  control={control}
-                  rules={{
-                    required: '入力してください',
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      type="tel"
-                      label="お問い合わせ内容"
-                      variant="standard"
-                      error={!!errors.contents}
-                      helperText={errors?.contents?.message}
-                      fullWidth
-                      multiline
-                    />
-                  )}
-                />
-              </Box>
+              <Controller
+                name="name"
+                control={control}
+                rules={{
+                  required: '入力してください',
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="お名前"
+                    variant="standard"
+                    error={!!errors.name}
+                    helperText={errors?.name?.message}
+                    fullWidth
+                  />
+                )}
+              />
+              <Controller
+                name="email"
+                control={control}
+                rules={{
+                  required: '入力してください',
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    type="email"
+                    label="メールアドレス"
+                    variant="standard"
+                    error={!!errors.email}
+                    helperText={errors?.email?.message}
+                    fullWidth
+                  />
+                )}
+              />
+              <Controller
+                name="tel"
+                control={control}
+                rules={{
+                  required: '入力してください',
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    type="tel"
+                    label="電話番号"
+                    variant="standard"
+                    error={!!errors.tel}
+                    helperText={errors?.tel?.message}
+                    fullWidth
+                  />
+                )}
+              />
+              <Controller
+                name="category"
+                control={control}
+                rules={{
+                  required: '入力してください',
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    type="tel"
+                    label="商品種別"
+                    variant="standard"
+                    error={!!errors.category}
+                    helperText={errors?.category?.message}
+                    fullWidth
+                  />
+                )}
+              />
+              <Controller
+                name="contents"
+                control={control}
+                rules={{
+                  required: '入力してください',
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    type="tel"
+                    label="お問い合わせ内容"
+                    variant="standard"
+                    error={!!errors.contents}
+                    helperText={errors?.contents?.message}
+                    fullWidth
+                    multiline
+                  />
+                )}
+              />
 
               <Box sx={{ width: 300, pt: { xs: 2, sm: 4 }, alignSelf: 'center' }}>
                 <Button

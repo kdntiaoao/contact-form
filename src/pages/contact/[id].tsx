@@ -4,13 +4,13 @@ import { useEffect } from 'react'
 
 import { Backdrop, Box, CircularProgress, Container, Typography } from '@mui/material'
 import { signInAnonymously } from 'firebase/auth'
-import {useAuthState} from 'react-firebase-hooks/auth'
+import { useAuthState } from 'react-firebase-hooks/auth'
 
 import { auth } from '../../../firebase/client'
 import { adminDb } from '../../../firebase/server'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import {  getContactInfo } from 'services/getContactData'
+import { getContactInfo } from 'services/getContactData'
 import { ChatData, ContactInfo } from 'types/data'
 
 type ContactChatPageProps = {
@@ -22,25 +22,17 @@ type ContactChatPageProps = {
 const ContactChatPage: NextPage<ContactChatPageProps> = ({ id, contactInfo, chatData }: ContactChatPageProps) => {
   const router = useRouter()
   const [user] = useAuthState(auth)
-  // const { contactData } = useContactData(id, initialData)
-  // const {
-  //   contactInfo: { name },
-  //   chatData,
-  // } = contactData
-
-  // useEffect(() => {
-  //   console.log('contactData : ', contactData)
-  // }, [contactData])
 
   useEffect(() => {
-    if (!user) signInAnonymously(auth).then(() => {
-      console.log({user})
-    })
+    if (!user)
+      signInAnonymously(auth).then(() => {
+        console.log({ user })
+      })
   }, [user])
 
   useEffect(() => {
     if (!user && id) {
-      getContactInfo(id)
+      getContactInfo(id).then((contactInfo) => console.log('getContactInfo', ' => ', contactInfo))
     }
   }, [id, user])
 
@@ -64,14 +56,13 @@ const ContactChatPage: NextPage<ContactChatPageProps> = ({ id, contactInfo, chat
           <Typography variant="h5">送信時間：{contactInfo?.submitTime || 'undefined'}</Typography>
           <Box mt={4}>
             <Typography>現在の状態：{chatData?.currentStatus || 'undefined'}</Typography>
-            {
-              chatData?.chatHistory?.map(({ contributor, postTime, contents: { text, newStatus } }) => (
-                <Box key={postTime} mt={4}>
-                  <Typography>投稿者 : {contributor || 'undefined'}</Typography>
-                  <Typography>投稿日時 : {postTime || 'undefined'}</Typography>
-                  <Typography>投稿内容 : {text || newStatus || 'undefined'}</Typography>
-                </Box>
-              ))}
+            {chatData?.chatHistory?.map(({ contributor, postTime, contents: { text, newStatus } }) => (
+              <Box key={postTime} mt={4}>
+                <Typography>投稿者 : {contributor || 'undefined'}</Typography>
+                <Typography>投稿日時 : {postTime || 'undefined'}</Typography>
+                <Typography>投稿内容 : {text || newStatus || 'undefined'}</Typography>
+              </Box>
+            ))}
           </Box>
         </Box>
       </Container>
