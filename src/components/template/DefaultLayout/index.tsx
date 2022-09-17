@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { ReactNode } from 'react'
+import { memo, ReactNode } from 'react'
 
 import { Stack } from '@mui/material'
 
@@ -10,7 +10,8 @@ type Props = {
   children: ReactNode
 }
 
-export const DefaultLayout = ({ title = 'お問合せフォーム', children }: Props) => {
+// eslint-disable-next-line react/display-name
+export const DefaultLayout = memo(({ title = 'お問合せフォーム', children }: Props) => {
   return (
     <>
       <Head>
@@ -23,4 +24,4 @@ export const DefaultLayout = ({ title = 'お問合せフォーム', children }: 
       </Stack>
     </>
   )
-}
+})

@@ -1,6 +1,7 @@
+import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 
 import EditIcon from '@mui/icons-material/Edit'
 import SendIcon from '@mui/icons-material/Send'
@@ -15,7 +16,8 @@ import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { Chat, ChatData, ContactInfo } from 'types/data'
 
-const ConfirmPage = () => {
+// eslint-disable-next-line react/display-name
+const ConfirmPage: NextPage = memo(() => {
   const router = useRouter()
   const queryName = router.query.name as string | undefined
   const queryEmail = router.query.email as string | undefined
@@ -27,7 +29,7 @@ const ConfirmPage = () => {
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     // 入力データがなければ処理をしない
     if (
       typeof queryName !== 'undefined' &&
@@ -59,7 +61,7 @@ const ConfirmPage = () => {
         setLoading(false)
       }
     }
-  }
+  }, [queryCategory, queryContents, queryEmail, queryName, queryTel, router, user])
 
   useEffect(() => {
     // 入力されたデータがないとき、お問い合わせページへ遷移
@@ -162,6 +164,6 @@ const ConfirmPage = () => {
       </Container>
     </DefaultLayout>
   )
-}
+})
 
 export default ConfirmPage
