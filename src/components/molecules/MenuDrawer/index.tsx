@@ -4,17 +4,20 @@ import { Fragment, memo } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemText, Toolbar } from '@mui/material'
 
-type Props = {
+type MenuListProps = {
+  menuList: { text: string; url: string }[][]
+  onClose: () => void
+}
+
+type MenuDrawerProps = {
   menuList: { text: string; url: string }[][]
   open: boolean
   onClose: () => void
 }
 
 // eslint-disable-next-line react/display-name
-export const MenuDrawer = memo(({ menuList, open, onClose }: Props) => {
-  console.log('rendering MenuDrawer')
-
-  const drawer = (
+const MenuList = memo(({ menuList, onClose }: MenuListProps) => {
+  return (
     <div>
       <Toolbar>
         <Box ml="auto">
@@ -30,7 +33,7 @@ export const MenuDrawer = memo(({ menuList, open, onClose }: Props) => {
             {list.map(({ text, url }) => (
               <ListItem key={text} disablePadding>
                 <Link href={url}>
-                  <ListItemButton component="a">
+                  <ListItemButton component="a" onClick={onClose}>
                     <ListItemText primary={text} />
                   </ListItemButton>
                 </Link>
@@ -41,6 +44,11 @@ export const MenuDrawer = memo(({ menuList, open, onClose }: Props) => {
       ))}
     </div>
   )
+})
+
+// eslint-disable-next-line react/display-name
+export const MenuDrawer = memo(({ menuList, open, onClose }: MenuDrawerProps) => {
+  console.log('rendering MenuDrawer')
 
   return (
     <Box component="nav">
@@ -56,7 +64,7 @@ export const MenuDrawer = memo(({ menuList, open, onClose }: Props) => {
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: { xs: '100%', sm: 320 } },
         }}
       >
-        {drawer}
+        <MenuList {...{ menuList, onClose }} />
       </Drawer>
     </Box>
   )
