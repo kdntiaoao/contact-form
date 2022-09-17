@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { memo, ReactElement, useState } from 'react'
+import { memo, ReactElement, useCallback, useState } from 'react'
 
 import MenuIcon from '@mui/icons-material/Menu'
 import { AppBar, Box, IconButton, Slide, Toolbar, Typography, useScrollTrigger } from '@mui/material'
@@ -14,23 +14,24 @@ type HeaderProps = {
   menuList: { text: string; url: string }[][]
 }
 
-const HideOnScroll = ({ children }: HideOnScrollProps) => {
+// eslint-disable-next-line react/display-name
+const HideOnScroll = memo(({ children }: HideOnScrollProps) => {
   const trigger = useScrollTrigger()
   return (
     <Slide appear={false} direction="down" in={!trigger}>
       {children}
     </Slide>
   )
-}
+})
 
 // eslint-disable-next-line react/display-name
 export const Header = memo(({ menuList }: HeaderProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
 
-  const handleDrawerToggle = () => {
+  const handleDrawerToggle = useCallback(() => {
     // console.log('handle drawer toggle!', isDrawerOpen)
     setIsDrawerOpen((prev) => !prev)
-  }
+  }, [])
 
   console.log('rendering Header')
 

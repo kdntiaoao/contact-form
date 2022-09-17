@@ -1,5 +1,6 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
+import { memo, useCallback } from 'react'
 
 import SendIcon from '@mui/icons-material/Send'
 import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
@@ -15,7 +16,8 @@ type FormInputs = {
   contents: string
 }
 
-const ContactPage: NextPage = () => {
+// eslint-disable-next-line react/display-name
+const ContactPage: NextPage = memo(() => {
   const router = useRouter()
   const queryName = router.query.name as string | undefined
   const queryEmail = router.query.email as string | undefined
@@ -39,9 +41,9 @@ const ContactPage: NextPage = () => {
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
-  const onSubmit: SubmitHandler<FormInputs> = (data) => {
+  const onSubmit: SubmitHandler<FormInputs> = useCallback((data) => {
     router.push({ pathname: '/contact/confirm', query: data }, '/contact/confirm')
-  }
+  }, [router])
 
   return (
     <>
@@ -176,6 +178,6 @@ const ContactPage: NextPage = () => {
       </DefaultLayout>
     </>
   )
-}
+})
 
 export default ContactPage

@@ -1,6 +1,6 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 
 import { Backdrop, Box, CircularProgress, Container, Typography } from '@mui/material'
 import { signInAnonymously } from 'firebase/auth'
@@ -19,68 +19,67 @@ type ContactChatPageProps = {
   chatData: ChatData | undefined
 }
 
-const ContactChatPage: NextPage<ContactChatPageProps> = ({
-  contactId,
-  contactInfo,
-  chatData,
-}: ContactChatPageProps) => {
-  const router = useRouter()
-  const [user] = useAuthState(auth)
+// eslint-disable-next-line react/display-name
+const ContactChatPage: NextPage<ContactChatPageProps> = memo(
+  ({ contactId, contactInfo, chatData }: ContactChatPageProps) => {
+    const router = useRouter()
+    const [user] = useAuthState(auth)
 
-  useEffect(() => {
-    if (!user)
-      signInAnonymously(auth).then(() => {
-        console.log({ user })
-      })
-  }, [user])
+    useEffect(() => {
+      if (!user)
+        signInAnonymously(auth).then(() => {
+          console.log({ user })
+        })
+    }, [user])
 
-  useEffect(() => {
-    if (user && contactId) {
-      getContactInfo(contactId).then((contactInfo) => {
-        if (contactInfo) {
-          console.log('getContactInfo', ' => ', contactInfo)
-        } else {
-          console.log('contactInfo not exist')
-        }
-      })
-    } else {
-      console.log('user or id not exist')
+    useEffect(() => {
+      if (user && contactId) {
+        getContactInfo(contactId).then((contactInfo) => {
+          if (contactInfo) {
+            console.log('getContactInfo', ' => ', contactInfo)
+          } else {
+            console.log('contactInfo not exist')
+          }
+        })
+      } else {
+        console.log('user or id not exist')
+      }
+    }, [contactId, user])
+
+    if (router.isFallback) {
+      return (
+        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      )
     }
-  }, [contactId, user])
 
-  if (router.isFallback) {
     return (
-      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      <DefaultLayout>
+        <Container>
+          <Box py={{ xs: 6, sm: 10 }}>
+            ID : {contactId || 'undefined'}
+            <Typography variant="h5">お名前：{contactInfo?.name || 'undefined'}</Typography>
+            <Typography variant="h5">メール：{contactInfo?.email || 'undefined'}</Typography>
+            <Typography variant="h5">電話：{contactInfo?.tel || 'undefined'}</Typography>
+            <Typography variant="h5">商品種別：{contactInfo?.category || 'undefined'}</Typography>
+            <Typography variant="h5">送信時間：{contactInfo?.submitTime || 'undefined'}</Typography>
+            <Box mt={4}>
+              <Typography>現在の状態：{chatData?.currentStatus || 'undefined'}</Typography>
+              {chatData?.chatHistory?.map(({ contributor, postTime, contents: { text, newStatus } }) => (
+                <Box key={postTime} mt={4}>
+                  <Typography>投稿者 : {contributor || 'undefined'}</Typography>
+                  <Typography>投稿日時 : {postTime || 'undefined'}</Typography>
+                  <Typography>投稿内容 : {text || newStatus || 'undefined'}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Container>
+      </DefaultLayout>
     )
   }
-
-  return (
-    <DefaultLayout>
-      <Container>
-        <Box py={{ xs: 6, sm: 10 }}>
-          ID : {contactId || 'undefined'}
-          <Typography variant="h5">お名前：{contactInfo?.name || 'undefined'}</Typography>
-          <Typography variant="h5">メール：{contactInfo?.email || 'undefined'}</Typography>
-          <Typography variant="h5">電話：{contactInfo?.tel || 'undefined'}</Typography>
-          <Typography variant="h5">商品種別：{contactInfo?.category || 'undefined'}</Typography>
-          <Typography variant="h5">送信時間：{contactInfo?.submitTime || 'undefined'}</Typography>
-          <Box mt={4}>
-            <Typography>現在の状態：{chatData?.currentStatus || 'undefined'}</Typography>
-            {chatData?.chatHistory?.map(({ contributor, postTime, contents: { text, newStatus } }) => (
-              <Box key={postTime} mt={4}>
-                <Typography>投稿者 : {contributor || 'undefined'}</Typography>
-                <Typography>投稿日時 : {postTime || 'undefined'}</Typography>
-                <Typography>投稿内容 : {text || newStatus || 'undefined'}</Typography>
-              </Box>
-            ))}
-          </Box>
-        </Box>
-      </Container>
-    </DefaultLayout>
-  )
-}
+)
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const querySnapshot = await adminDb.collection('contactInfo').get()
