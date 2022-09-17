@@ -14,12 +14,16 @@ import { getContactInfo } from 'services/getContactData'
 import { ChatData, ContactInfo } from 'types/data'
 
 type ContactChatPageProps = {
-  id: string | undefined
+  contactId: string | undefined
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
 }
 
-const ContactChatPage: NextPage<ContactChatPageProps> = ({ id, contactInfo, chatData }: ContactChatPageProps) => {
+const ContactChatPage: NextPage<ContactChatPageProps> = ({
+  contactId,
+  contactInfo,
+  chatData,
+}: ContactChatPageProps) => {
   const router = useRouter()
   const [user] = useAuthState(auth)
 
@@ -31,10 +35,18 @@ const ContactChatPage: NextPage<ContactChatPageProps> = ({ id, contactInfo, chat
   }, [user])
 
   useEffect(() => {
-    if (!user && id) {
-      getContactInfo(id).then((contactInfo) => console.log('getContactInfo', ' => ', contactInfo))
+    if (user && contactId) {
+      getContactInfo(contactId).then((contactInfo) => {
+        if (contactInfo) {
+          console.log('getContactInfo', ' => ', contactInfo)
+        } else {
+          console.log('contactInfo not exist')
+        }
+      })
+    } else {
+      console.log('user or id not exist')
     }
-  }, [id, user])
+  }, [contactId, user])
 
   if (router.isFallback) {
     return (
@@ -48,7 +60,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = ({ id, contactInfo, chat
     <DefaultLayout>
       <Container>
         <Box py={{ xs: 6, sm: 10 }}>
-          ID : {id || 'undefined'}
+          ID : {contactId || 'undefined'}
           <Typography variant="h5">お名前：{contactInfo?.name || 'undefined'}</Typography>
           <Typography variant="h5">メール：{contactInfo?.email || 'undefined'}</Typography>
           <Typography variant="h5">電話：{contactInfo?.tel || 'undefined'}</Typography>
@@ -71,11 +83,16 @@ const ContactChatPage: NextPage<ContactChatPageProps> = ({ id, contactInfo, chat
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const querySnapshot = await adminDb.collection('contactData').get()
+  const querySnapshot = await adminDb.collection('contactInfo').get()
   const paths: { params: { id: string } }[] = []
-  querySnapshot.forEach((doc) => {
-    paths.push({ params: { id: doc.id } })
-  })
+  if (!querySnapshot.empty) {
+    querySnapshot.forEach((doc) => {
+      paths.push({ params: { id: doc.id } })
+    })
+  } else {
+    console.log('querySnapshot is empty.')
+  }
+
   return { paths, fallback: true }
 }
 
@@ -87,7 +104,7 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
   const chatData = chatDataDoc?.exists ? chatDataDoc?.data() : undefined
 
   return {
-    props: { id: contactId, contactInfo, chatData },
+    props: { contactId, contactInfo, chatData },
     revalidate: 10,
   }
 }
