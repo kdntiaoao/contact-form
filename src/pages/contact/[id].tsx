@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { memo, useEffect, useState } from 'react'
 
 import { Backdrop, Box, CircularProgress, Container, Stack, Typography } from '@mui/material'
+import { format } from 'date-fns'
 import { signInAnonymously } from 'firebase/auth'
 import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
@@ -10,9 +11,9 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth, db } from '../../../firebase/client'
 import { adminDb } from '../../../firebase/server'
 
+import { Chat } from 'components/molecules/Chat'
 import { ChatForm } from 'components/organisms/ChatForm'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { getContactInfo } from 'services/getContactData'
 import { ChatData, ContactInfo } from 'types/data'
 
 type ContactChatPageProps = {
@@ -29,31 +30,17 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
 
     useEffect(() => {
-      if (!user)
-        signInAnonymously(auth).then(() => {
-          console.log({ user })
-        })
+      if (!user) signInAnonymously(auth)
     }, [user])
 
     useEffect(() => {
       let unsub: Unsubscribe | undefined
 
       if (user && contactId) {
-        // お問い合わせ情報の取得
-        getContactInfo(contactId).then((contactInfo) => {
-          if (contactInfo) {
-            // console.log('getContactInfo', ' => ', contactInfo)
-          } else {
-            console.log('contactInfo not exist')
-          }
-        })
-
         // 現在のチャットデータの取得
         unsub = onSnapshot(doc(db, 'chatData', contactId), (doc) => {
           if (doc.exists()) {
-            const source = doc.metadata.hasPendingWrites ? 'Local' : 'Server'
             const chatData = doc.data() as ChatData
-            console.log(source, ' data: ', doc.data())
             setChatData(chatData)
           } else {
             console.log('chatData not exist')
@@ -80,8 +67,8 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
 
     return (
       <DefaultLayout>
-        <Container>
-          <Box py={{ xs: 6, sm: 10 }}>
+        <Container maxWidth="md">
+          <Box pt={{ xs: 6, sm: 10 }} pb={13}>
             ID : {contactId || 'undefined'}
             <Typography variant="h5">お名前：{contactInfo?.name || 'undefined'}</Typography>
             <Typography variant="h5">メール：{contactInfo?.email || 'undefined'}</Typography>
@@ -92,25 +79,33 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
               <Typography>
                 現在の状態：{chatData?.currentStatus !== undefined ? chatData.currentStatus : 'undefined'}
               </Typography>
-              {chatData?.chatHistory?.map(({ contributor, postTime, contents: { text, newStatus } }) => (
-                <Box key={postTime} mt={4}>
-                  <Typography>投稿者 : {contributor || 'undefined'}</Typography>
-                  <Typography>投稿日時 : {postTime || 'undefined'}</Typography>
-                  <Typography>投稿内容 : {text || newStatus || 'undefined'}</Typography>
-                </Box>
-              ))}
+              <Stack spacing={2}>
+                {chatData?.chatHistory?.map(
+                  ({ contributor, postTime, contents: { text } }) =>
+                    typeof text !== 'undefined' &&
+                    postTime && (
+                      <Chat
+                        reverse={contributor !== '0'}
+                        contributor={contributor === '0' && contactInfo ? contactInfo.name : contributor}
+                        text={text}
+                        postTime={format(postTime, 'H:mm')}
+                      />
+                    )
+                )}
+              </Stack>
             </Box>
+            {/* 入力エリア */}
+            <Stack
+              sx={{ bgcolor: '#fff', borderTop: '1px solid #aaa', position: 'fixed', bottom: 0, left: 0, right: 0 }}
+            >
+              <Container maxWidth="md">
+                <Box py={2}>
+                  <ChatForm contributor="0" contactId={contactId} />
+                </Box>
+              </Container>
+            </Stack>
           </Box>
         </Container>
-
-        {/* 入力エリア */}
-        <Stack sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
-          <Container sx={{ border: '1px solid #aaa' }}>
-            <Box px={4} py={2}>
-              <ChatForm contributor="0" contactId={contactId} />
-            </Box>
-          </Container>
-        </Stack>
       </DefaultLayout>
     )
   }
