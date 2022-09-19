@@ -1,12 +1,11 @@
 import { memo, SyntheticEvent, useCallback, useState } from 'react'
 
-import SendIcon from '@mui/icons-material/Send'
-import { Alert, Button, Snackbar, Stack, TextField } from '@mui/material'
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore'
-import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+import { SubmitHandler, useForm } from 'react-hook-form'
 
-import { db } from '../../../../firebase/client'
+import { db } from '../../../../../firebase/client'
 
+import { ChatForm } from 'components/organisms/presentations/ChatForm'
 import { Chat } from 'types/data'
 
 type Props = {
@@ -14,13 +13,13 @@ type Props = {
   contactId: string | undefined
 }
 
-type FormInput = {
+export type ChatFormInputType = {
   text: string
 }
 
 // eslint-disable-next-line react/display-name
-export const ChatForm = memo(({ contributor, contactId }: Props) => {
-  const { handleSubmit, control, reset } = useForm<FormInput>({
+export const ChatFormContainer = memo(({ contributor, contactId }: Props) => {
+  const { handleSubmit, control, reset } = useForm<ChatFormInputType>({
     mode: 'onChange',
     defaultValues: {
       text: '',
@@ -34,10 +33,10 @@ export const ChatForm = memo(({ contributor, contactId }: Props) => {
       return
     }
 
-    setError(false);
+    setError(false)
   }
 
-  const onSubmit: SubmitHandler<FormInput> = useCallback(
+  const onSubmit: SubmitHandler<ChatFormInputType> = useCallback(
     async ({ text }) => {
       try {
         if (text === '') throw new Error('input is empty.')
@@ -62,33 +61,12 @@ export const ChatForm = memo(({ contributor, contactId }: Props) => {
   )
 
   return (
-    <>
-      {/* エラー表示 */}
-      <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-          {errorMessage || 'エラーが発生しました'}
-        </Alert>
-      </Snackbar>
-
-      {/* 入力フォーム */}
-      <Stack
-        direction="row"
-        spacing={4}
-        component="form"
-        noValidate
-        autoComplete="off"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <Controller
-          name="text"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => <TextField {...field} variant="outlined" sx={{ flex: 1 }} />}
-        />
-        <Button type="submit" variant="contained" endIcon={<SendIcon />}>
-          送信
-        </Button>
-      </Stack>
-    </>
+    <ChatForm
+      error={error}
+      onClose={handleClose}
+      errorMessage={errorMessage}
+      onSubmit={handleSubmit(onSubmit)}
+      control={control}
+    />
   )
 })
