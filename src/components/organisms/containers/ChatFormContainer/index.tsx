@@ -28,13 +28,13 @@ export const ChatFormContainer = memo(({ contributor, contactId }: Props) => {
   const [error, setError] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string>()
 
-  const handleClose = (event?: SyntheticEvent | Event, reason?: string) => {
+  const handleClose = useCallback((event?: SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return
     }
 
     setError(false)
-  }
+  }, [])
 
   const onSubmit: SubmitHandler<ChatFormInputType> = useCallback(
     async ({ text }) => {
@@ -43,7 +43,6 @@ export const ChatFormContainer = memo(({ contributor, contactId }: Props) => {
         if (typeof contributor === 'undefined') throw new Error('contributor is undefined.')
         if (typeof contactId === 'undefined') throw new Error('contactId is undefined.')
 
-        console.log(text)
         const chat: Chat = { contributor, postTime: Date.now(), contents: { text } }
         const docRef = doc(db, 'chatData', contactId)
         await updateDoc(docRef, { chatHistory: arrayUnion(chat) })
