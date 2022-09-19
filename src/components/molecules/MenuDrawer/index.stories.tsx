@@ -13,7 +13,12 @@ export default {
   argTypes: {
     menuList: {
       control: { type: 'object' },
-      defaultValue: true,
+      defaultValue: [
+        [
+          { text: 'ホーム', url: '/' },
+          { text: 'お問い合わせ', url: '/contact' },
+        ],
+      ],
       description: 'メニューリスト',
       table: {
         type: {
@@ -52,13 +57,3 @@ const Template: ComponentStory<typeof MenuDrawer> = (args) => {
 }
 
 export const Normal = Template.bind({})
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-Normal.args = {
-  menuList: [
-    [
-      { text: 'ホーム', url: '/' },
-      { text: 'お問い合わせ', url: '/contact' },
-    ],
-  ],
-  open: true,
-}
