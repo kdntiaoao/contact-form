@@ -7,7 +7,7 @@ export type ContactInfo = {
 }
 
 export type Chat = {
-  contributor: string // サポーターID(お客様の場合は"0")
+  contributor: string // 投稿者ID(お客様の場合は"0")
   postTime: number // チャット投稿日時(タイムスタンプ)
   // チャットが投稿された場合はtextにその内容が
   // 状態が変更された場合はnewStatusに新しい状態が入る
