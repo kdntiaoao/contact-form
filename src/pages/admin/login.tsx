@@ -1,6 +1,23 @@
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useState } from 'react'
 
-import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
+import {
+  Box,
+  Button,
+  Container,
+  FormControl,
+  FormHelperText,
+  IconButton,
+  Input,
+  InputAdornment,
+  InputLabel,
+  Stack,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
@@ -16,6 +33,7 @@ const LoginPage = memo(() => {
     handleSubmit,
     control,
     formState: { errors, isSubmitting, isSubmitSuccessful },
+    setError,
   } = useForm<FormInputs>({
     mode: 'onBlur',
     defaultValues: {
@@ -25,10 +43,32 @@ const LoginPage = memo(() => {
   })
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
+  const [showPassword, setShowPassword] = useState<boolean>(false)
 
-  const onSubmit: SubmitHandler<FormInputs> = useCallback((data) => {
-    console.log('submit : ', data)
-  }, [])
+  const onSubmit: SubmitHandler<FormInputs> = useCallback(
+    (data) => {
+      try {
+        console.log('submit : ', data)
+        // throw new Error('IDまたはパスワードが無効です')
+      } catch (error) {
+        if (error instanceof Error) {
+          setError('email', {
+            type: 'invalid',
+            message: error.message,
+          })
+          setError('password', {
+            type: 'invalid',
+            message: error.message,
+          })
+        }
+      }
+    },
+    [setError]
+  )
+
+  const handleClickShowPassword = () => {
+    setShowPassword((prev) => !prev)
+  }
 
   return (
     <DefaultLayout>
@@ -58,6 +98,7 @@ const LoginPage = memo(() => {
                 <TextField
                   {...field}
                   type="email"
+                  autoComplete="username"
                   label="メールアドレス"
                   variant="standard"
                   error={!!errors.email}
@@ -73,16 +114,29 @@ const LoginPage = memo(() => {
                 required: '入力してください',
               }}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  type="password"
-                  autoComplete="current-password"
-                  label="パスワード"
-                  variant="standard"
-                  error={!!errors.password}
-                  helperText={errors?.password?.message}
-                  fullWidth
-                />
+                <FormControl variant="standard">
+                  <InputLabel htmlFor="password" error={!!errors.password}>
+                    パスワード
+                  </InputLabel>
+                  <Input
+                    {...field}
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    error={!!errors.password}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword}>
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    fullWidth
+                  />
+                  <FormHelperText id="password" error={!!errors.password}>
+                    {errors?.password?.message}
+                  </FormHelperText>
+                </FormControl>
               )}
             />
 
