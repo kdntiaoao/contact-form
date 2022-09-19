@@ -10,7 +10,7 @@ import { ChatFormInputType } from 'components/organisms/containers/ChatFormConta
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-  title: 'Molecules/ChatForm',
+  title: 'Organisms/ChatForm',
   component: ChatForm,
   // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {
