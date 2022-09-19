@@ -14,17 +14,18 @@ import { adminDb } from '../../../firebase/server'
 import { Chat } from 'components/molecules/Chat'
 import { ChatForm } from 'components/organisms/ChatForm'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { ChatData, ContactInfo } from 'types/data'
+import { ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type ContactChatPageProps = {
   contactId: string | undefined
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
+  supporterData: SupporterData
 }
 
 // eslint-disable-next-line react/display-name
 const ContactChatPage: NextPage<ContactChatPageProps> = memo(
-  ({ contactId, contactInfo, chatData: initialChatData }: ContactChatPageProps) => {
+  ({ contactId, contactInfo, chatData: initialChatData, supporterData }: ContactChatPageProps) => {
     const router = useRouter()
     const [user] = useAuthState(auth)
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
@@ -69,24 +70,27 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
       <DefaultLayout>
         <Container maxWidth="md">
           <Box pt={{ xs: 6, sm: 10 }} pb={13}>
-            ID : {contactId || 'undefined'}
-            <Typography variant="h5">お名前：{contactInfo?.name || 'undefined'}</Typography>
-            <Typography variant="h5">メール：{contactInfo?.email || 'undefined'}</Typography>
-            <Typography variant="h5">電話：{contactInfo?.tel || 'undefined'}</Typography>
-            <Typography variant="h5">商品種別：{contactInfo?.category || 'undefined'}</Typography>
-            <Typography variant="h5">送信時間：{contactInfo?.submitTime || 'undefined'}</Typography>
-            <Box mt={4}>
+            <Typography variant="h5">お問い合わせチャット</Typography>
+            <Box mt={1}>
               <Typography>
-                現在の状態：{chatData?.currentStatus !== undefined ? chatData.currentStatus : 'undefined'}
+                商品についてご不明点やご質問等ございましたら、こちらのチャットにてお気軽にご相談ください。
               </Typography>
+            </Box>
+            <Box mt={4}>
               <Stack spacing={2}>
                 {chatData?.chatHistory?.map(
-                  ({ contributor, postTime, contents: { text } }) =>
+                  ({ contributor, postTime, contents: { text } }, index) =>
                     typeof text !== 'undefined' &&
                     postTime && (
                       <Chat
-                        reverse={contributor !== '0'}
-                        contributor={contributor === '0' && contactInfo ? contactInfo.name : contributor}
+                        reverse={contributor === '0'}
+                        contributor={
+                          contributor === chatData?.chatHistory[index - 1]?.contributor
+                            ? ''
+                            : contributor === '0' && contactInfo
+                            ? `${contactInfo.name} 様`
+                            : supporterData[contributor].name
+                        }
                         text={text}
                         postTime={format(postTime, 'H:mm')}
                       />
@@ -128,12 +132,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsContext) => {
   const contactId: string | undefined = params?.id?.toString()
   const contactInfoDoc = contactId ? await adminDb.collection('contactInfo').doc(contactId).get() : undefined
-  const contactInfo = contactInfoDoc?.exists ? contactInfoDoc?.data() : undefined
+  const contactInfo = contactInfoDoc?.exists ? contactInfoDoc?.data() : undefined // お問い合わせ情報
   const chatDataDoc = contactId ? await adminDb.collection('chatData').doc(contactId).get() : undefined
-  const chatData = chatDataDoc?.exists ? chatDataDoc?.data() : undefined
+  const chatData = chatDataDoc?.exists ? chatDataDoc?.data() : undefined // チャットデータ
+  const supporterDataSnapshot = await adminDb.collection('supporterData').get()
+  const supporterData: SupporterData = {} // サポーターデータ
+  supporterDataSnapshot.forEach((doc) => {
+    const { name, email } = doc.data()
+    if (typeof name === 'string' && typeof email === 'string') {
+      supporterData[doc.id] = { name, email }
+    }
+  })
 
   return {
-    props: { contactId, contactInfo, chatData },
+    props: { contactId, contactInfo, chatData, supporterData },
     revalidate: 10,
   }
 }
