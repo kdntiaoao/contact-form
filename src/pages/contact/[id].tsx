@@ -2,7 +2,7 @@ import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 
 import { useRouter } from 'next/router'
 import { memo, useEffect, useState } from 'react'
 
-import { Backdrop, Box, CircularProgress, Container, Stack, Typography } from '@mui/material'
+import { Backdrop, Box, CircularProgress, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { format } from 'date-fns'
 import { signInAnonymously } from 'firebase/auth'
 import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore'
@@ -29,6 +29,8 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
     const router = useRouter()
     const [user] = useAuthState(auth)
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
+    const theme = useTheme()
+    const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
     useEffect(() => {
       if (!user) signInAnonymously(auth)
@@ -70,35 +72,37 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
       <DefaultLayout>
         <Container maxWidth="md">
           <Box pt={{ xs: 6, sm: 10 }} pb={13}>
-            <Typography variant="h5">お問い合わせチャット</Typography>
+            <Box>
+              <Typography variant={matches ? 'h4' : 'h5'} component="h1">
+                お問い合わせチャット
+              </Typography>
+            </Box>
             <Box mt={1}>
               <Typography>
                 商品についてご不明点やご質問等ございましたら、こちらのチャットにてお気軽にご相談ください。
               </Typography>
             </Box>
-            <Box mt={4}>
-              <Stack spacing={2}>
-                {chatData?.chatHistory?.map(
-                  ({ contributor, postTime, contents: { text } }, index) =>
-                    typeof text !== 'undefined' &&
-                    postTime && (
-                      <Chat
-                        key={postTime}
-                        reverse={contributor === '0'}
-                        contributor={
-                          contributor === chatData?.chatHistory[index - 1]?.contributor
-                            ? ''
-                            : contributor === '0' && contactInfo
-                            ? `${contactInfo.name} 様`
-                            : supporterData[contributor].name
-                        }
-                        text={text}
-                        postTime={format(postTime, 'H:mm')}
-                      />
-                    )
-                )}
-              </Stack>
-            </Box>
+            <Stack mt={{ xs: 4, sm: 6 }} spacing={2}>
+              {chatData?.chatHistory?.map(
+                ({ contributor, postTime, contents: { text } }, index) =>
+                  typeof text !== 'undefined' &&
+                  postTime && (
+                    <Chat
+                      key={postTime}
+                      reverse={contributor === '0'}
+                      contributor={
+                        contributor === chatData?.chatHistory[index - 1]?.contributor
+                          ? ''
+                          : contributor === '0' && contactInfo
+                          ? `${contactInfo.name} 様`
+                          : supporterData[contributor].name
+                      }
+                      text={text}
+                      postTime={format(postTime, 'H:mm')}
+                    />
+                  )
+              )}
+            </Stack>
             {/* 入力エリア */}
             <Stack
               sx={{ bgcolor: '#fff', borderTop: '1px solid #aaa', position: 'fixed', bottom: 0, left: 0, right: 0 }}

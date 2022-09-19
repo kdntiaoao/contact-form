@@ -12,7 +12,10 @@ type Props = {
 export const Chat = ({ reverse, text, contributor, postTime }: Props) => {
   return (
     <Stack direction={reverse ? 'row-reverse' : 'row'} spacing={2}>
-      <Avatar alt={contributor} sx={{ bgcolor: reverse ? 'primary.300' : grey[400] }}>
+      <Avatar
+        alt={contributor}
+        sx={{ bgcolor: reverse ? 'primary.300' : grey[400], visibility: contributor === '' ? 'hidden' : 'visible' }}
+      >
         <PersonIcon />
       </Avatar>
       <Stack alignItems={reverse ? 'flex-end' : 'flex-start'} maxWidth="100%" flex={1}>
