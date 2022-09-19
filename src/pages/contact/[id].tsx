@@ -12,7 +12,7 @@ import { auth, db } from '../../../firebase/client'
 import { adminDb } from '../../../firebase/server'
 
 import { Chat } from 'components/molecules/Chat'
-import { ChatForm } from 'components/organisms/ChatForm'
+import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { ChatData, ContactInfo, SupporterData } from 'types/data'
 
@@ -83,6 +83,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
                     typeof text !== 'undefined' &&
                     postTime && (
                       <Chat
+                        key={postTime}
                         reverse={contributor === '0'}
                         contributor={
                           contributor === chatData?.chatHistory[index - 1]?.contributor
@@ -104,7 +105,8 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
             >
               <Container maxWidth="md">
                 <Box py={2}>
-                  <ChatForm contributor="0" contactId={contactId} />
+                  {/* <ChatForm contributor="0" contactId={contactId} /> */}
+                  <ChatFormContainer contributor="0" contactId={contactId} />
                 </Box>
               </Container>
             </Stack>
