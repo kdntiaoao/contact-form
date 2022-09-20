@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import { memo, useCallback, useState } from 'react'
 
 import Visibility from '@mui/icons-material/Visibility'
@@ -18,7 +19,10 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+
+import { auth } from '../../../firebase/client'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
 
@@ -29,6 +33,7 @@ type FormInputs = {
 
 // eslint-disable-next-line react/display-name
 const LoginPage = memo(() => {
+  const router = useRouter()
   const {
     handleSubmit,
     control,
@@ -46,22 +51,25 @@ const LoginPage = memo(() => {
   const [showPassword, setShowPassword] = useState<boolean>(false)
 
   const onSubmit: SubmitHandler<FormInputs> = useCallback(
-    (data) => {
-      try {
-        console.log('submit : ', data)
-        // throw new Error('IDまたはパスワードが無効です')
-      } catch (error) {
-        if (error instanceof Error) {
+    async (data) => {
+      const { email, password } = data
+
+      await signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user
+          console.log('success signin : ', user)
+          router.push('/admin/contact')
+        })
+        .catch((error) => {
           setError('email', {
-            type: 'invalid',
-            message: error.message,
+            type: error.code,
+            message: 'IDまたはパスワードが無効です',
           })
           setError('password', {
-            type: 'invalid',
-            message: error.message,
+            type: error.code,
+            message: 'IDまたはパスワードが無効です',
           })
-        }
-      }
+        })
     },
     [setError]
   )
