@@ -72,20 +72,20 @@ const ConfirmPage: NextPage = memo(() => {
     <DefaultLayout>
       <LoadingScreen loading={loading} />
 
-      <Container>
+      <Container maxWidth="md">
         <Box py={{ xs: 6, sm: 10 }}>
-          <Box mb={{ xs: 2, sm: 4 }}>
+          <Box>
             <Typography variant={matches ? 'h4' : 'h5'} component="h1">
               お問い合わせ
             </Typography>
           </Box>
-          <Box>
+          <Box mt={1}>
             <Typography variant="body1" component="p">
               入力内容をご確認の上「送信する」ボタンを押してください。
             </Typography>
           </Box>
 
-          <Stack mt={{ xs: 6, sm: 10 }} spacing={6}>
+          <Stack mt={{ xs: 4, sm: 6 }} spacing={6}>
             <TextField
               label="お名前"
               variant="standard"
