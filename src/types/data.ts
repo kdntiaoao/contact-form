@@ -18,8 +18,9 @@ export type Chat = {
 }
 
 export type ChatData = {
-  chatHistory: Chat[]
-  currentStatus: number
+  chatHistory: Chat[] // チャット履歴
+  currentStatus: number // 現在の状態
+  supporter: string // サポーターID(担当者がいない場合は"0")
 }
 
 export type SupporterData = {

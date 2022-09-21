@@ -47,7 +47,7 @@ const ConfirmPage: NextPage = memo(() => {
         submitTime: currentDate,
       }
       const chat: Chat = { contributor: '0', postTime: currentDate, contents: { text: queryContents } }
-      const chatData: ChatData = { chatHistory: [chat], currentStatus: 0 }
+      const chatData: ChatData = { chatHistory: [chat], currentStatus: 0, supporter: '0' }
 
       try {
         setLoading(true)
