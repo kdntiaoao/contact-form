@@ -14,6 +14,8 @@ import { adminDb } from '../../../firebase/server'
 import { Chat } from 'components/molecules/Chat'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { getContactInfo } from 'services/contact/getContactInfo'
+import { getContactInfoList } from 'services/contact/getContactInfoList'
 import { ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type ContactChatPageProps = {
@@ -122,37 +124,35 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
 )
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const querySnapshot = await adminDb.collection('contactInfo').get()
-  const paths: { params: { id: string } }[] = []
-  if (!querySnapshot.empty) {
-    querySnapshot.forEach((doc) => {
-      paths.push({ params: { id: doc.id } })
-    })
-  } else {
-    console.log('querySnapshot is empty.')
-  }
+  const contactInfoList = await getContactInfoList(true)
+  const paths: { params: { id: string } }[] = contactInfoList
+    ? Object.keys(contactInfoList).map((key) => ({ params: { id: key } }))
+    : []
 
   return { paths, fallback: true }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsContext) => {
-  const contactId: string | undefined = params?.id?.toString()
-  const contactInfoDoc = contactId ? await adminDb.collection('contactInfo').doc(contactId).get() : undefined
-  const contactInfo = contactInfoDoc?.exists ? contactInfoDoc?.data() : undefined // お問い合わせ情報
-  const chatDataDoc = contactId ? await adminDb.collection('chatData').doc(contactId).get() : undefined
-  const chatData = chatDataDoc?.exists ? chatDataDoc?.data() : undefined // チャットデータ
-  const supporterDataSnapshot = await adminDb.collection('supporterData').get()
-  const supporterData: SupporterData = {} // サポーターデータ
-  supporterDataSnapshot.forEach((doc) => {
-    const { name, email } = doc.data()
-    if (typeof name === 'string' && typeof email === 'string') {
-      supporterData[doc.id] = { name, email }
-    }
-  })
+  const contactId = params?.id?.toString()
+  if (contactId) {
+    const contactInfo = await getContactInfo(contactId, true) // お問い合わせ情報
+    const chatDataDoc = contactId ? await adminDb.collection('chatData').doc(contactId).get() : undefined
+    const chatData = chatDataDoc?.exists ? chatDataDoc?.data() : undefined // チャットデータ
+    const supporterDataSnapshot = await adminDb.collection('supporterData').get()
+    const supporterData: SupporterData = {} // サポーターデータ
+    supporterDataSnapshot.forEach((doc) => {
+      const { name, email } = doc.data()
+      if (typeof name === 'string' && typeof email === 'string') {
+        supporterData[doc.id] = { name, email }
+      }
+    })
 
-  return {
-    props: { contactId, contactInfo, chatData, supporterData },
-    revalidate: 10,
+    return {
+      props: { contactId, contactInfo, chatData, supporterData },
+      revalidate: 10,
+    }
+  } else {
+    return { props: {}, revalidate: 10 }
   }
 }
 
