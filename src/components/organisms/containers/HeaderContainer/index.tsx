@@ -20,7 +20,10 @@ export const HeaderContainer = memo(() => {
       // { text: '採用情報', url: '/recruit' },
       { text: 'お問い合わせ', url: '/contact' },
     ],
-    [{ text: 'ログイン', url: '/admin/login' }],
+    [
+      { text: 'ログイン', url: '/admin/login' },
+      { text: 'お問い合わせ一覧', url: '/admin/contact' },
+    ],
   ]
 
   if (admin) {

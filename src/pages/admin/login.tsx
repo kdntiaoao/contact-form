@@ -71,7 +71,7 @@ const LoginPage = memo(() => {
           })
         })
     },
-    [setError]
+    [router, setError]
   )
 
   const handleClickShowPassword = () => {

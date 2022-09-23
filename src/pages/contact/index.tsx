@@ -19,11 +19,11 @@ type FormInputs = {
 // eslint-disable-next-line react/display-name
 const ContactPage: NextPage = memo(() => {
   const router = useRouter()
-  const queryName = router.query.name as string | undefined
-  const queryEmail = router.query.email as string | undefined
-  const queryTel = router.query.tel as string | undefined
-  const queryCategory = router.query.category as string | undefined
-  const queryContents = router.query.contents as string | undefined
+  const queryName = router.query.name?.toString()
+  const queryEmail = router.query.email?.toString()
+  const queryTel = router.query.tel?.toString()
+  const queryCategory = router.query.category?.toString()
+  const queryContents = router.query.contents?.toString()
   const {
     handleSubmit,
     control,
@@ -41,9 +41,12 @@ const ContactPage: NextPage = memo(() => {
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
-  const onSubmit: SubmitHandler<FormInputs> = useCallback((data) => {
-    router.push({ pathname: '/contact/confirm', query: data }, '/contact/confirm')
-  }, [router])
+  const onSubmit: SubmitHandler<FormInputs> = useCallback(
+    (data) => {
+      router.push({ pathname: '/contact/confirm', query: data }, '/contact/confirm')
+    },
+    [router]
+  )
 
   return (
     <>
