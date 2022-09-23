@@ -5,12 +5,12 @@ import CloseIcon from '@mui/icons-material/Close'
 import { Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemText, Toolbar } from '@mui/material'
 
 type MenuListProps = {
-  menuList: { text: string; url: string }[][]
+  menuList: { text: string; url: string; onClick?: () => void }[][]
   onClose: () => void
 }
 
 type MenuDrawerProps = {
-  menuList: { text: string; url: string }[][]
+  menuList: { text: string; url: string; onClick?: () => void }[][]
   open: boolean
   onClose: () => void
 }
@@ -30,10 +30,16 @@ const MenuList = memo(({ menuList, onClose }: MenuListProps) => {
         <Fragment key={list[0].text}>
           <Divider />
           <List>
-            {list.map(({ text, url }) => (
+            {list.map(({ text, url, onClick }) => (
               <ListItem key={text} disablePadding>
                 <Link href={url}>
-                  <ListItemButton component="a" onClick={onClose}>
+                  <ListItemButton
+                    component="a"
+                    onClick={() => {
+                      onClick?.()
+                      onClose()
+                    }}
+                  >
                     <ListItemText primary={text} />
                   </ListItemButton>
                 </Link>
