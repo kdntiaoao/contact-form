@@ -1,5 +1,6 @@
 import { NextPage } from 'next'
-import { memo, useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { format } from 'date-fns'
@@ -14,36 +15,42 @@ import { ChatData, ContactInfo } from 'types/data'
 
 // eslint-disable-next-line react/display-name
 const ContactListPage: NextPage = memo(() => {
+  const router = useRouter()
   const [user, loading] = useAuthState(auth)
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
   const [contactInfoList, setContactInfoList] = useState<Record<string, ContactInfo>>()
   const [chatDataList, setChatDataList] = useState<Record<string, ChatData>>()
 
+  const fetchData = useCallback(async () => {
+    const contactInfoSnapshot = await getDocs(collection(db, 'contactInfo'))
+    const contactInfoList: Record<string, ContactInfo> = {}
+    const chatDataSnapshot = await getDocs(collection(db, 'chatData'))
+    const chatDataList: Record<string, ChatData> = {}
+
+    contactInfoSnapshot.forEach((doc) => {
+      const data = doc.data() as ContactInfo
+      contactInfoList[doc.id] = data
+    })
+
+    chatDataSnapshot.forEach((doc) => {
+      const data = doc.data() as ChatData
+      chatDataList[doc.id] = data
+    })
+
+    setContactInfoList(contactInfoList)
+    setChatDataList(chatDataList)
+  }, [setContactInfoList, setChatDataList])
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (user) {
-        const contactInfoSnapshot = await getDocs(collection(db, 'contactInfo'))
-        const contactInfoList: Record<string, ContactInfo> = {}
-        const chatDataSnapshot = await getDocs(collection(db, 'chatData'))
-        const chatDataList: Record<string, ChatData> = {}
-
-        contactInfoSnapshot.forEach((doc) => {
-          const data = doc.data() as ContactInfo
-          contactInfoList[doc.id] = data
-        })
-
-        chatDataSnapshot.forEach((doc) => {
-          const data = doc.data() as ChatData
-          chatDataList[doc.id] = data
-        })
-
-        setContactInfoList(contactInfoList)
-        setChatDataList(chatDataList)
-      }
+    if (user) {
+      fetchData()
     }
-    fetchData()
-  }, [user])
+  }, [fetchData, user])
+
+  useEffect(() => {
+    if (!loading && !user) router.push('/admin/login')
+  }, [loading, router, user])
 
   if (loading || !contactInfoList || !chatDataList) return <LoadingScreen loading />
 
