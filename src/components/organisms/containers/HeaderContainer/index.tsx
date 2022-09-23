@@ -1,10 +1,19 @@
 import { memo, useEffect, useState } from 'react'
 
+import { signOut } from 'firebase/auth'
+
+import { auth } from '../../../../../firebase/client'
+
 import { Header } from 'components/organisms/presentations/Header'
+
 
 // eslint-disable-next-line react/display-name
 export const HeaderContainer = memo(() => {
   const [admin, setAdmin] = useState<boolean>(false)
+
+  const logout = () => {
+    signOut(auth)
+  }
 
   const menuList = [
     [
@@ -22,6 +31,7 @@ export const HeaderContainer = memo(() => {
     ],
     [
       { text: 'ログイン', url: '/admin/login' },
+      { text: 'ログアウト', url: '/admin/login', onClick: logout },
       { text: 'お問い合わせ一覧', url: '/admin/contact' },
     ],
   ]
@@ -29,7 +39,7 @@ export const HeaderContainer = memo(() => {
   if (admin) {
     menuList.push([
       { text: 'お問い合わせ一覧', url: '/' },
-      { text: 'ログアウト', url: '/' },
+      { text: 'ログアウト', url: '/admin/login', onClick: logout },
     ])
   }
 

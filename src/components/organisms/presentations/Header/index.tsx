@@ -11,7 +11,7 @@ type HideOnScrollProps = {
 }
 
 type HeaderProps = {
-  menuList: { text: string; url: string }[][]
+  menuList: { text: string; url: string, onClick?: () => void }[][]
 }
 
 // eslint-disable-next-line react/display-name
