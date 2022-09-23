@@ -9,25 +9,26 @@ import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 
 import { auth, db } from '../../../firebase/client'
-import { adminDb } from '../../../firebase/server'
 
 import { Chat } from 'components/molecules/Chat'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { getChatData } from 'services/chat/getChatData'
 import { getContactInfo } from 'services/contact/getContactInfo'
 import { getContactInfoList } from 'services/contact/getContactInfoList'
+import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
 import { ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type ContactChatPageProps = {
   contactId: string | undefined
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
-  supporterData: SupporterData
+  supporterDataList: Record<string, SupporterData>
 }
 
 // eslint-disable-next-line react/display-name
 const ContactChatPage: NextPage<ContactChatPageProps> = memo(
-  ({ contactId, contactInfo, chatData: initialChatData, supporterData }: ContactChatPageProps) => {
+  ({ contactId, contactInfo, chatData: initialChatData, supporterDataList }: ContactChatPageProps) => {
     const router = useRouter()
     const [user] = useAuthState(auth)
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
@@ -97,7 +98,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
                           ? ''
                           : contributor === '0' && contactInfo
                           ? `${contactInfo.name} 様`
-                          : supporterData[contributor].name
+                          : supporterDataList[contributor].name
                       }
                       text={text}
                       postTime={format(postTime, 'H:mm')}
@@ -136,23 +137,16 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
   const contactId = params?.id?.toString()
   if (contactId) {
     const contactInfo = await getContactInfo(contactId, true) // お問い合わせ情報
-    const chatDataDoc = contactId ? await adminDb.collection('chatData').doc(contactId).get() : undefined
-    const chatData = chatDataDoc?.exists ? chatDataDoc?.data() : undefined // チャットデータ
-    const supporterDataSnapshot = await adminDb.collection('supporterData').get()
-    const supporterData: SupporterData = {} // サポーターデータ
-    supporterDataSnapshot.forEach((doc) => {
-      const { name, email } = doc.data()
-      if (typeof name === 'string' && typeof email === 'string') {
-        supporterData[doc.id] = { name, email }
-      }
-    })
+    const chatData = await getChatData(contactId, true) // チャットデータ
+    const supporterDataList = await getSupporterDataList(true) // サポーターデータリスト
 
     return {
-      props: { contactId, contactInfo, chatData, supporterData },
-      revalidate: 10,
+      props: { contactId, contactInfo, chatData, supporterDataList },
+      revalidate: 60,
     }
   } else {
-    return { props: {}, revalidate: 10 }
+    console.log('contactId is empty.')
+    return { props: {}, revalidate: 60 }
   }
 }
 

@@ -24,8 +24,6 @@ export type ChatData = {
 }
 
 export type SupporterData = {
-  [supporterId: string]: {
-    name: string // サポーターのお名前
-    email: string // サポーターのメールアドレス
-  }
+  name: string // サポーターのお名前
+  email: string // サポーターのメールアドレス
 }

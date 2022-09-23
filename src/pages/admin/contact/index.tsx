@@ -7,11 +7,11 @@ import { collection, getDocs } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 
 import { auth, db } from '../../../../firebase/client'
-import { adminDb } from '../../../../firebase/server'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { getChatDataList } from 'services/chat/getChatDataList'
+import { getContactInfoList } from 'services/contact/getContactInfoList'
 import { ChatData, ContactInfo } from 'types/data'
-
 
 type ContactPageProps = {
   contactInfoList: Record<string, ContactInfo>
@@ -87,22 +87,8 @@ const ContactListPage: NextPage<ContactPageProps> = memo(
 )
 
 export const getStaticProps: GetStaticProps = async () => {
-  const contactInfoSnapshot = await adminDb.collection('contactInfo').get()
-  const chatDataSnapshot = await adminDb.collection('chatData').get()
-  const contactInfoList: Record<string, ContactInfo> = {}
-  const chatDataList: Record<string, ChatData> = {}
-  if (!contactInfoSnapshot.empty && !chatDataSnapshot.empty) {
-    contactInfoSnapshot.forEach((doc) => {
-      const data = doc.data() as ContactInfo
-      contactInfoList[doc.id] = data
-    })
-    chatDataSnapshot.forEach((doc) => {
-      const data = doc.data() as ChatData
-      chatDataList[doc.id] = data
-    })
-  } else {
-    console.log('querySnapshot is empty.')
-  }
+  const contactInfoList = await getContactInfoList(true)
+  const chatDataList = await getChatDataList(true)
 
   return { props: { contactInfoList, chatDataList }, revalidate: 60 }
 }
