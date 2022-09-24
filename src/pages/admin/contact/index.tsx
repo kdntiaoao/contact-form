@@ -65,22 +65,21 @@ const ContactListPage: NextPage = memo(() => {
           </Box>
 
           <Box mt={{ xs: 4, sm: 6 }}>
-            {contactInfoList &&
-              Object.keys(contactInfoList).map((key) => {
-                const { name, email, tel, category, submitTime } = contactInfoList[key]
-                return (
-                  <Box key={key} mt={2}>
-                    <Typography variant="h5">{key}</Typography>
-                    <Typography>name : {name}</Typography>
-                    <Typography>email : {email}</Typography>
-                    <Typography>tel : {tel}</Typography>
-                    <Typography>category : {category}</Typography>
-                    <Typography>submitTime : {format(submitTime, 'M月d日 H:mm')}</Typography>
-                    <Typography>currentStatus : {chatDataList[key].currentStatus}</Typography>
-                    <Typography>supporterId : {chatDataList[key].supporter}</Typography>
-                  </Box>
-                )
-              })}
+            {Object.keys(contactInfoList).map((key) => {
+              const { name, email, tel, category, contents, supporter, submitTime } = contactInfoList[key]
+              return (
+                <Box key={key} mt={2}>
+                  <Typography variant="h5">{key}</Typography>
+                  <Typography>name : {name}</Typography>
+                  <Typography>email : {email}</Typography>
+                  <Typography>tel : {tel}</Typography>
+                  <Typography>category : {category}</Typography>
+                  <Typography>contents : {contents}</Typography>
+                  <Typography>supporter : {supporter}</Typography>
+                  <Typography>submitTime : {format(submitTime, 'M月d日 H:mm')}</Typography>
+                </Box>
+              )
+            })}
           </Box>
         </Box>
       </Container>

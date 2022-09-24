@@ -1,14 +1,11 @@
 import { collection, getDocs } from 'firebase/firestore'
 
 import { db } from '../../../firebase/client'
-import { adminDb } from '../../../firebase/server'
 
 import { SupporterData } from 'types/data'
 
-export const getSupporterDataList = async (firebaseAdmin: boolean = false): Promise<Record<string, SupporterData> | null> => {
-  const supporterDataListSnap = firebaseAdmin
-    ? await adminDb.collection('supporterData').get()
-    : await getDocs(collection(db, 'supporterData'))
+export const getSupporterDataList = async (): Promise<Record<string, SupporterData> | null> => {
+  const supporterDataListSnap =  await getDocs(collection(db, 'supporterData'))
 
   // データ取得に失敗した場合
   if (supporterDataListSnap.empty) {

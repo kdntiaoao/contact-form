@@ -1,29 +1,65 @@
 export type ContactInfo = {
-  name: string // お客様のお名前
-  email: string // お客様のメールアドレス
-  tel: string // お客様の電話番号
-  category: string // 商品種別
-  submitTime: number // フォーム送信日時(タイムスタンプ)
+  /**
+   * お客様のお名前
+   */
+  name: string
+  /**
+   * お客様のメールアドレス
+   */
+  email: string
+  /**
+   * お客様の電話番号
+   */
+  tel: string
+  /**
+   * 商品種別
+   */
+  category: string
+  /**
+   * お問い合わせ内容
+   */
+  contents: string
+  /**
+   * サポーターID(担当者がいない場合は"0")
+   */
+  supporter: string
+  /**
+   * フォーム送信日時(タイムスタンプ)
+   */
+  submitTime: number
 }
 
 export type Chat = {
-  contributor: string // 投稿者ID(お客様の場合は"0")
-  postTime: number // チャット投稿日時(タイムスタンプ)
-  // チャットが投稿された場合はtextにその内容が
-  // 状態が変更された場合はnewStatusに新しい状態が入る
+  /**
+   * 投稿者ID(お客様の場合は"0")
+   */
+  contributor: string
+  /**
+   * チャット投稿日時(タイムスタンプ)
+   * チャットが投稿された場合はtextにその内容が状態が変更された場合はnewStatusに新しい状態が入る
+   */
+  postTime: number
   contents: {
-    text?: string // チャットのメッセージ
-    newStatus?: number // 変更後の状態
+    /**
+     * チャットのメッセージ
+     */
+    text?: string
+    /**
+     * 変更後の状態
+     */
+    newStatus?: number
   }
 }
 
-export type ChatData = {
-  chatHistory: Chat[] // チャット履歴
-  currentStatus: number // 現在の状態
-  supporter: string // サポーターID(担当者がいない場合は"0")
-}
+export type ChatData = Chat[]
 
 export type SupporterData = {
-  name: string // サポーターのお名前
-  email: string // サポーターのメールアドレス
+  /**
+   * サポーターのお名前
+   */
+  name: string
+  /**
+   * サポーターのメールアドレス
+   */
+  email: string
 }

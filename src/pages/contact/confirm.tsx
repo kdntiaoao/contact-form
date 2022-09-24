@@ -7,14 +7,15 @@ import EditIcon from '@mui/icons-material/Edit'
 import SendIcon from '@mui/icons-material/Send'
 import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { signInAnonymously } from 'firebase/auth'
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
+import { push, ref, set } from 'firebase/database'
+import { addDoc, collection } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 
-import { auth, db } from '../../../firebase/client'
+import { auth, database, db } from '../../../firebase/client'
 
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { Chat, ChatData, ContactInfo } from 'types/data'
+import { Chat, ContactInfo } from 'types/data'
 
 // eslint-disable-next-line react/display-name
 const ConfirmPage: NextPage = memo(() => {
@@ -44,16 +45,24 @@ const ConfirmPage: NextPage = memo(() => {
         email: queryEmail,
         tel: queryTel,
         category: queryCategory,
+        contents: queryContents,
+        supporter: '0',
         submitTime: currentDate,
       }
       const chat: Chat = { contributor: '0', postTime: currentDate, contents: { text: queryContents } }
-      const chatData: ChatData = { chatHistory: [chat], currentStatus: 0, supporter: '0' }
 
       try {
         setLoading(true)
         if (!user) await signInAnonymously(auth)
+
+        // お問い合わせ情報の保存(Firestore)
         const docRef = await addDoc(collection(db, 'contactInfo'), contactInfo)
-        await setDoc(doc(db, 'chatData', docRef.id), chatData)
+
+        // チャットデータの追加(Realtime Database)
+        const chatDataRef = ref(database, `chatDataList/${docRef.id}`)
+        const newChatRef = push(chatDataRef)
+        await set(newChatRef, chat)
+
         await router.push(`/contact/${docRef.id}`)
       } catch (error) {
         console.log(error)
