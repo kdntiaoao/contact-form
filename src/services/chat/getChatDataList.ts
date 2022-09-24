@@ -1,14 +1,11 @@
 import { collection, getDocs } from 'firebase/firestore'
 
 import { db } from '../../../firebase/client'
-import { adminDb } from '../../../firebase/server'
 
 import { ChatData } from 'types/data'
 
-export const getChatDataList = async (firebaseAdmin: boolean = false): Promise<Record<string, ChatData> | null> => {
-  const chatDataListSnap = firebaseAdmin
-    ? await adminDb.collection('chatData').get()
-    : await getDocs(collection(db, 'chatData'))
+export const getChatDataList = async (): Promise<Record<string, ChatData> | null> => {
+  const chatDataListSnap = await getDocs(collection(db, 'chatData'))
 
   // データ取得に失敗した場合
   if (chatDataListSnap.empty) {
@@ -22,5 +19,6 @@ export const getChatDataList = async (firebaseAdmin: boolean = false): Promise<R
     const data = doc.data() as ChatData
     chatDataList[doc.id] = data
   })
+
   return chatDataList
 }

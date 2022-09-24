@@ -5,18 +5,15 @@ import { memo, useEffect, useState } from 'react'
 import { Backdrop, Box, CircularProgress, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { format } from 'date-fns'
 import { signInAnonymously } from 'firebase/auth'
-import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore'
+import { off, onValue, orderByChild, query, ref } from 'firebase/database'
 import { useAuthState } from 'react-firebase-hooks/auth'
 
-import { auth, db } from '../../../firebase/client'
+import { auth, database} from '../../../firebase/client'
+import { adminDatabase, adminDb } from '../../../firebase/server'
 
 import { Chat } from 'components/molecules/Chat'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { getChatData } from 'services/chat/getChatData'
-import { getContactInfo } from 'services/contact/getContactInfo'
-import { getContactInfoList } from 'services/contact/getContactInfoList'
-import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
 import { ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type ContactChatPageProps = {
@@ -30,7 +27,7 @@ type ContactChatPageProps = {
 const ContactChatPage: NextPage<ContactChatPageProps> = memo(
   ({ contactId, contactInfo, chatData: initialChatData, supporterDataList }: ContactChatPageProps) => {
     const router = useRouter()
-    const [user] = useAuthState(auth)
+    const [user, loading] = useAuthState(auth)
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
     const theme = useTheme()
     const matches = useMediaQuery(theme.breakpoints.up('sm'))
@@ -40,28 +37,28 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
     }, [user])
 
     useEffect(() => {
-      let unsub: Unsubscribe | undefined
+      const chatDataRef = query(ref(database, `chatDataList/${contactId}`), orderByChild('postTime'))
 
       if (user && contactId) {
         // 現在のチャットデータの取得
-        unsub = onSnapshot(doc(db, 'chatData', contactId), (doc) => {
-          if (doc.exists()) {
-            const chatData = doc.data() as ChatData
-            setChatData(chatData)
-          } else {
-            console.log('chatData not exist')
-          }
+        onValue(chatDataRef, (snapshot) => {
+          const chatData: ChatData = []
+          snapshot.forEach((snap) => {
+            const data = snap.val()
+            chatData.push(data)
+          })
+          setChatData(chatData)
         })
-      } else {
+      } else if (!loading) {
         console.log('user or id not exist')
       }
 
       const cleanup = () => {
-        unsub?.()
+        off(chatDataRef)
       }
 
       return cleanup
-    }, [contactId, user])
+    }, [contactId, loading, user])
 
     if (router.isFallback) {
       return (
@@ -86,7 +83,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
               </Typography>
             </Box>
             <Stack mt={{ xs: 4, sm: 6 }} spacing={2}>
-              {chatData?.chatHistory?.map(
+              {chatData?.map(
                 ({ contributor, postTime, contents: { text } }, index) =>
                   typeof text !== 'undefined' &&
                   postTime && (
@@ -94,7 +91,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
                       key={postTime}
                       reverse={contributor === '0'}
                       contributor={
-                        contributor === chatData?.chatHistory[index - 1]?.contributor
+                        contributor === chatData[index - 1]?.contributor
                           ? ''
                           : contributor === '0' && contactInfo
                           ? `${contactInfo.name} 様`
@@ -125,7 +122,13 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
 )
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const contactInfoList = await getContactInfoList(true)
+  const contactInfoListSnap = await adminDb.collection('contactInfo').get()
+  const contactInfoList: Record<string, ContactInfo> = {}
+  contactInfoListSnap.forEach((doc) => {
+    const data = doc.data() as ContactInfo
+    contactInfoList[doc.id] = data
+  })
+
   const paths: { params: { id: string } }[] = contactInfoList
     ? Object.keys(contactInfoList).map((key) => ({ params: { id: key } }))
     : []
@@ -136,9 +139,23 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsContext) => {
   const contactId = params?.id?.toString()
   if (contactId) {
-    const contactInfo = await getContactInfo(contactId, true) // お問い合わせ情報
-    const chatData = await getChatData(contactId, true) // チャットデータ
-    const supporterDataList = await getSupporterDataList(true) // サポーターデータリスト
+    const contactInfoSnap = await adminDb.collection('contactInfo').doc(contactId).get()
+    const contactInfo = await contactInfoSnap.data() // お問い合わせ情報
+
+    const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).once('value')
+    const chatData: ChatData = [] // チャットデータ
+    chatDataSnap.forEach((snap) => {
+      chatData.push(snap.val())
+    })
+
+    const supporterDataSnap = await adminDb.collection('supporterData').get()
+    const supporterDataList: Record<string, SupporterData> = {} // サポーターデータ
+    supporterDataSnap.forEach((doc) => {
+      const { name, email } = doc.data()
+      if (typeof name === 'string' && typeof email === 'string') {
+        supporterDataList[doc.id] = { name, email }
+      }
+    })
 
     return {
       props: { contactId, contactInfo, chatData, supporterDataList },

@@ -1,9 +1,9 @@
 import { memo, SyntheticEvent, useCallback, useState } from 'react'
 
-import { arrayUnion, doc, updateDoc } from 'firebase/firestore'
+import { push, ref, set } from 'firebase/database'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
-import { db } from '../../../../../firebase/client'
+import { database } from '../../../../../firebase/client'
 
 import { ChatForm } from 'components/organisms/presentations/ChatForm'
 import { Chat } from 'types/data'
@@ -44,8 +44,9 @@ export const ChatFormContainer = memo(({ contributor, contactId }: Props) => {
         if (typeof contactId === 'undefined') throw new Error('contactId is undefined.')
 
         const chat: Chat = { contributor, postTime: Date.now(), contents: { text } }
-        const docRef = doc(db, 'chatData', contactId)
-        await updateDoc(docRef, { chatHistory: arrayUnion(chat) })
+        const chatDataRef = ref(database, `chatDataList/${contactId}`)
+        const newChatRef = push(chatDataRef)
+        await set(newChatRef, chat)
 
         reset()
       } catch (error: unknown) {
