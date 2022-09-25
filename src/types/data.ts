@@ -24,6 +24,10 @@ export type ContactInfo = {
    */
   supporter: string
   /**
+   * 現在の対応状況
+   */
+  currentStatus: number
+  /**
    * フォーム送信日時(タイムスタンプ)
    */
   submitTime: number

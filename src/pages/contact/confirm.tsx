@@ -47,6 +47,7 @@ const ConfirmPage: NextPage = memo(() => {
         category: queryCategory,
         contents: queryContents,
         supporter: '0',
+        currentStatus: 0,
         submitTime: currentDate,
       }
       const chat: Chat = { contributor: '0', postTime: currentDate, contents: { text: queryContents } }
@@ -127,7 +128,7 @@ const ConfirmPage: NextPage = memo(() => {
             />
             <TextField
               label="お問い合わせ内容"
-              variant="standard"
+              variant="outlined"
               defaultValue={queryContents}
               fullWidth
               InputProps={{ readOnly: true }}

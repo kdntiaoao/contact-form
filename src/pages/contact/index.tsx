@@ -3,7 +3,17 @@ import { useRouter } from 'next/router'
 import { memo, useCallback } from 'react'
 
 import SendIcon from '@mui/icons-material/Send'
-import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Container,
+  Stack,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
@@ -16,6 +26,23 @@ type FormInputs = {
   contents: string
 }
 
+const categoryOptions = [
+  'A001',
+  'A002',
+  'A003',
+  'A004',
+  'A005',
+  'A006',
+  'A007',
+  'A008',
+  'A009',
+  'A010',
+  'B001',
+  'B002',
+  'B003',
+  'B004',
+]
+
 // eslint-disable-next-line react/display-name
 const ContactPage: NextPage = memo(() => {
   const router = useRouter()
@@ -27,15 +54,23 @@ const ContactPage: NextPage = memo(() => {
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<FormInputs>({
     mode: 'onBlur',
     defaultValues: {
-      name: queryName || '',
-      email: queryEmail || 'メールアドレス',
-      tel: queryTel || '012345689',
+      // name: queryName,
+      // email: queryEmail,
+      // tel: queryTel,
+      // category: queryCategory,
+      // contents: queryContents,
+      name: queryName || '田中太郎',
+      email: queryEmail || 'sample@example.com',
+      tel: queryTel || '08000121234',
       category: queryCategory || 'A001',
-      contents: queryContents || 'Hello, world',
+      contents:
+        queryContents ||
+        '私は当時しばしばどんな講演院というのの以上と信じうです。けっして生涯を落第者はよほどその修養あるただけとするばみますのは意味するだないが、あくまでには退けなかっましたない。個人に明らめでつもりはまあ今日にまあましありた。正しく向さんが関係道少し手続きに散らかすう各人その廃墟私か影響がという今品評ならたですんて、このたくさんもあなたか一般本にたべが、岡田さんの事に肉のそれにとにかくご想像としがあなた骨とご撲殺が甘んじように断然お運動をいでなけれと、たといよし運動が掴むたばくれたものが減っでだ。もっともそれから大力で賑わすのはそう窮屈としなて、その角度にはありなてという世の中を認めば来ですます。',
     },
   })
   const theme = useTheme()
@@ -77,6 +112,7 @@ const ContactPage: NextPage = memo(() => {
                 control={control}
                 rules={{
                   required: '入力してください',
+                  maxLength: { value: 16, message: '16文字以内にしてください' },
                 }}
                 render={({ field }) => (
                   <TextField
@@ -85,6 +121,7 @@ const ContactPage: NextPage = memo(() => {
                     variant="standard"
                     error={!!errors.name}
                     helperText={errors?.name?.message}
+                    inputProps={{ maxLength: 16 }}
                     fullWidth
                   />
                 )}
@@ -94,6 +131,7 @@ const ContactPage: NextPage = memo(() => {
                 control={control}
                 rules={{
                   required: '入力してください',
+                  maxLength: { value: 200, message: '200文字以内にしてください' },
                 }}
                 render={({ field }) => (
                   <TextField
@@ -103,6 +141,7 @@ const ContactPage: NextPage = memo(() => {
                     variant="standard"
                     error={!!errors.email}
                     helperText={errors?.email?.message}
+                    inputProps={{ maxLength: 200 }}
                     fullWidth
                   />
                 )}
@@ -112,6 +151,7 @@ const ContactPage: NextPage = memo(() => {
                 control={control}
                 rules={{
                   required: '入力してください',
+                  maxLength: { value: 12, message: '12文字以内にしてください' },
                 }}
                 render={({ field }) => (
                   <TextField
@@ -121,6 +161,7 @@ const ContactPage: NextPage = memo(() => {
                     variant="standard"
                     error={!!errors.tel}
                     helperText={errors?.tel?.message}
+                    inputProps={{ maxLength: 12 }}
                     fullWidth
                   />
                 )}
@@ -131,15 +172,24 @@ const ContactPage: NextPage = memo(() => {
                 rules={{
                   required: '入力してください',
                 }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    type="tel"
-                    label="商品種別"
-                    variant="standard"
-                    error={!!errors.category}
-                    helperText={errors?.category?.message}
-                    fullWidth
+                render={({ field: {name, value} }) => (
+                  <Autocomplete
+                    autoHighlight
+                    disableClearable
+                    value={value}
+                    onChange={(_, newValue) => newValue && setValue('category', newValue)}
+                    options={categoryOptions}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        name={name}
+                        label="商品種別"
+                        variant="standard"
+                        error={!!errors.category}
+                        helperText={errors?.category?.message}
+                        fullWidth
+                      />
+                    )}
                   />
                 )}
               />
@@ -148,15 +198,17 @@ const ContactPage: NextPage = memo(() => {
                 control={control}
                 rules={{
                   required: '入力してください',
+                  maxLength: { value: 2000, message: '2000文字以内にしてください' },
                 }}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    type="tel"
                     label="お問い合わせ内容"
-                    variant="standard"
+                    variant="outlined"
                     error={!!errors.contents}
                     helperText={errors?.contents?.message}
+                    inputProps={{ maxLength: 2000 }}
+                    minRows={2}
                     fullWidth
                     multiline
                   />
