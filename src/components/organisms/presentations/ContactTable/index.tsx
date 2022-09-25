@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { memo } from 'react'
 
 import {
+  Chip,
   Paper,
   Table,
   TableBody,
@@ -26,16 +27,13 @@ type HeadCell = {
 }
 
 type Props = {
-  contactInfoArray: {
-    name: string
-    tel: string
-    category: string
-    contents: string
-    supporter: string
-    currentStatus: number
-    submitTime: number
+  contactInfoArray: (Data & {
+    currentStatusInfo: {
+      label: '未対応' | '対応中' | '対応完了'
+      color: 'warning' | 'info' | 'success'
+    }
     key: string
-  }[]
+  })[]
 }
 
 const headCells: HeadCell[] = [
@@ -53,7 +51,7 @@ export const ContactTable = memo(({ contactInfoArray }: Props) => {
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('md'))
   const newContactInfoArray = contactInfoArray.map(
-    ({ name, tel, category, contents, supporter, currentStatus, submitTime, key }) => {
+    ({ name, tel, category, contents, supporter, currentStatus, submitTime, currentStatusInfo, key }) => {
       return {
         name,
         tel,
@@ -68,6 +66,7 @@ export const ContactTable = memo(({ contactInfoArray }: Props) => {
         supporter,
         currentStatus,
         submitTime: format(submitTime, matches ? 'M月d日 H:mm' : 'M/d'),
+        currentStatusInfo,
         key,
       }
     }
@@ -88,11 +87,11 @@ export const ContactTable = memo(({ contactInfoArray }: Props) => {
 
         <TableBody>
           {newContactInfoArray.map(
-            ({ currentStatus, name, tel, category, contents, formattedContents, submitTime, supporter, key }) => (
+            ({ name, tel, category, contents, formattedContents, submitTime, supporter, currentStatusInfo, key }) => (
               <Link key={key} href={`/admin/contact/${key}`}>
                 <TableRow tabIndex={0} role="link" hover sx={{ cursor: 'pointer' }}>
                   <TableCell align="center">
-                    <Typography noWrap>{currentStatus}</Typography>
+                    <Chip label={currentStatusInfo.label} color={currentStatusInfo.color} variant="outlined" />
                   </TableCell>
                   <TableCell align="center">
                     <Typography noWrap>{name}</Typography>
