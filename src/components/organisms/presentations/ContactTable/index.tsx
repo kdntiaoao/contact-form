@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { memo } from 'react'
 
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
@@ -35,29 +36,31 @@ export const ContactTable = memo(({ headCells, contactInfoArray }: Props) => {
 
         <TableBody>
           {contactInfoArray.map(({ currentStatus, name, tel, category, contents, submitTime, supporter, key }) => (
-            <TableRow key={key}>
-              <TableCell align="center">
-                <Typography noWrap>{currentStatus}</Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography noWrap>{name}</Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography noWrap>{tel}</Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography noWrap>{category}</Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography noWrap>{submitTime}</Typography>
-              </TableCell>
-              <TableCell sx={{ minWidth: 300 }}>
-                <Typography>{contents}</Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography noWrap>{supporter}</Typography>
-              </TableCell>
-            </TableRow>
+            <Link key={key} href={`/admin/contact/${key}`}>
+              <TableRow tabIndex={0} role="link" hover sx={{ cursor: 'pointer' }}>
+                <TableCell align="center">
+                  <Typography noWrap>{currentStatus}</Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography noWrap>{name}</Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography noWrap>{tel}</Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography noWrap>{category}</Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography noWrap>{submitTime}</Typography>
+                </TableCell>
+                <TableCell sx={{ minWidth: 300 }}>
+                  <Typography>{contents}</Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography noWrap>{supporter}</Typography>
+                </TableCell>
+              </TableRow>
+            </Link>
           ))}
         </TableBody>
       </Table>

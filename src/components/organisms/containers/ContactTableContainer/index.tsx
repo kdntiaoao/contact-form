@@ -42,7 +42,9 @@ export const ContactTableContainer = memo(({ contactInfoList }: Props) => {
       key: key,
     }
   })
-  contactInfoArray.sort((a, b) => a.timestamp - b.timestamp)
+  contactInfoArray.sort((a, b) => {
+    return a.currentStatus !== b.currentStatus ? a.currentStatus - b.currentStatus : a.timestamp - b.timestamp
+  })
 
   return <ContactTable headCells={headCells} contactInfoArray={contactInfoArray} />
 })
