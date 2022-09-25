@@ -128,7 +128,7 @@ const ConfirmPage: NextPage = memo(() => {
             />
             <TextField
               label="お問い合わせ内容"
-              variant="standard"
+              variant="outlined"
               defaultValue={queryContents}
               fullWidth
               InputProps={{ readOnly: true }}
