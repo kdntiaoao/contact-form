@@ -6,7 +6,6 @@ import { Control, Controller } from 'react-hook-form'
 
 import { ChatFormInputType } from 'components/organisms/containers/ChatFormContainer'
 
-
 type Props = {
   error: boolean
   onClose: () => void
@@ -31,8 +30,10 @@ export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control 
         <Controller
           name="text"
           control={control}
-          rules={{ required: true }}
-          render={({ field }) => <TextField {...field} variant="outlined" sx={{ flex: 1 }} />}
+          rules={{ required: true, maxLength: 4000 }}
+          render={({ field }) => (
+            <TextField {...field} variant="outlined" sx={{ flex: 1 }} inputProps={{ maxLength: 4000 }} />
+          )}
         />
         <Button type="submit" variant="contained" endIcon={<SendIcon />}>
           送信
