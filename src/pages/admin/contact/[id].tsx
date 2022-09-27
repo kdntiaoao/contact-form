@@ -2,10 +2,11 @@ import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 
 import { useRouter } from 'next/router'
 import { memo, useEffect, useState } from 'react'
 
-import {  Box,  Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { format } from 'date-fns'
 import { off, onValue, orderByChild, query, ref } from 'firebase/database'
 import { useAuthState } from 'react-firebase-hooks/auth'
+import { animateScroll as scroll } from 'react-scroll'
 
 import { auth, database } from '../../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../../firebase/server'
@@ -48,6 +49,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             chatData.push(data)
           })
           setChatData(chatData)
+          scroll.scrollToBottom()
         })
       } else if (!loading) {
         console.log('user or id not exist')

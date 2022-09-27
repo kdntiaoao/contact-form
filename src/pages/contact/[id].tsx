@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 import { signInAnonymously } from 'firebase/auth'
 import { off, onValue, orderByChild, query, ref } from 'firebase/database'
 import { useAuthState } from 'react-firebase-hooks/auth'
+import { animateScroll as scroll } from 'react-scroll'
 
 import { auth, database } from '../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../firebase/server'
@@ -49,6 +50,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
             chatData.push(data)
           })
           setChatData(chatData)
+          scroll.scrollToBottom()
         })
       } else if (!loading) {
         console.log('user or id not exist')
