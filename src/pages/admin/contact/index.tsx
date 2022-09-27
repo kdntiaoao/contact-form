@@ -49,7 +49,7 @@ const ContactListPage: NextPage = memo(() => {
   }, [fetchData, user])
 
   useEffect(() => {
-    if (!loading && !user) router.push('/admin/login')
+    if (!loading && (!user || !user?.email)) router.push('/')
   }, [loading, router, user])
 
   if (loading || !contactInfoList || !chatDataList) return <LoadingScreen loading />
