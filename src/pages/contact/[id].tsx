@@ -2,16 +2,18 @@ import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 
 import { useRouter } from 'next/router'
 import { memo, useEffect, useState } from 'react'
 
-import { Backdrop, Box, CircularProgress, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { format } from 'date-fns'
 import { signInAnonymously } from 'firebase/auth'
 import { off, onValue, orderByChild, query, ref } from 'firebase/database'
 import { useAuthState } from 'react-firebase-hooks/auth'
+import { animateScroll as scroll } from 'react-scroll'
 
-import { auth, database} from '../../../firebase/client'
+import { auth, database } from '../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../firebase/server'
 
 import { Chat } from 'components/molecules/Chat'
+import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { ChatData, ContactInfo, SupporterData } from 'types/data'
@@ -33,8 +35,8 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
     const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
     useEffect(() => {
-      if (!user) signInAnonymously(auth)
-    }, [user])
+      if (!loading && !user) signInAnonymously(auth)
+    }, [loading, user])
 
     useEffect(() => {
       const chatDataRef = query(ref(database, `chatDataList/${contactId}`), orderByChild('postTime'))
@@ -48,6 +50,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
             chatData.push(data)
           })
           setChatData(chatData)
+          scroll.scrollToBottom()
         })
       } else if (!loading) {
         console.log('user or id not exist')
@@ -60,13 +63,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
       return cleanup
     }, [contactId, loading, user])
 
-    if (router.isFallback) {
-      return (
-        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true}>
-          <CircularProgress color="inherit" />
-        </Backdrop>
-      )
-    }
+    if (router.isFallback || !user) return <LoadingScreen loading />
 
     return (
       <DefaultLayout>

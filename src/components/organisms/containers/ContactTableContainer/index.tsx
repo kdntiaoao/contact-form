@@ -1,30 +1,14 @@
 import { memo } from 'react'
 
-import { format } from 'date-fns'
-
 import { ContactTable } from 'components/organisms/presentations/ContactTable'
 import { ContactInfo } from 'types/data'
-
-type Data = Omit<ContactInfo, 'email'>
-
-export type HeadCell = {
-  id: keyof Data
-  label: string
-}
 
 type Props = {
   contactInfoList: Record<string, ContactInfo>
 }
 
-const headCells: HeadCell[] = [
-  { id: 'currentStatus', label: '対応状況' },
-  { id: 'name', label: '氏名' },
-  { id: 'tel', label: '電話番号' },
-  { id: 'category', label: '製品種別' },
-  { id: 'submitTime', label: 'お問い合わせ日時' },
-  { id: 'contents', label: 'お問い合わせ内容' },
-  { id: 'supporter', label: '担当者' },
-]
+const currentStatusArray: ['未対応', '対応中', '対応完了'] = ['未対応', '対応中', '対応完了']
+const currentStatusColorArray: ['warning', 'info', 'success'] = ['warning', 'info', 'success']
 
 // eslint-disable-next-line react/display-name
 export const ContactTableContainer = memo(({ contactInfoList }: Props) => {
@@ -34,17 +18,17 @@ export const ContactTableContainer = memo(({ contactInfoList }: Props) => {
       name,
       tel,
       category,
-      contents: contents.length <= 100 ? contents : contents.slice(0, 100) + '...',
-      supporter,
+      contents,
+      supporter: supporter === '0' ? '担当者はいません' : supporter,
       currentStatus,
-      submitTime: format(submitTime, 'M月d日 H:mm'),
-      timestamp: submitTime,
+      currentStatusInfo: { label: currentStatusArray[currentStatus], color: currentStatusColorArray[currentStatus] },
+      submitTime,
       key: key,
     }
   })
   contactInfoArray.sort((a, b) => {
-    return a.currentStatus !== b.currentStatus ? a.currentStatus - b.currentStatus : a.timestamp - b.timestamp
+    return a.currentStatus !== b.currentStatus ? a.currentStatus - b.currentStatus : a.submitTime - b.submitTime
   })
 
-  return <ContactTable headCells={headCells} contactInfoArray={contactInfoArray} />
+  return <ContactTable contactInfoArray={contactInfoArray} />
 })
