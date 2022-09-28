@@ -1,8 +1,9 @@
 import { memo } from 'react'
 
-import { Chip, Container, Divider, Stack } from '@mui/material'
+import { Chip, Stack } from '@mui/material'
 
 type Props = {
+  direction?: 'row' | 'column'
   currentStatus: number | undefined
   // eslint-disable-next-line no-unused-vars
   changeStatus: (newStatus: number) => void
@@ -15,23 +16,20 @@ const statusList: { label: string; color: 'warning' | 'info' | 'success' }[] = [
 ]
 
 // eslint-disable-next-line react/display-name
-export const StatusSelectArea = memo(({ currentStatus, changeStatus }: Props) => {
+export const StatusSelectArea = memo(({ direction = 'row' ,currentStatus, changeStatus }: Props) => {
   return (
     <>
-      <Container maxWidth="md">
-        <Stack direction="row" spacing={2} py={2}>
-          {statusList.map(({ label, color }, index) => (
-            <Chip
-              key={label}
-              label={label}
-              color={color}
-              variant={index === currentStatus ? 'filled' : 'outlined'}
-              onClick={() => changeStatus(index)}
-            />
-          ))}
-        </Stack>
-      </Container>
-      <Divider />
+      <Stack direction={direction} spacing={2}>
+        {statusList.map(({ label, color }, index) => (
+          <Chip
+            key={label}
+            label={label}
+            color={color}
+            variant={index === currentStatus ? 'filled' : 'outlined'}
+            onClick={() => changeStatus(index)}
+          />
+        ))}
+      </Stack>
     </>
   )
 })

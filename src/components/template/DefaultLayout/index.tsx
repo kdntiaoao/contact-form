@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { memo, ReactNode } from 'react'
 
+import styled from '@emotion/styled'
 import { Stack } from '@mui/material'
 
 import { HeaderContainer } from 'components/organisms/containers/HeaderContainer'
@@ -10,6 +11,11 @@ type Props = {
   children: ReactNode
 }
 
+const Main = styled.main`
+  flex: 1;
+  position: relative;
+`
+
 // eslint-disable-next-line react/display-name
 export const DefaultLayout = memo(({ title = 'お問合せフォーム', children }: Props) => {
   return (
@@ -18,9 +24,9 @@ export const DefaultLayout = memo(({ title = 'お問合せフォーム', childre
         <title>{title}</title>
       </Head>
 
-      <Stack>
+      <Stack minHeight='100vh'>
         <HeaderContainer />
-        <main>{children}</main>
+        <Main>{children}</Main>
       </Stack>
     </>
   )

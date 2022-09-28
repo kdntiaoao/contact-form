@@ -56,7 +56,7 @@ const ContactListPage: NextPage = memo(() => {
 
   return (
     <DefaultLayout>
-      <Container>
+      <Container maxWidth="xl">
         <Box py={{ xs: 6, sm: 10 }}>
           <Box>
             <Typography variant={matches ? 'h4' : 'h5'} component="h1">

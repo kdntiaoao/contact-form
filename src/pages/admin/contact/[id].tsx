@@ -1,8 +1,10 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 
-import { Box,  Container,  Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded'
+import { Box, Button, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { format } from 'date-fns'
 import { off, onValue, orderByChild, query, ref } from 'firebase/database'
 import { doc, onSnapshot, Unsubscribe, updateDoc } from 'firebase/firestore'
@@ -40,15 +42,18 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
     const [currentStatus, setCurrentStatus] = useState<number | undefined>(initialContactInfo?.currentStatus)
     const theme = useTheme()
-    const matches = useMediaQuery(theme.breakpoints.up('sm'))
+    const matches = useMediaQuery(theme.breakpoints.up('md'))
 
-    const changeStatus = useCallback(async (newStatus: number): Promise<void> => {
-      if (contactId && user) {
-        setCurrentStatus(newStatus)
-        const contactInfoRef = doc(db, 'contactInfo', contactId)
-        await updateDoc(contactInfoRef, { currentStatus: newStatus })
-      }
-    }, [contactId, user])
+    const changeStatus = useCallback(
+      async (newStatus: number): Promise<void> => {
+        if (contactId && user) {
+          setCurrentStatus(newStatus)
+          const contactInfoRef = doc(db, 'contactInfo', contactId)
+          await updateDoc(contactInfoRef, { currentStatus: newStatus })
+        }
+      },
+      [contactId, user]
+    )
 
     useEffect(() => {
       if (!loading && (!user || !user?.email)) router.push('/')
@@ -94,54 +99,67 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
     return (
       <DefaultLayout>
-        <StatusSelectArea currentStatus={currentStatus} changeStatus={changeStatus} />
-
-        <Container maxWidth="md">
-          <Box pt={{ xs: 6, sm: 10 }} pb={13}>
-            <Box>
-              <Typography variant={matches ? 'h4' : 'h5'} component="h1">
-                お問い合わせチャット
-              </Typography>
-            </Box>
-            <Box mt={1}>
-              <Typography>
-                商品についてご不明点やご質問等ございましたら、こちらのチャットにてお気軽にご相談ください。
-              </Typography>
-            </Box>
-            <Stack mt={{ xs: 4, sm: 6 }} spacing={2}>
-              {chatData?.map(
-                ({ contributor, postTime, contents: { text } }, index) =>
-                  typeof text !== 'undefined' &&
-                  postTime && (
-                    <Chat
-                      key={postTime}
-                      reverse={contributor !== '0'}
-                      contributor={
-                        contributor === chatData[index - 1]?.contributor
-                          ? ''
-                          : contributor === '0' && contactInfo
-                          ? `${contactInfo.name} 様`
-                          : supporterDataList[contributor].name
-                      }
-                      text={text}
-                      postTime={format(postTime, 'H:mm')}
-                    />
-                  )
-              )}
-            </Stack>
-            {/* 入力エリア */}
-            <Stack
-              sx={{ bgcolor: '#fff', borderTop: '1px solid #aaa', position: 'fixed', bottom: 0, left: 0, right: 0 }}
-            >
-              <Container maxWidth="md">
-                <Box py={2}>
-                  {/* <ChatForm contributor="0" contactId={contactId} /> */}
-                  <ChatFormContainer contributor={user.uid} contactId={contactId} />
+        <Box sx={{ position: 'absolute', inset: 0 }}>
+          <Stack direction={matches ? 'row' : 'column'} height="100%">
+            <Container maxWidth="md" sx={{ width: { xs: '100%', md: 'fit-content' } }}>
+              <Box py={matches ? 4 : 2}>
+                <Box mb={matches ? 4 : 2}>
+                  <Link href="/admin/contact">
+                    <Button component="a" variant="text" endIcon={<ArrowForwardIosRoundedIcon />}>
+                      お問い合わせ一覧
+                    </Button>
+                  </Link>
                 </Box>
-              </Container>
-            </Stack>
-          </Box>
-        </Container>
+
+                <StatusSelectArea
+                  direction={matches ? 'column' : 'row'}
+                  currentStatus={currentStatus}
+                  changeStatus={changeStatus}
+                />
+              </Box>
+            </Container>
+
+            <Divider orientation={matches ? 'vertical' : 'horizontal'} flexItem />
+
+            <Container maxWidth="md" sx={{ flex: 1 }}>
+              <Box pt={{ xs: 6, md: 4 }} pb={13}>
+                <Stack spacing={2}>
+                  {chatData?.map(
+                    ({ contributor, postTime, contents: { text } }, index) =>
+                      typeof text !== 'undefined' &&
+                      postTime && (
+                        <Chat
+                          key={postTime}
+                          reverse={contributor !== '0'}
+                          contributor={
+                            contributor === chatData[index - 1]?.contributor
+                              ? ''
+                              : contributor === '0' && contactInfo
+                              ? `${contactInfo.name} 様`
+                              : supporterDataList[contributor].name
+                          }
+                          text={text}
+                          postTime={format(postTime, 'H:mm')}
+                        />
+                      )
+                  )}
+                </Stack>
+
+                {/* 入力エリア */}
+                <Stack
+                  sx={{ bgcolor: '#fff', borderTop: '1px solid #aaa', position: 'fixed', bottom: 0, left: 0, right: 0 }}
+                >
+                  <Container maxWidth="md">
+                    <Box py={2}>
+                      {/* <ChatForm contributor="0" contactId={contactId} /> */}
+                      <ChatFormContainer contributor={user.uid} contactId={contactId} />
+                    </Box>
+                  </Container>
+                </Stack>
+              </Box>
+            </Container>
+          </Stack>
+        </Box>
       </DefaultLayout>
     )
   }
