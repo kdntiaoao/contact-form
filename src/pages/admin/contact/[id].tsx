@@ -1,18 +1,20 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 
-import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box,  Container,  Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { format } from 'date-fns'
 import { off, onValue, orderByChild, query, ref } from 'firebase/database'
+import { doc, onSnapshot, Unsubscribe, updateDoc } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { animateScroll as scroll } from 'react-scroll'
 
-import { auth, database } from '../../../../firebase/client'
+import { auth, database, db } from '../../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
 import { Chat } from 'components/molecules/Chat'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
+import { StatusSelectArea } from 'components/molecules/StatusSelectArea'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { ChatData, ContactInfo, SupporterData } from 'types/data'
@@ -26,19 +28,36 @@ type AdminContactChatPageProps = {
 
 // eslint-disable-next-line react/display-name
 const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
-  ({ contactId, contactInfo, chatData: initialChatData, supporterDataList }: AdminContactChatPageProps) => {
+  ({
+    contactId,
+    contactInfo: initialContactInfo,
+    chatData: initialChatData,
+    supporterDataList,
+  }: AdminContactChatPageProps) => {
     const router = useRouter()
     const [user, loading] = useAuthState(auth)
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
+    const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
+    const [currentStatus, setCurrentStatus] = useState<number | undefined>(initialContactInfo?.currentStatus)
     const theme = useTheme()
     const matches = useMediaQuery(theme.breakpoints.up('sm'))
+
+    const changeStatus = useCallback(async (newStatus: number): Promise<void> => {
+      if (contactId && user) {
+        setCurrentStatus(newStatus)
+        const contactInfoRef = doc(db, 'contactInfo', contactId)
+        await updateDoc(contactInfoRef, { currentStatus: newStatus })
+      }
+    }, [contactId, user])
 
     useEffect(() => {
       if (!loading && (!user || !user?.email)) router.push('/')
     }, [loading, router, user])
 
     useEffect(() => {
+      // クリーンアップ用
       const chatDataRef = query(ref(database, `chatDataList/${contactId}`), orderByChild('postTime'))
+      let unsub: Unsubscribe
 
       if (user && contactId) {
         // 現在のチャットデータの取得
@@ -51,12 +70,21 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
           setChatData(chatData)
           scroll.scrollToBottom()
         })
+
+        // 現在のお問い合わせ情報を取得
+        const contactInfoRef = doc(db, 'contactInfo', contactId)
+        unsub = onSnapshot(contactInfoRef, (doc) => {
+          const data = doc.data() as ContactInfo
+          setContactInfo(data)
+          setCurrentStatus(data.currentStatus)
+        })
       } else if (!loading) {
         console.log('user or id not exist')
       }
 
       const cleanup = () => {
         off(chatDataRef)
+        unsub?.()
       }
 
       return cleanup
@@ -66,6 +94,8 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
     return (
       <DefaultLayout>
+        <StatusSelectArea currentStatus={currentStatus} changeStatus={changeStatus} />
+
         <Container maxWidth="md">
           <Box pt={{ xs: 6, sm: 10 }} pb={13}>
             <Box>
