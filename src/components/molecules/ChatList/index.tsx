@@ -29,6 +29,8 @@ export const ChatList = memo(({ admin = false, chatData, contactInfo, supporterD
     [chatData, contactInfo, supporterDataList]
   )
 
+  console.log('rendering ChatList')
+
   return (
     <Stack spacing={2}>
       {chatData?.map(

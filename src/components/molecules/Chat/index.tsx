@@ -10,6 +10,8 @@ type Props = {
 }
 
 export const Chat = ({ reverse, text, contributor, postTime }: Props) => {
+  console.log('rendering Chat')
+
   return (
     <Stack direction={reverse ? 'row-reverse' : 'row'} spacing={2}>
       <Avatar

@@ -1,10 +1,8 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 
-import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded'
-import { Box, Button, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { off, onValue, orderByChild, query, ref } from 'firebase/database'
 import { doc, onSnapshot, Unsubscribe, updateDoc } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
@@ -14,6 +12,7 @@ import { auth, database, db } from '../../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
 import { ChatList } from 'components/molecules/ChatList'
+import { LinkButton } from 'components/molecules/LinkButton'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { StatusSelectArea } from 'components/molecules/StatusSelectArea'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
@@ -103,11 +102,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             <Container maxWidth="md" sx={{ width: { xs: '100%', md: 'fit-content' } }}>
               <Box py={matches ? 4 : 2}>
                 <Box mb={matches ? 4 : 2}>
-                  <Link href="/admin/contact">
-                    <Button component="a" variant="text" endIcon={<ArrowForwardIosRoundedIcon />}>
-                      お問い合わせ一覧
-                    </Button>
-                  </Link>
+                  <LinkButton href="/admin/contact">お問い合わせ一覧</LinkButton>
                 </Box>
 
                 <StatusSelectArea
