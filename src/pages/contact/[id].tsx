@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { memo, useEffect, useState } from 'react'
 
 import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { format } from 'date-fns'
 import { signInAnonymously } from 'firebase/auth'
 import { off, onValue, orderByChild, query, ref } from 'firebase/database'
 import { useAuthState } from 'react-firebase-hooks/auth'
@@ -12,7 +11,7 @@ import { animateScroll as scroll } from 'react-scroll'
 import { auth, database } from '../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../firebase/server'
 
-import { Chat } from 'components/molecules/Chat'
+import { ChatList } from 'components/molecules/ChatList'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
@@ -79,27 +78,12 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
                 商品についてご不明点やご質問等ございましたら、こちらのチャットにてお気軽にご相談ください。
               </Typography>
             </Box>
-            <Stack mt={{ xs: 4, sm: 6 }} spacing={2}>
-              {chatData?.map(
-                ({ contributor, postTime, contents: { text } }, index) =>
-                  typeof text !== 'undefined' &&
-                  postTime && (
-                    <Chat
-                      key={postTime}
-                      reverse={contributor === '0'}
-                      contributor={
-                        contributor === chatData[index - 1]?.contributor
-                          ? ''
-                          : contributor === '0' && contactInfo
-                          ? `${contactInfo.name} 様`
-                          : supporterDataList[contributor].name
-                      }
-                      text={text}
-                      postTime={format(postTime, 'H:mm')}
-                    />
-                  )
+            <Box mt={{ xs: 4, sm: 6 }}>
+              {chatData && contactInfo && supporterDataList && (
+                <ChatList {...{ chatData, contactInfo, supporterDataList }} />
               )}
-            </Stack>
+            </Box>
+
             {/* 入力エリア */}
             <Stack
               sx={{ bgcolor: '#fff', borderTop: '1px solid #aaa', position: 'fixed', bottom: 0, left: 0, right: 0 }}

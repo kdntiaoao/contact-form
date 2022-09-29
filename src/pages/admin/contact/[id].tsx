@@ -5,7 +5,6 @@ import { memo, useCallback, useEffect, useState } from 'react'
 
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded'
 import { Box, Button, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
-import { format } from 'date-fns'
 import { off, onValue, orderByChild, query, ref } from 'firebase/database'
 import { doc, onSnapshot, Unsubscribe, updateDoc } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
@@ -14,7 +13,7 @@ import { animateScroll as scroll } from 'react-scroll'
 import { auth, database, db } from '../../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
-import { Chat } from 'components/molecules/Chat'
+import { ChatList } from 'components/molecules/ChatList'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { StatusSelectArea } from 'components/molecules/StatusSelectArea'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
@@ -123,27 +122,14 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
             <Container maxWidth="md" sx={{ flex: 1 }}>
               <Box pt={{ xs: 6, md: 4 }} pb={13}>
-                <Stack spacing={2}>
-                  {chatData?.map(
-                    ({ contributor, postTime, contents: { text } }, index) =>
-                      typeof text !== 'undefined' &&
-                      postTime && (
-                        <Chat
-                          key={postTime}
-                          reverse={contributor !== '0'}
-                          contributor={
-                            contributor === chatData[index - 1]?.contributor
-                              ? ''
-                              : contributor === '0' && contactInfo
-                              ? `${contactInfo.name} 様`
-                              : supporterDataList[contributor].name
-                          }
-                          text={text}
-                          postTime={format(postTime, 'H:mm')}
-                        />
-                      )
-                  )}
-                </Stack>
+                {chatData && contactInfo && supporterDataList && (
+                  <ChatList
+                    admin={true}
+                    chatData={chatData}
+                    contactInfo={contactInfo}
+                    supporterDataList={supporterDataList}
+                  />
+                )}
 
                 {/* 入力エリア */}
                 <Stack
