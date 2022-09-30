@@ -1,10 +1,11 @@
 import { memo, useCallback } from 'react'
 
-import { Stack } from '@mui/material'
+import { Chip, Divider, Stack } from '@mui/material'
 import { format } from 'date-fns'
 
 import { Chat } from '../Chat'
 
+import { statusList } from 'components/organisms/presentations/StatusSelectArea'
 import { ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type Props = {
@@ -33,18 +34,22 @@ export const ChatList = memo(({ admin = false, chatData, contactInfo, supporterD
 
   return (
     <Stack spacing={2}>
-      {chatData?.map(
-        ({ contributor, postTime, contents: { text } }, index) =>
-          typeof text !== 'undefined' &&
-          postTime && (
-            <Chat
-              key={postTime}
-              reverse={admin ? contributor !== '0' : contributor === '0'}
-              contributor={contributorToName(contributor, index)}
-              text={text}
-              postTime={format(postTime, 'H:mm')}
-            />
+      {chatData?.map(({ contributor, postTime, contents: { text, newStatus } }, index) =>
+        postTime && typeof text !== 'undefined' ? (
+          <Chat
+            key={postTime}
+            reverse={admin ? contributor !== '0' : contributor === '0'}
+            contributor={contributorToName(contributor, index)}
+            text={text}
+            postTime={format(postTime, 'H:mm')}
+          />
+        ) : (
+          typeof newStatus === 'number' && (
+            <Divider key={postTime}>
+              <Chip label={statusList[newStatus].label} color={statusList[newStatus].color} variant="outlined" />
+            </Divider>
           )
+        )
       )}
     </Stack>
   )

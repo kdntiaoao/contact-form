@@ -1,10 +1,10 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { signInAnonymously } from 'firebase/auth'
-import { off, onValue, orderByChild, query, ref } from 'firebase/database'
+import { off, onValue, orderByChild, push, query, ref, set } from 'firebase/database'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { animateScroll as scroll } from 'react-scroll'
 
@@ -15,7 +15,7 @@ import { ChatList } from 'components/molecules/ChatList'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { ChatData, ContactInfo, SupporterData } from 'types/data'
+import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type ContactChatPageProps = {
   contactId: string | undefined
@@ -32,6 +32,16 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
     const theme = useTheme()
     const matches = useMediaQuery(theme.breakpoints.up('sm'))
+
+    // Firebaseにチャットを保存する関数
+    const postChat = useCallback(
+      async (chat: Chat) => {
+        const chatDataRef = ref(database, `chatDataList/${contactId}`)
+        const newChatRef = push(chatDataRef)
+        await set(newChatRef, chat)
+      },
+      [contactId]
+    )
 
     useEffect(() => {
       if (!loading && !user) signInAnonymously(auth)
@@ -90,8 +100,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
             >
               <Container maxWidth="md">
                 <Box py={2}>
-                  {/* <ChatForm contributor="0" contactId={contactId} /> */}
-                  <ChatFormContainer contributor="0" contactId={contactId} />
+                  <ChatFormContainer contributor="0" contactId={contactId} postChat={postChat} />
                 </Box>
               </Container>
             </Stack>
