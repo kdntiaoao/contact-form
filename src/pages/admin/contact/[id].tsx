@@ -23,7 +23,7 @@ type AdminContactChatPageProps = {
   contactId: string | undefined
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
-  supporterDataList: Record<string, SupporterData>
+  supporterDataList: SupporterData
 }
 
 // eslint-disable-next-line react/display-name
@@ -118,7 +118,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                 <StatusSelectAreaContainer
                   direction={matches ? 'column' : 'row'}
                   currentStatus={contactInfo?.currentStatus}
-                  contributor={contactInfo?.supporter}
+                  supporter={contactInfo?.supporter}
                   uid={user.uid}
                   changeStatus={changeStatus}
                 />
@@ -144,7 +144,6 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                 >
                   <Container maxWidth="md">
                     <Box py={2}>
-                      {/* <ChatForm contributor="0" contactId={contactId} /> */}
                       <ChatFormContainer contributor={user.uid} contactId={contactId} postChat={postChat} />
                     </Box>
                   </Container>
@@ -186,7 +185,7 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
     })
 
     const supporterDataSnap = await adminDb.collection('supporterData').get()
-    const supporterDataList: Record<string, SupporterData> = {} // サポーターデータ
+    const supporterDataList: SupporterData = {} // サポーターデータ
     supporterDataSnap.forEach((doc) => {
       const { name, email } = doc.data()
       if (typeof name === 'string' && typeof email === 'string') {

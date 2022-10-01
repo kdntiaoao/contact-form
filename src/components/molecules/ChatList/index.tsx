@@ -12,7 +12,7 @@ type Props = {
   admin?: boolean
   chatData: ChatData
   contactInfo: ContactInfo
-  supporterDataList: Record<string, SupporterData>
+  supporterDataList: SupporterData
 }
 
 // eslint-disable-next-line react/display-name

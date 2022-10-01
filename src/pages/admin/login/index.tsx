@@ -22,7 +22,7 @@ import {
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 
-import { auth } from '../../../firebase/client'
+import { auth } from '../../../../firebase/client'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
 

@@ -21,7 +21,7 @@ type ContactChatPageProps = {
   contactId: string | undefined
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
-  supporterDataList: Record<string, SupporterData>
+  supporterDataList: SupporterData
 }
 
 // eslint-disable-next-line react/display-name
@@ -139,7 +139,7 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
     })
 
     const supporterDataSnap = await adminDb.collection('supporterData').get()
-    const supporterDataList: Record<string, SupporterData> = {} // サポーターデータ
+    const supporterDataList: SupporterData = {} // サポーターデータ
     supporterDataSnap.forEach((doc) => {
       const { name, email } = doc.data()
       if (typeof name === 'string' && typeof email === 'string') {

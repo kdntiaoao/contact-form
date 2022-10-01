@@ -57,7 +57,7 @@ export type Chat = {
 
 export type ChatData = Chat[]
 
-export type SupporterData = {
+export type Supporter = {
   /**
    * サポーターのお名前
    */
@@ -67,3 +67,5 @@ export type SupporterData = {
    */
   email: string
 }
+
+export type SupporterData = Record<string, Supporter>

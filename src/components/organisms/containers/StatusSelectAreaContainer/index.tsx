@@ -7,7 +7,7 @@ import { Chat } from 'types/data'
 type Props = {
   direction?: 'row' | 'column'
   currentStatus: number | undefined
-  contributor: string | undefined
+  supporter: string | undefined
   uid: string
   // eslint-disable-next-line no-unused-vars
   changeStatus: (newStatus: number, chat: Chat) => void
@@ -15,7 +15,7 @@ type Props = {
 
 // eslint-disable-next-line react/display-name
 export const StatusSelectAreaContainer = memo(
-  ({ direction = 'row', currentStatus, contributor, uid, changeStatus }: Props) => {
+  ({ direction = 'row', currentStatus, supporter, uid, changeStatus }: Props) => {
     const [disabled, setDisabaled] = useState<boolean>(false)
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
 
@@ -46,12 +46,13 @@ export const StatusSelectAreaContainer = memo(
     )
 
     useEffect(() => {
-      if (currentStatus === 2 || (currentStatus === 1 && contributor !== '0' && uid !== contributor)) {
+      if (currentStatus === 2 || (currentStatus === 1 && supporter !== '0' && uid !== supporter)) {
         setDisabaled(true)
       } else {
+        console.log(supporter)
         setDisabaled(false)
       }
-    }, [contributor, currentStatus, uid])
+    }, [supporter, currentStatus, uid])
 
     return (
       <>
