@@ -44,7 +44,7 @@ export const ChatList = memo(({ admin = false, chatData, contactInfo, supporterD
             postTime={format(postTime, 'H:mm')}
           />
         ) : (
-          typeof newStatus === 'number' && (
+          admin && typeof newStatus === 'number' && (
             <Divider key={postTime}>
               <Chip label={statusList[newStatus].label} color={statusList[newStatus].color} variant="outlined" />
             </Divider>

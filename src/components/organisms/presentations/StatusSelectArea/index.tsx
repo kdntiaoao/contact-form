@@ -5,6 +5,7 @@ import { Chip, Stack } from '@mui/material'
 type Props = {
   direction?: 'row' | 'column'
   currentStatus: number | undefined
+  disabled: boolean
   // eslint-disable-next-line no-unused-vars
   onClick: (newStatus: number) => void
 }
@@ -16,7 +17,7 @@ export const statusList: { label: string; color: 'warning' | 'info' | 'success' 
 ]
 
 // eslint-disable-next-line react/display-name
-export const StatusSelectArea = memo(({ direction = 'row', currentStatus, onClick }: Props) => {
+export const StatusSelectArea = memo(({ direction = 'row', currentStatus, disabled, onClick }: Props) => {
   return (
     <>
       <Stack direction={direction} spacing={2}>
@@ -26,7 +27,8 @@ export const StatusSelectArea = memo(({ direction = 'row', currentStatus, onClic
             label={label}
             color={color}
             variant={index === currentStatus ? 'filled' : 'outlined'}
-            onClick={() => index !== currentStatus && onClick(index)}
+            disabled={disabled}
+            onClick={() => onClick(index)}
           />
         ))}
       </Stack>

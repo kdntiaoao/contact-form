@@ -57,7 +57,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
         if (contactId && user) {
           setContactInfo((contactInfo) => contactInfo && { ...contactInfo, currentStatus: newStatus })
           const contactInfoRef = doc(db, 'contactInfo', contactId)
-          await updateDoc(contactInfoRef, { currentStatus: newStatus })
+          await updateDoc(contactInfoRef, { currentStatus: newStatus, supporter: user.uid })
           await postChat(chat)
         }
       },
@@ -118,7 +118,8 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                 <StatusSelectAreaContainer
                   direction={matches ? 'column' : 'row'}
                   currentStatus={contactInfo?.currentStatus}
-                  contributor={user.uid}
+                  contributor={contactInfo?.supporter}
+                  uid={user.uid}
                   changeStatus={changeStatus}
                 />
               </Box>
