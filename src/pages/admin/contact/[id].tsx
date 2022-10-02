@@ -55,9 +55,14 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     const changeStatus = useCallback(
       async (newStatus: number, chat: Chat): Promise<void> => {
         if (contactId && user) {
-          setContactInfo((contactInfo) => contactInfo && { ...contactInfo, currentStatus: newStatus })
+          // 更新される部分だけのお問い合わせ情報
+          const newContactInfo: Partial<ContactInfo> = {
+            currentStatus: newStatus,
+            supporter: newStatus === 0 ? '0' : user.uid,
+          }
+          setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newContactInfo })
           const contactInfoRef = doc(db, 'contactInfo', contactId)
-          await updateDoc(contactInfoRef, { currentStatus: newStatus, supporter: user.uid })
+          await updateDoc(contactInfoRef, newContactInfo)
           await postChat(chat)
         }
       },
