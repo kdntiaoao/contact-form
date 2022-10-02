@@ -1,4 +1,4 @@
-import { memo, SyntheticEvent, useCallback, useState } from 'react'
+import { memo, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 
 import { SubmitHandler, useForm } from 'react-hook-form'
 
@@ -8,6 +8,8 @@ import { Chat } from 'types/data'
 type Props = {
   contributor: string | undefined
   contactId: string | undefined
+  currentStatus?: number | undefined
+  supporter?: string | undefined // 現在の担当者のID
   // eslint-disable-next-line no-unused-vars
   postChat: (chat: Chat) => Promise<void>
 }
@@ -17,7 +19,7 @@ export type ChatFormInputType = {
 }
 
 // eslint-disable-next-line react/display-name
-export const ChatFormContainer = memo(({ contributor, contactId, postChat }: Props) => {
+export const ChatFormContainer = memo(({ contributor, contactId, currentStatus, supporter, postChat }: Props) => {
   const { handleSubmit, control, reset } = useForm<ChatFormInputType>({
     mode: 'onChange',
     defaultValues: {
@@ -26,6 +28,7 @@ export const ChatFormContainer = memo(({ contributor, contactId, postChat }: Pro
   })
   const [error, setError] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string>()
+  const [disabled, setDisabled] = useState<boolean>(false)
 
   const handleClose = useCallback((event?: SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -57,6 +60,14 @@ export const ChatFormContainer = memo(({ contributor, contactId, postChat }: Pro
     [contactId, contributor, postChat, reset]
   )
 
+  useEffect(() => {
+    if (currentStatus === 1 && supporter === contributor) {
+      setDisabled(false)
+    } else {
+      setDisabled(true)
+    }
+  }, [contributor, currentStatus, supporter])
+
   return (
     <ChatForm
       error={error}
@@ -64,6 +75,7 @@ export const ChatFormContainer = memo(({ contributor, contactId, postChat }: Pro
       errorMessage={errorMessage}
       onSubmit={handleSubmit(onSubmit)}
       control={control}
+      disabled={disabled}
     />
   )
 })
