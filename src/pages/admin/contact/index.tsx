@@ -3,15 +3,16 @@ import { useRouter } from 'next/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { collection, getDocs } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 
-import { auth, db } from '../../../../firebase/client'
+import { auth } from '../../../../firebase/client'
 
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ContactTableContainer } from 'components/organisms/containers/ContactTableContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { ChatData, ContactInfo } from 'types/data'
+import { getContactInfoList } from 'services/contact/getContactInfoList'
+import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
+import { ContactInfo, SupporterData } from 'types/data'
 
 // eslint-disable-next-line react/display-name
 const ContactListPage: NextPage = memo(() => {
@@ -20,27 +21,15 @@ const ContactListPage: NextPage = memo(() => {
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
   const [contactInfoList, setContactInfoList] = useState<Record<string, ContactInfo>>()
-  const [chatDataList, setChatDataList] = useState<Record<string, ChatData>>()
+  const [supporterDataList, setSupporterDataList] = useState<SupporterData>()
 
   const fetchData = useCallback(async () => {
-    const contactInfoSnapshot = await getDocs(collection(db, 'contactInfo'))
-    const contactInfoList: Record<string, ContactInfo> = {}
-    const chatDataSnapshot = await getDocs(collection(db, 'chatData'))
-    const chatDataList: Record<string, ChatData> = {}
+    const contactInfoList: Record<string, ContactInfo> | null = await getContactInfoList()
+    const supporterDataList: SupporterData | null = await getSupporterDataList()
 
-    contactInfoSnapshot.forEach((doc) => {
-      const data = doc.data() as ContactInfo
-      contactInfoList[doc.id] = data
-    })
-
-    chatDataSnapshot.forEach((doc) => {
-      const data = doc.data() as ChatData
-      chatDataList[doc.id] = data
-    })
-
-    setContactInfoList(contactInfoList)
-    setChatDataList(chatDataList)
-  }, [setContactInfoList, setChatDataList])
+    contactInfoList && setContactInfoList(contactInfoList)
+    supporterDataList && setSupporterDataList(supporterDataList)
+  }, [setContactInfoList])
 
   useEffect(() => {
     if (user) {
@@ -52,7 +41,7 @@ const ContactListPage: NextPage = memo(() => {
     if (!loading && (!user || !user?.email)) router.push('/')
   }, [loading, router, user])
 
-  if (loading || !contactInfoList || !chatDataList) return <LoadingScreen loading />
+  if (loading || !contactInfoList || !supporterDataList) return <LoadingScreen loading />
 
   return (
     <DefaultLayout>
@@ -65,7 +54,7 @@ const ContactListPage: NextPage = memo(() => {
           </Box>
 
           <Box mt={{ xs: 4, sm: 6 }}>
-            <ContactTableContainer contactInfoList={contactInfoList} />
+            <ContactTableContainer contactInfoList={contactInfoList} supporterDataList={supporterDataList} />
           </Box>
         </Box>
       </Container>

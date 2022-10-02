@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Box, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
-import { off, onValue, orderByChild, query, ref } from 'firebase/database'
+import { off, onValue, orderByChild, push, query, ref, set } from 'firebase/database'
 import { doc, onSnapshot, Unsubscribe, updateDoc } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { animateScroll as scroll } from 'react-scroll'
@@ -14,16 +14,16 @@ import { adminDatabase, adminDb } from '../../../../firebase/server'
 import { ChatList } from 'components/molecules/ChatList'
 import { LinkButton } from 'components/molecules/LinkButton'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
-import { StatusSelectArea } from 'components/molecules/StatusSelectArea'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
+import { StatusSelectAreaContainer } from 'components/organisms/containers/StatusSelectAreaContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { ChatData, ContactInfo, SupporterData } from 'types/data'
+import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type AdminContactChatPageProps = {
   contactId: string | undefined
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
-  supporterDataList: Record<string, SupporterData>
+  supporterDataList: SupporterData
 }
 
 // eslint-disable-next-line react/display-name
@@ -38,19 +38,35 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     const [user, loading] = useAuthState(auth)
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
     const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
-    const [currentStatus, setCurrentStatus] = useState<number | undefined>(initialContactInfo?.currentStatus)
     const theme = useTheme()
     const matches = useMediaQuery(theme.breakpoints.up('md'))
 
+    // Firebaseにチャットを保存する関数
+    const postChat = useCallback(
+      async (chat: Chat) => {
+        const chatDataRef = ref(database, `chatDataList/${contactId}`)
+        const newChatRef = push(chatDataRef)
+        await set(newChatRef, chat)
+      },
+      [contactId]
+    )
+
+    // 対応状況を変更する関数
     const changeStatus = useCallback(
-      async (newStatus: number): Promise<void> => {
+      async (newStatus: number, chat: Chat): Promise<void> => {
         if (contactId && user) {
-          setCurrentStatus(newStatus)
+          // 更新される部分だけのお問い合わせ情報
+          const newContactInfo: Partial<ContactInfo> = {
+            currentStatus: newStatus,
+            supporter: newStatus === 0 ? '0' : user.uid,
+          }
+          setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newContactInfo })
           const contactInfoRef = doc(db, 'contactInfo', contactId)
-          await updateDoc(contactInfoRef, { currentStatus: newStatus })
+          await updateDoc(contactInfoRef, newContactInfo)
+          await postChat(chat)
         }
       },
-      [contactId, user]
+      [contactId, postChat, user]
     )
 
     useEffect(() => {
@@ -79,7 +95,6 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
         unsub = onSnapshot(contactInfoRef, (doc) => {
           const data = doc.data() as ContactInfo
           setContactInfo(data)
-          setCurrentStatus(data.currentStatus)
         })
       } else if (!loading) {
         console.log('user or id not exist')
@@ -105,9 +120,11 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                   <LinkButton href="/admin/contact">お問い合わせ一覧</LinkButton>
                 </Box>
 
-                <StatusSelectArea
+                <StatusSelectAreaContainer
                   direction={matches ? 'column' : 'row'}
-                  currentStatus={currentStatus}
+                  currentStatus={contactInfo?.currentStatus}
+                  supporter={contactInfo?.supporter}
+                  uid={user.uid}
                   changeStatus={changeStatus}
                 />
               </Box>
@@ -132,8 +149,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                 >
                   <Container maxWidth="md">
                     <Box py={2}>
-                      {/* <ChatForm contributor="0" contactId={contactId} /> */}
-                      <ChatFormContainer contributor={user.uid} contactId={contactId} />
+                      <ChatFormContainer contributor={user.uid} contactId={contactId} currentStatus={contactInfo?.currentStatus} supporter={contactInfo?.supporter} postChat={postChat} />
                     </Box>
                   </Container>
                 </Stack>
@@ -174,7 +190,7 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
     })
 
     const supporterDataSnap = await adminDb.collection('supporterData').get()
-    const supporterDataList: Record<string, SupporterData> = {} // サポーターデータ
+    const supporterDataList: SupporterData = {} // サポーターデータ
     supporterDataSnap.forEach((doc) => {
       const { name, email } = doc.data()
       if (typeof name === 'string' && typeof email === 'string') {

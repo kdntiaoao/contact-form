@@ -29,7 +29,6 @@ export const Header = memo(({ menuList }: HeaderProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
 
   const handleDrawerToggle = useCallback(() => {
-    // console.log('handle drawer toggle!', isDrawerOpen)
     setIsDrawerOpen((prev) => !prev)
   }, [])
 

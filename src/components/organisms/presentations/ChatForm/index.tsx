@@ -12,10 +12,11 @@ type Props = {
   errorMessage: string | undefined
   onSubmit: () => void
   control: Control<ChatFormInputType>
+  disabled: boolean
 }
 
 // eslint-disable-next-line react/display-name
-export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control }: Props) => {
+export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control, disabled }: Props) => {
   return (
     <>
       {/* エラー表示 */}
@@ -32,10 +33,10 @@ export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control 
           control={control}
           rules={{ required: true, maxLength: 4000 }}
           render={({ field }) => (
-            <TextField {...field} variant="outlined" sx={{ flex: 1 }} inputProps={{ maxLength: 4000 }} />
+            <TextField {...field} variant="outlined" disabled={disabled} sx={{ flex: 1 }} inputProps={{ maxLength: 4000 }} />
           )}
         />
-        <Button type="submit" variant="contained" endIcon={<SendIcon />}>
+        <Button type="submit" variant="contained" disabled={disabled} endIcon={<SendIcon />}>
           送信
         </Button>
       </Stack>

@@ -22,6 +22,7 @@ export default {
       control: { type: 'object' },
       defaultValue: [
         { contributor: '0', postTime: 1664030961535, contents: { text: 'Hello, world!' } },
+        { contributor: 'OtL4a3q2C1QzwK4sXmXp3s3ha4C2', postTime: 1664030974622, contents: { newStatus: 1 } },
         { contributor: 'OtL4a3q2C1QzwK4sXmXp3s3ha4C2', postTime: 1664030974722, contents: { text: 'Hello, world!' } },
         {
           contributor: '0',

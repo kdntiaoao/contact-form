@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, Box, Paper, Stack, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
@@ -9,7 +11,8 @@ type Props = {
   postTime: string
 }
 
-export const Chat = ({ reverse, text, contributor, postTime }: Props) => {
+// eslint-disable-next-line react/display-name
+export const Chat = memo(({ reverse, text, contributor, postTime }: Props) => {
   console.log('rendering Chat')
 
   return (
@@ -33,4 +36,4 @@ export const Chat = ({ reverse, text, contributor, postTime }: Props) => {
       </Stack>
     </Stack>
   )
-}
+})
