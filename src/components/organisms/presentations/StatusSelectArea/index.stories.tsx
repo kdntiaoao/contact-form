@@ -12,7 +12,8 @@ export default {
   // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {
     direction: {
-      control: { type: 'text' },
+      control: { type: 'radio' },
+      options: ['row', 'column'],
       defaultValue: 'row',
       description: '並ぶ方向',
       table: {
@@ -20,7 +21,8 @@ export default {
       },
     },
     currentStatus: {
-      control: { type: 'number' },
+      control: { type: 'select' },
+      options: [0, 1, 2],
       defaultValue: 0,
       description: '現在の状態',
       table: {
