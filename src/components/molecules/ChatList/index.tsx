@@ -19,7 +19,7 @@ type Props = {
 export const ChatList = memo(({ admin = false, chatData, contactInfo, supporterDataList }: Props) => {
   const contributorToName = useCallback(
     (contributor: string, index: number) => {
-      if (contributor === chatData?.[index - 1]?.contributor) {
+      if (chatData?.[index - 1]?.contents.text && contributor === chatData?.[index - 1]?.contributor) {
         return ''
       } else if (contributor === '0' && contactInfo) {
         return `${contactInfo.name} 様`
@@ -44,7 +44,8 @@ export const ChatList = memo(({ admin = false, chatData, contactInfo, supporterD
             postTime={format(postTime, 'H:mm')}
           />
         ) : (
-          admin && typeof newStatus === 'number' && (
+          admin &&
+          typeof newStatus === 'number' && (
             <Divider key={postTime}>
               <Chip label={statusList[newStatus].label} color={statusList[newStatus].color} variant="outlined" />
             </Divider>
