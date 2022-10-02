@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 
-import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Container } from '@mui/material'
 import { useAuthState } from 'react-firebase-hooks/auth'
 
 import { auth } from '../../../../firebase/client'
@@ -18,8 +18,6 @@ import { ContactInfo, SupporterData } from 'types/data'
 const ContactListPage: NextPage = memo(() => {
   const router = useRouter()
   const [user, loading] = useAuthState(auth)
-  const theme = useTheme()
-  const matches = useMediaQuery(theme.breakpoints.up('sm'))
   const [contactInfoList, setContactInfoList] = useState<Record<string, ContactInfo>>()
   const [supporterDataList, setSupporterDataList] = useState<SupporterData>()
 
@@ -47,15 +45,11 @@ const ContactListPage: NextPage = memo(() => {
     <DefaultLayout>
       <Container maxWidth="xl">
         <Box py={{ xs: 6, sm: 10 }}>
-          <Box>
-            <Typography variant={matches ? 'h4' : 'h5'} component="h1">
-              お問い合わせ一覧
-            </Typography>
-          </Box>
-
-          <Box mt={{ xs: 4, sm: 6 }}>
-            <ContactTableContainer contactInfoList={contactInfoList} supporterDataList={supporterDataList} />
-          </Box>
+          <ContactTableContainer
+            tableTitle="お問い合わせ一覧"
+            contactInfoList={contactInfoList}
+            supporterDataList={supporterDataList}
+          />
         </Box>
       </Container>
     </DefaultLayout>
