@@ -6,6 +6,7 @@ import { ChatForm } from 'components/organisms/presentations/ChatForm'
 import { Chat } from 'types/data'
 
 type Props = {
+  admin: boolean
   contributor: string | undefined
   contactId: string | undefined
   currentStatus?: number | undefined
@@ -19,7 +20,7 @@ export type ChatFormInputType = {
 }
 
 // eslint-disable-next-line react/display-name
-export const ChatFormContainer = memo(({ contributor, contactId, currentStatus, supporter, postChat }: Props) => {
+export const ChatFormContainer = memo(({ admin, contributor, contactId, currentStatus, supporter, postChat }: Props) => {
   const { handleSubmit, control, reset } = useForm<ChatFormInputType>({
     mode: 'onChange',
     defaultValues: {
@@ -75,7 +76,7 @@ export const ChatFormContainer = memo(({ contributor, contactId, currentStatus, 
       errorMessage={errorMessage}
       onSubmit={handleSubmit(onSubmit)}
       control={control}
-      disabled={disabled}
+      disabled={admin && disabled}
     />
   )
 })
