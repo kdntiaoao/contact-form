@@ -149,7 +149,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                 >
                   <Container maxWidth="md">
                     <Box py={2}>
-                      <ChatFormContainer contributor={user.uid} contactId={contactId} currentStatus={contactInfo?.currentStatus} supporter={contactInfo?.supporter} postChat={postChat} />
+                      <ChatFormContainer admin={true} contributor={user.uid} contactId={contactId} currentStatus={contactInfo?.currentStatus} supporter={contactInfo?.supporter} postChat={postChat} />
                     </Box>
                   </Container>
                 </Stack>
