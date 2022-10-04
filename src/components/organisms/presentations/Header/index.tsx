@@ -32,8 +32,6 @@ export const Header = memo(({ menuList }: HeaderProps) => {
     setIsDrawerOpen((prev) => !prev)
   }, [])
 
-  console.log('rendering Header')
-
   return (
     <>
       <HideOnScroll>

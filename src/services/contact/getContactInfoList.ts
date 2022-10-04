@@ -9,7 +9,6 @@ export const getContactInfoList = async (): Promise<Record<string, ContactInfo> 
 
   // データ取得に失敗した場合
   if (contactInfoListSnap.empty) {
-    console.log('contactInfoListSnap is empty.')
     return null
   }
 

@@ -9,7 +9,6 @@ export const getSupporterDataList = async (): Promise<SupporterData | null> => {
 
   // データ取得に失敗した場合
   if (supporterDataListSnap.empty) {
-    console.log('supporterDataListSnap is empty.')
     return null
   }
 

@@ -9,7 +9,6 @@ export const getChatDataList = async (): Promise<Record<string, ChatData> | null
 
   // データ取得に失敗した場合
   if (chatDataListSnap.empty) {
-    console.log('chatDataListSnap is empty.')
     return null
   }
 

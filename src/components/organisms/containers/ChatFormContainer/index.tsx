@@ -52,7 +52,6 @@ export const ChatFormContainer = memo(({ admin, contributor, contactId, currentS
         reset()
       } catch (error: unknown) {
         if (error instanceof Error) {
-          console.log(error.message)
           setError(true)
           setErrorMessage(error.message)
         }

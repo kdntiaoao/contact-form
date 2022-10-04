@@ -55,9 +55,7 @@ const LoginPage = memo(() => {
       const { email, password } = data
 
       await signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user
-          console.log('success signin : ', user)
+        .then(() => {
           router.push('/admin/contact')
         })
         .catch((error) => {

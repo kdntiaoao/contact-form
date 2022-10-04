@@ -63,7 +63,6 @@ const SignupPage = memo(() => {
           const user = userCredential.user
           const supporter: Supporter = { name, email }
           await setDoc(doc(db, 'supporterData', user.uid), supporter)
-          console.log('success signin : ', user)
           router.push('/admin/contact')
         })
         .catch((error) => {

@@ -61,8 +61,6 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
           setChatData(chatData)
           scroll.scrollToBottom()
         })
-      } else if (!loading) {
-        console.log('user or id not exist')
       }
 
       const cleanup = () => {
@@ -152,7 +150,6 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
       revalidate: 60,
     }
   } else {
-    console.log('contactId is empty.')
     return { props: {}, revalidate: 60 }
   }
 }
