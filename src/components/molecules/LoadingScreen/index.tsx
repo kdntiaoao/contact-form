@@ -8,8 +8,6 @@ type Props = {
 
 // eslint-disable-next-line react/display-name
 export const LoadingScreen = memo(({ loading }: Props) => {
-  console.log('rendering LoadingScreen')
-
   return (
     <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
       <CircularProgress color="inherit" />

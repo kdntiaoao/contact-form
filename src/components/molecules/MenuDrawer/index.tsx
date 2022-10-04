@@ -54,8 +54,6 @@ const MenuList = memo(({ menuList, onClose }: MenuListProps) => {
 
 // eslint-disable-next-line react/display-name
 export const MenuDrawer = memo(({ menuList, open, onClose }: MenuDrawerProps) => {
-  console.log('rendering MenuDrawer')
-
   return (
     <Box component="nav">
       <Drawer

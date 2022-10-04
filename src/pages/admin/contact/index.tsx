@@ -39,7 +39,7 @@ const ContactListPage: NextPage = memo(() => {
     if (!loading && (!user || !user?.email)) router.push('/')
   }, [loading, router, user])
 
-  if (loading || !contactInfoList || !supporterDataList) return <LoadingScreen loading />
+  if (loading || !contactInfoList || !supporterDataList || !user) return <LoadingScreen loading />
 
   return (
     <DefaultLayout>
@@ -49,6 +49,7 @@ const ContactListPage: NextPage = memo(() => {
             tableTitle="お問い合わせ一覧"
             contactInfoList={contactInfoList}
             supporterDataList={supporterDataList}
+            uid={user.uid}
           />
         </Box>
       </Container>

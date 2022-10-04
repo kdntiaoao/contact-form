@@ -65,8 +65,6 @@ const ConfirmPage: NextPage = memo(() => {
         await set(newChatRef, chat)
 
         await router.push(`/contact/${docRef.id}`)
-      } catch (error) {
-        console.log(error)
       } finally {
         setLoading(false)
       }

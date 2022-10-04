@@ -12,7 +12,6 @@ export const getChatData = async (contactId: string): Promise<ChatData | null> =
     const chatData = chatDataSnap.val() as ChatData
     return chatData
   } else {
-    console.log('chatDataSnap is empty.')
     return null
   }
 }

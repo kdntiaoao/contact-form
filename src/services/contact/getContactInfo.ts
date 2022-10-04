@@ -12,7 +12,6 @@ export const getContactInfo = async (contactId: string): Promise<ContactInfo | n
     const contactInfo = contactInfoSnap.data() as ContactInfo
     return contactInfo
   } else {
-    console.log('contactInfoSnap is empty.')
     return null
   }
 }
