@@ -30,13 +30,21 @@ type HeadCell = {
 type Props = {
   tableTitle: string
   contactInfoArray: (Data & {
+    supporterId: string
     currentStatusInfo: {
       label: '未対応' | '対応中' | '対応完了'
       color: 'warning' | 'info' | 'success'
     }
     key: string
   })[]
+  uid: string
 }
+
+export type FilteredListType = {
+  text: string
+  visible?: boolean
+  checked?: boolean
+}[][]
 
 const headCells: HeadCell[] = [
   { id: 'currentStatus', label: '状況' },
@@ -49,13 +57,16 @@ const headCells: HeadCell[] = [
 ]
 
 // eslint-disable-next-line react/display-name
-export const ContactTable = memo(({ tableTitle, contactInfoArray }: Props) => {
+export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) => {
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('md'))
-  const [filteredStatusList, setFilteredStatusList] = useState<{ text: string; visible: boolean }[]>([
-    { text: '未対応', visible: true },
-    { text: '対応中', visible: true },
-    { text: '対応完了', visible: true },
+  const [filteredList, setFilteredList] = useState<FilteredListType>([
+    [
+      { text: '未対応', visible: true },
+      { text: '対応中', visible: true },
+      { text: '対応完了', visible: true },
+    ],
+    [{ text: '担当のみ表示', checked: false }],
   ])
   const [filteredContactInfoArray, setFilteredContactInfoArray] =
     useState<
@@ -65,6 +76,7 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray }: Props) => {
         category: string
         contents: string
         formattedContents: string
+        supporterId: string
         supporter: string
         currentStatus: number
         submitTime: string
@@ -89,32 +101,51 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray }: Props) => {
     [matches]
   )
 
-  const changeFilteredStatus = useCallback((target: number) => {
-    setFilteredStatusList((prev) => {
+  const changeFilteredStatus = useCallback((target: [number, number]) => {
+    setFilteredList((prev) => {
       const newList = [...prev]
-      newList[target].visible = !newList[target].visible
+      if (typeof newList[target[0]][target[1]].visible !== 'undefined') {
+        newList[target[0]][target[1]].visible = !newList[target[0]][target[1]].visible
+      }
+      if (typeof newList[target[0]][target[1]].checked !== 'undefined') {
+        newList[target[0]][target[1]].checked = !newList[target[0]][target[1]].checked
+      }
       return newList
     })
   }, [])
 
-  const initialArray = useMemo(() => (
-    contactInfoArray.map(
-      ({ name, tel, category, contents, supporter, currentStatus, submitTime, currentStatusInfo, key }) => {
-        return {
+  const initialArray = useMemo(
+    () =>
+      contactInfoArray.map(
+        ({
           name,
           tel,
           category,
           contents,
-          formattedContents: formatLimitText(contents),
           supporter,
+          supporterId,
           currentStatus,
-          submitTime: format(submitTime, matches ? 'M月d日 H:mm' : 'M/d'),
+          submitTime,
           currentStatusInfo,
           key,
+        }) => {
+          return {
+            name,
+            tel,
+            category,
+            contents,
+            formattedContents: formatLimitText(contents),
+            supporter,
+            supporterId,
+            currentStatus,
+            submitTime: format(submitTime, matches ? 'M月d日 H:mm' : 'M/d'),
+            currentStatusInfo,
+            key,
+          }
         }
-      }
-    )
-  ), [contactInfoArray, formatLimitText, matches])
+      ),
+    [contactInfoArray, formatLimitText, matches]
+  )
 
   useEffect(() => {
     setFilteredContactInfoArray(initialArray)
@@ -122,17 +153,15 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray }: Props) => {
 
   useEffect(() => {
     setFilteredContactInfoArray(
-      [...initialArray].filter(({ currentStatus }) => filteredStatusList[currentStatus].visible)
+      [...initialArray]
+        .filter(({ currentStatus }) => filteredList[0][currentStatus].visible)
+        .filter(({ supporterId }) => !filteredList[1][0].checked || supporterId === uid)
     )
-  }, [filteredStatusList, initialArray])
+  }, [filteredList, initialArray, uid])
 
   return (
     <>
-      <TableToolBar
-        tableTitle={tableTitle}
-        filteredStatusList={filteredStatusList}
-        changeFilteredStatus={changeFilteredStatus}
-      />
+      <TableToolBar tableTitle={tableTitle} filteredList={filteredList} changeFilteredStatus={changeFilteredStatus} />
 
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 750 }} aria-label="お問い合わせ一覧表">

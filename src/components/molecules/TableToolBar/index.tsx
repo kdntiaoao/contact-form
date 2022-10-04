@@ -2,17 +2,19 @@ import { memo } from 'react'
 
 import { Toolbar, Typography } from '@mui/material'
 
-import { FilterListButton } from '../FilterListButton'
+import { FilteredListButton } from '../FilteredListButton'
+
+import { FilteredListType } from 'components/organisms/presentations/ContactTable'
 
 type TableToolBarProps = {
   tableTitle?: string
-  filteredStatusList: { text: string; visible: boolean }[]
+  filteredList: FilteredListType
   // eslint-disable-next-line no-unused-vars
-  changeFilteredStatus: (target: number) => void
+  changeFilteredStatus: (target: [number, number]) => void
 }
 
 // eslint-disable-next-line react/display-name
-export const TableToolBar = memo(({ tableTitle, filteredStatusList, changeFilteredStatus }: TableToolBarProps) => {
+export const TableToolBar = memo(({ tableTitle, filteredList, changeFilteredStatus }: TableToolBarProps) => {
   return (
     <Toolbar
       sx={{
@@ -24,7 +26,7 @@ export const TableToolBar = memo(({ tableTitle, filteredStatusList, changeFilter
         {tableTitle}
       </Typography>
 
-      <FilterListButton filterStatusList={filteredStatusList} changeFilterStatus={changeFilteredStatus} />
+      <FilteredListButton filteredList={filteredList} changeFilteredStatus={changeFilteredStatus} />
     </Toolbar>
   )
 })
