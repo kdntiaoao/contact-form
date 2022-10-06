@@ -17,6 +17,7 @@
     "@mui/icons-material": "^5.10.3",
     "@mui/lab": "^5.0.0-alpha.98",
     "@mui/material": "^5.10.4",
+    "@sendgrid/mail": "^7.7.0",
     "@types/react-scroll": "^1.8.4",
     "date-fns": "^2.29.3",
     "firebase": "^9.9.4",
