@@ -59,11 +59,6 @@ const ContactPage: NextPage = memo(() => {
   } = useForm<FormInputs>({
     mode: 'onBlur',
     defaultValues: {
-      // name: queryName,
-      // email: queryEmail,
-      // tel: queryTel,
-      // category: queryCategory,
-      // contents: queryContents,
       name: queryName || '田中太郎',
       email: queryEmail || 'sample@example.com',
       tel: queryTel || '08000121234',

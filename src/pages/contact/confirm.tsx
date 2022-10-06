@@ -64,6 +64,24 @@ const ConfirmPage: NextPage = memo(() => {
         const newChatRef = push(chatDataRef)
         await set(newChatRef, chat)
 
+        // テスト用メールのときはメールを送信しない
+        if (queryEmail.indexOf('@example.com') < 0) {
+          await fetch('/api/send', {
+            body: JSON.stringify({
+              name: queryName,
+              email: queryEmail,
+              tel: queryTel,
+              category: queryCategory,
+              contents: queryContents,
+              chatUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/contact/${docRef.id}`,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+          })
+        }
+
         await router.push(`/contact/${docRef.id}`)
       } catch (error) {
         console.log(error)
