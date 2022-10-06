@@ -172,12 +172,13 @@ const ContactPage: NextPage = memo(() => {
                 rules={{
                   required: '入力してください',
                 }}
-                render={({ field: {name, value} }) => (
+                render={({ field: { name, value, onBlur } }) => (
                   <Autocomplete
                     autoHighlight
                     disableClearable
                     value={value}
                     onChange={(_, newValue) => newValue && setValue('category', newValue)}
+                    onBlur={onBlur}
                     options={categoryOptions}
                     renderInput={(params) => (
                       <TextField
