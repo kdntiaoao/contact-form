@@ -58,6 +58,7 @@ const ContactPage: NextPage = memo(() => {
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<FormInputs>({
     mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       name: queryName || '田中太郎',
       email: queryEmail || 'sample@example.com',

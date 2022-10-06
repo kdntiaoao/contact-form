@@ -49,7 +49,6 @@ export const StatusSelectAreaContainer = memo(
       if (currentStatus === 2 || (currentStatus === 1 && supporter !== '0' && uid !== supporter)) {
         setDisabaled(true)
       } else {
-        console.log(supporter)
         setDisabaled(false)
       }
     }, [supporter, currentStatus, uid])
