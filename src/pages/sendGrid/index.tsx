@@ -50,7 +50,7 @@ const SendGridPage = memo(() => {
           {hello || 'Error!!!'}
         </Typography>
       </Box>
-      <Box py={6}>
+      <Box py={6} textAlign="center">
         <Button onClick={handleClick}>Send Mail</Button>
       </Box>
     </DefaultLayout>

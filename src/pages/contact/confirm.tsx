@@ -66,7 +66,7 @@ const ConfirmPage: NextPage = memo(() => {
 
         // テスト用メールのときはメールを送信しない
         if (queryEmail.indexOf('@example.com') < 0) {
-          await fetch('/api/send', {
+          const res = await fetch('/api/send', {
             body: JSON.stringify({
               name: queryName,
               email: queryEmail,
@@ -80,6 +80,12 @@ const ConfirmPage: NextPage = memo(() => {
             },
             method: 'POST',
           })
+
+          if (res.ok) {
+            console.log('ok')
+          } else {
+            throw new Error('sendGrid error!')
+          }
         }
 
         await router.push(`/contact/${docRef.id}`)
