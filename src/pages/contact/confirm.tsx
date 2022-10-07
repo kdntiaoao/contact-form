@@ -82,7 +82,7 @@ const ConfirmPage: NextPage = memo(() => {
           })
 
           if (res.ok) {
-            const json = res.json()
+            const json = await res.json()
             console.log(json)
           } else {
             throw new Error('sendGrid error!')
