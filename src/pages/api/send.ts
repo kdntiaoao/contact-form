@@ -66,7 +66,8 @@ ${req.body.chatUrl}`,
     })()
   }
 
-  res.status(200).end()
+  // res.status(200).end()
+  res.status(200).json({ ...req.body })
 }
 
 export default handler
