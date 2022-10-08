@@ -8,13 +8,13 @@ import SendIcon from '@mui/icons-material/Send'
 import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { signInAnonymously } from 'firebase/auth'
 import { push, ref, set } from 'firebase/database'
-import { addDoc, collection } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 
-import { auth, database, db } from '../../../firebase/client'
+import { auth, database } from '../../../firebase/client'
 
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { addContactInfo } from 'services/contact/addContactInfo'
 import { Chat, ContactInfo } from 'types/data'
 
 // eslint-disable-next-line react/display-name
@@ -57,10 +57,12 @@ const ConfirmPage: NextPage = memo(() => {
         if (!user) await signInAnonymously(auth)
 
         // お問い合わせ情報の保存(Firestore)
-        const docRef = await addDoc(collection(db, 'contactInfo'), contactInfo)
+        const docId = await addContactInfo(contactInfo)
+
+        console.log({ docId })
 
         // チャットデータの追加(Realtime Database)
-        const chatDataRef = ref(database, `chatDataList/${docRef.id}`)
+        const chatDataRef = ref(database, `chatDataList/${docId}`)
         const newChatRef = push(chatDataRef)
         await set(newChatRef, chat)
 
@@ -73,16 +75,14 @@ const ConfirmPage: NextPage = memo(() => {
               tel: queryTel,
               category: queryCategory,
               contents: queryContents,
-              chatUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/contact/${docRef.id}`,
+              chatUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/contact/${docId}`,
             }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             method: 'POST',
           })
         }
 
-        await router.push(`/contact/${docRef.id}`)
+        await router.push(`/contact/${docId}`)
       } finally {
         setLoading(false)
       }
