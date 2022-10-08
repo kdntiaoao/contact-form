@@ -3,8 +3,6 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import sgMail from '@sendgrid/mail'
 
 const handler = (req: NextApiRequest, res: NextApiResponse) => {
-  let errorData = { isError: false }
-
   if (process.env.SENDGRID_API_KEY && req.method === 'POST') {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
@@ -67,11 +65,9 @@ ${req.body.chatUrl}`,
         console.error(error)
       }
     })()
-  } else {
-    errorData.isError = true
   }
 
-  res.status(200).json({ errorData })
+  res.status(200).end()
 }
 
 export default handler

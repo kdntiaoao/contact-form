@@ -9,20 +9,20 @@ const SendGridPage = memo(() => {
   const [hello, setHello] = useState<string>()
 
   const sendMail = useCallback(async () => {
-    await fetch('/api/send', {
-      body: JSON.stringify({
-        name: 'aaa',
-        email: 'swim.free.nthm@gmail.com',
-        tel: '080xxxxxxxx',
-        category: 'A001',
-        contents: 'aaaaa',
-        chatUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/contact`,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    })
+    // await fetch('/api/send', {
+    //   body: JSON.stringify({
+    //     name: 'aaa',
+    //     email: 'swim.free.nthm@gmail.com',
+    //     tel: '080xxxxxxxx',
+    //     category: 'A001',
+    //     contents: 'aaaaa',
+    //     chatUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/contact`,
+    //   }),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   method: 'POST',
+    // })
   }, [])
 
   const handleClick = useCallback(() => {
