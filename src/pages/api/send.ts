@@ -1,8 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
+import sgMail from '@sendgrid/mail'
+
 const handler = (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method === 'POST') {
-    const sgMail = require('@sendgrid/mail')
+  let errorData = { isError: false }
+
+  if (process.env.SENDGRID_API_KEY && req.method === 'POST') {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
     const msg = {
@@ -59,21 +62,16 @@ ${req.body.chatUrl}`,
 
     ;(async () => {
       try {
-        await sgMail
-          .send(msg)
-          .then(() => {
-            console.log('Email sent')
-          })
-          .catch((error: Error) => {
-            console.error(error)
-          })
+        await sgMail.send(msg)
       } catch (error) {
         console.error(error)
       }
     })()
+  } else {
+    errorData.isError = true
   }
 
-  res.status(200).end()
+  res.status(200).json({ errorData })
 }
 
 export default handler
