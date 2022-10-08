@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
+import sgMail from '@sendgrid/mail'
+
 const handler = (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method === 'POST') {
-    const sgMail = require('@sendgrid/mail')
+  if (process.env.SENDGRID_API_KEY && req.method === 'POST') {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
     const msg = {
