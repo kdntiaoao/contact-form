@@ -6,14 +6,10 @@ import { memo, useCallback, useEffect, useState } from 'react'
 import EditIcon from '@mui/icons-material/Edit'
 import SendIcon from '@mui/icons-material/Send'
 import { Box, Button, Container, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { signInAnonymously } from 'firebase/auth'
-import { push, ref, set } from 'firebase/database'
-import { useAuthState } from 'react-firebase-hooks/auth'
-
-import { auth, database } from '../../../firebase/client'
 
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { addChat } from 'services/chat/addChat'
 import { addContactInfo } from 'services/contact/addContactInfo'
 import { Chat, ContactInfo } from 'types/data'
 
@@ -26,7 +22,6 @@ const ConfirmPage: NextPage = memo(() => {
   const queryCategory = router.query.category as string | undefined
   const queryContents = router.query.contents as string | undefined
   const [loading, setLoading] = useState<boolean>(false)
-  const [user] = useAuthState(auth)
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('sm'))
 
@@ -54,7 +49,6 @@ const ConfirmPage: NextPage = memo(() => {
 
       try {
         setLoading(true)
-        if (!user) await signInAnonymously(auth)
 
         // お問い合わせ情報の保存(Firestore)
         const docId = await addContactInfo(contactInfo)
@@ -62,9 +56,7 @@ const ConfirmPage: NextPage = memo(() => {
         console.log({ docId })
 
         // チャットデータの追加(Realtime Database)
-        const chatDataRef = ref(database, `chatDataList/${docId}`)
-        const newChatRef = push(chatDataRef)
-        await set(newChatRef, chat)
+        await addChat(docId, chat)
 
         // テスト用メールのときはメールを送信しない
         if (queryEmail.indexOf('@example.com') < 0) {
@@ -87,7 +79,7 @@ const ConfirmPage: NextPage = memo(() => {
         setLoading(false)
       }
     }
-  }, [queryCategory, queryContents, queryEmail, queryName, queryTel, router, user])
+  }, [queryCategory, queryContents, queryEmail, queryName, queryTel, router])
 
   useEffect(() => {
     // 入力されたデータがないとき、お問い合わせページへ遷移
