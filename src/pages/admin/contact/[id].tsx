@@ -3,12 +3,10 @@ import { useRouter } from 'next/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Box, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
-import { off, onValue, orderByChild, push, query, ref, set } from 'firebase/database'
-import { doc, onSnapshot, Unsubscribe, updateDoc } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { animateScroll as scroll } from 'react-scroll'
 
-import { auth, database, db } from '../../../../firebase/client'
+import { auth } from '../../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
 import { ChatList } from 'components/molecules/ChatList'
@@ -17,6 +15,9 @@ import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { StatusSelectAreaContainer } from 'components/organisms/containers/StatusSelectAreaContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { addChat } from 'services/chat/addChat'
+import { getChatData } from 'services/chat/getChatData'
+import { getContactInfo } from 'services/contact/getContactInfo'
 import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type AdminContactChatPageProps = {
@@ -44,9 +45,16 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
       async (chat: Chat) => {
-        const chatDataRef = ref(database, `chatDataList/${contactId}`)
-        const newChatRef = push(chatDataRef)
-        await set(newChatRef, chat)
+        if (contactId) {
+          await addChat(contactId, chat)
+
+          const chatData = await getChatData(contactId)
+
+          if (chatData) {
+            setChatData(chatData)
+            scroll.scrollToBottom()
+          }
+        }
       },
       [contactId]
     )
@@ -61,8 +69,11 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             supporter: newStatus === 0 ? '0' : user.uid,
           }
           setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newContactInfo })
-          const contactInfoRef = doc(db, 'contactInfo', contactId)
-          await updateDoc(contactInfoRef, newContactInfo)
+          await fetch(`/api/contact/${contactId}`, {
+            body: JSON.stringify({ newContactInfo }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+          })
           await postChat(chat)
         }
       },
@@ -74,39 +85,19 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     }, [loading, router, user])
 
     useEffect(() => {
-      // クリーンアップ用
-      const chatDataRef = query(ref(database, `chatDataList/${contactId}`), orderByChild('postTime'))
-      let unsub: Unsubscribe
+      if (contactId) {
+        getContactInfo(contactId).then((contactInfo) => {
+          setContactInfo(contactInfo)
+        })
 
-      if (user && contactId) {
-        // 現在のチャットデータの取得
-        onValue(chatDataRef, (snapshot) => {
-          const chatData: ChatData = []
-          snapshot.forEach((snap) => {
-            const data = snap.val()
-            chatData.push(data)
-          })
+        getChatData(contactId).then((chatData) => {
           setChatData(chatData)
           scroll.scrollToBottom()
         })
-
-        // 現在のお問い合わせ情報を取得
-        const contactInfoRef = doc(db, 'contactInfo', contactId)
-        unsub = onSnapshot(contactInfoRef, (doc) => {
-          const data = doc.data() as ContactInfo
-          setContactInfo(data)
-        })
       }
+    }, [contactId])
 
-      const cleanup = () => {
-        off(chatDataRef)
-        unsub?.()
-      }
-
-      return cleanup
-    }, [contactId, loading, user])
-
-    if (router.isFallback || !user) return <LoadingScreen loading />
+    if (router.isFallback || loading || !user) return <LoadingScreen loading />
 
     return (
       <DefaultLayout>
@@ -147,7 +138,14 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                 >
                   <Container maxWidth="md">
                     <Box py={2}>
-                      <ChatFormContainer admin={true} contributor={user.uid} contactId={contactId} currentStatus={contactInfo?.currentStatus} supporter={contactInfo?.supporter} postChat={postChat} />
+                      <ChatFormContainer
+                        admin={true}
+                        contributor={user.uid}
+                        contactId={contactId}
+                        currentStatus={contactInfo?.currentStatus}
+                        supporter={contactInfo?.supporter}
+                        postChat={postChat}
+                      />
                     </Box>
                   </Container>
                 </Stack>
@@ -181,7 +179,7 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
     const contactInfoSnap = await adminDb.collection('contactInfo').doc(contactId).get()
     const contactInfo = await contactInfoSnap.data() // お問い合わせ情報
 
-    const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).once('value')
+    const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).orderByChild('postTime').once('value')
     const chatData: ChatData = [] // チャットデータ
     chatDataSnap.forEach((snap) => {
       chatData.push(snap.val())
