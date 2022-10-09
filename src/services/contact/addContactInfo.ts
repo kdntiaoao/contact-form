@@ -1,7 +1,7 @@
 import { ContactInfo } from 'types/data'
 
 export const addContactInfo = async (contactInfo: ContactInfo): Promise<string> => {
-  const firestoreRes = await fetch('/api/contactInfo', {
+  const firestoreRes = await fetch('/api/contact', {
     body: JSON.stringify({ contactInfo }),
     headers: { 'Content-Type': 'application/json' },
     method: 'POST',
