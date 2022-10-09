@@ -53,8 +53,6 @@ const ConfirmPage: NextPage = memo(() => {
         // お問い合わせ情報の保存(Firestore)
         const docId = await addContactInfo(contactInfo)
 
-        console.log({ docId })
-
         // チャットデータの追加(Realtime Database)
         await addChat(docId, chat)
 

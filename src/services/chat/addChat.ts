@@ -1,8 +1,8 @@
 import { Chat } from 'types/data'
 
-export const addChat = async (chatId: string, chat: Chat): Promise<void> => {
-  await fetch('/api/chat', {
-    body: JSON.stringify({ chatId, chat }),
+export const addChat = async (contactId: string, chat: Chat): Promise<void> => {
+  await fetch(`/api/chat/${contactId}`, {
+    body: JSON.stringify({ chat }),
     headers: { 'Content-Type': 'application/json' },
     method: 'POST',
   })

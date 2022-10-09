@@ -3,18 +3,15 @@ import { useRouter } from 'next/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { signInAnonymously } from 'firebase/auth'
-import { push, ref, set } from 'firebase/database'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { animateScroll as scroll } from 'react-scroll'
 
-import { auth, database } from '../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../firebase/server'
 
 import { ChatList } from 'components/molecules/ChatList'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { addChat } from 'services/chat/addChat'
 import { getChatData } from 'services/chat/getChatData'
 import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
 
@@ -29,7 +26,6 @@ type ContactChatPageProps = {
 const ContactChatPage: NextPage<ContactChatPageProps> = memo(
   ({ contactId, contactInfo, chatData: initialChatData, supporterDataList }: ContactChatPageProps) => {
     const router = useRouter()
-    const [user, loading] = useAuthState(auth)
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
     const theme = useTheme()
     const matches = useMediaQuery(theme.breakpoints.up('sm'))
@@ -37,16 +33,19 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
       async (chat: Chat) => {
-        const chatDataRef = ref(database, `chatDataList/${contactId}`)
-        const newChatRef = push(chatDataRef)
-        await set(newChatRef, chat)
+        if (contactId) {
+          await addChat(contactId, chat)
+
+          const chatData = await getChatData(contactId)
+
+          if (chatData) {
+            setChatData(chatData)
+            scroll.scrollToBottom()
+          }
+        }
       },
       [contactId]
     )
-
-    useEffect(() => {
-      if (!loading && !user) signInAnonymously(auth)
-    }, [loading, user])
 
     useEffect(() => {
       if (contactId) {
