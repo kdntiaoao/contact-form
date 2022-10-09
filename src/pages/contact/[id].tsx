@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { signInAnonymously } from 'firebase/auth'
-import { off, onValue, orderByChild, push, query, ref, set } from 'firebase/database'
+import { push, ref, set } from 'firebase/database'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { animateScroll as scroll } from 'react-scroll'
 
@@ -15,6 +15,7 @@ import { ChatList } from 'components/molecules/ChatList'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { getChatData } from 'services/chat/getChatData'
 import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type ContactChatPageProps = {
@@ -48,29 +49,17 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
     }, [loading, user])
 
     useEffect(() => {
-      const chatDataRef = query(ref(database, `chatDataList/${contactId}`), orderByChild('postTime'))
-
-      if (user && contactId) {
-        // 現在のチャットデータの取得
-        onValue(chatDataRef, (snapshot) => {
-          const chatData: ChatData = []
-          snapshot.forEach((snap) => {
-            const data = snap.val()
-            chatData.push(data)
-          })
-          setChatData(chatData)
-          scroll.scrollToBottom()
+      if (contactId) {
+        getChatData(contactId).then((chatData) => {
+          if (chatData) {
+            setChatData(chatData)
+            scroll.scrollToBottom()
+          }
         })
       }
+    }, [contactId])
 
-      const cleanup = () => {
-        off(chatDataRef)
-      }
-
-      return cleanup
-    }, [contactId, loading, user])
-
-    if (router.isFallback || !user) return <LoadingScreen loading />
+    if (router.isFallback) return <LoadingScreen loading />
 
     return (
       <DefaultLayout>
@@ -130,7 +119,7 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
     const contactInfoSnap = await adminDb.collection('contactInfo').doc(contactId).get()
     const contactInfo = await contactInfoSnap.data() // お問い合わせ情報
 
-    const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).once('value')
+    const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).orderByChild('postTime').once('value')
     const chatData: ChatData = [] // チャットデータ
     chatDataSnap.forEach((snap) => {
       chatData.push(snap.val())

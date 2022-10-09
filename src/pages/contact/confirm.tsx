@@ -83,8 +83,8 @@ const ConfirmPage: NextPage = memo(() => {
 
   useEffect(() => {
     // 入力されたデータがないとき、お問い合わせページへ遷移
-    if (!queryName) router.push('/contact')
-  }, [queryName, router])
+    if (!queryName || !queryEmail || !queryTel || !queryCategory || !queryContents) router.push('/contact')
+  }, [queryCategory, queryContents, queryEmail, queryName, queryTel, router])
 
   return (
     <DefaultLayout>
