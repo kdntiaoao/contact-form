@@ -20,62 +20,65 @@ export type ChatFormInputType = {
 }
 
 // eslint-disable-next-line react/display-name
-export const ChatFormContainer = memo(({ admin, contributor, contactId, currentStatus, supporter, postChat }: Props) => {
-  const { handleSubmit, control, reset } = useForm<ChatFormInputType>({
-    mode: 'onChange',
-    defaultValues: {
-      text: '',
-    },
-  })
-  const [error, setError] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState<string>()
-  const [disabled, setDisabled] = useState<boolean>(false)
+export const ChatFormContainer = memo(
+  ({ admin, contributor, contactId, currentStatus, supporter, postChat }: Props) => {
+    const { handleSubmit, control, reset } = useForm<ChatFormInputType>({
+      mode: 'onChange',
+      defaultValues: {
+        text: '',
+      },
+    })
+    const [error, setError] = useState<boolean>(false)
+    const [errorMessage, setErrorMessage] = useState<string>()
+    const [disabled, setDisabled] = useState<boolean>(false)
 
-  const handleClose = useCallback((event?: SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return
-    }
-
-    setError(false)
-  }, [])
-
-  const onSubmit: SubmitHandler<ChatFormInputType> = useCallback(
-    async ({ text }) => {
-      try {
-        if (text === '') throw new Error('input is empty.')
-        if (typeof contributor === 'undefined') throw new Error('contributor is undefined.')
-        if (typeof contactId === 'undefined') throw new Error('contactId is undefined.')
-
-        const chat: Chat = { contributor, postTime: Date.now(), contents: { text } }
-        await postChat(chat)
-
-        reset()
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          setError(true)
-          setErrorMessage(error.message)
-        }
+    const handleClose = useCallback((event?: SyntheticEvent | Event, reason?: string) => {
+      if (reason === 'clickaway') {
+        return
       }
-    },
-    [contactId, contributor, postChat, reset]
-  )
 
-  useEffect(() => {
-    if (currentStatus === 1 && supporter === contributor) {
-      setDisabled(false)
-    } else {
-      setDisabled(true)
-    }
-  }, [contributor, currentStatus, supporter])
+      setError(false)
+    }, [])
 
-  return (
-    <ChatForm
-      error={error}
-      onClose={handleClose}
-      errorMessage={errorMessage}
-      onSubmit={handleSubmit(onSubmit)}
-      control={control}
-      disabled={admin && disabled}
-    />
-  )
-})
+    const onSubmit: SubmitHandler<ChatFormInputType> = useCallback(
+      async ({ text }) => {
+        try {
+          if (text === '') throw new Error('input is empty.')
+          if (typeof contributor === 'undefined') throw new Error('contributor is undefined.')
+          if (typeof contactId === 'undefined') throw new Error('contactId is undefined.')
+
+          const chat: Chat = { contributor, postTime: Date.now(), contents: { text } }
+
+          reset()
+
+          await postChat(chat)
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            setError(true)
+            setErrorMessage(error.message)
+          }
+        }
+      },
+      [contactId, contributor, postChat, reset]
+    )
+
+    useEffect(() => {
+      if (currentStatus === 1 && supporter === contributor) {
+        setDisabled(false)
+      } else {
+        setDisabled(true)
+      }
+    }, [contributor, currentStatus, supporter])
+
+    return (
+      <ChatForm
+        error={error}
+        onClose={handleClose}
+        errorMessage={errorMessage}
+        onSubmit={handleSubmit(onSubmit)}
+        control={control}
+        disabled={admin && disabled}
+      />
+    )
+  }
+)
