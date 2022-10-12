@@ -7,7 +7,11 @@ import { Supporter, SupporterData } from 'types/data'
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   // サポーター情報を登録
   if (req.method === 'POST') {
-    res.status(200).json('register success!')
+    const { uid, supporter } = req.body
+
+    await adminDb.collection('supporterData').doc(uid).set(supporter)
+
+    res.status(200).end()
   }
 
   // サポーターを取得
