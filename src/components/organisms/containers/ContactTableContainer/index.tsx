@@ -23,7 +23,7 @@ export const ContactTableContainer = memo(({ tableTitle, contactInfoList, suppor
       category,
       contents,
       supporterId: supporter,
-      supporter: supporter === '0' ? '担当者はいません' : supporterDataList[supporter].name,
+      supporter: supporter === '0' ? '-' : supporterDataList[supporter].name,
       currentStatus,
       currentStatusInfo: { label: currentStatusArray[currentStatus], color: currentStatusColorArray[currentStatus] },
       submitTime,

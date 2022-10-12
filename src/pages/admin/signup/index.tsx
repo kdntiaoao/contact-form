@@ -63,7 +63,6 @@ const SignupPage = memo(() => {
           const user = userCredential.user
 
           const supporter: Supporter = { name, email }
-          // await setDoc(doc(db, 'supporterData', user.uid), supporter)
           await addSupporter(user.uid, supporter)
 
           await router.push('/admin/contact')
