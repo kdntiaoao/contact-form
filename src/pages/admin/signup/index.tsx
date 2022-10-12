@@ -20,12 +20,12 @@ import {
   useTheme,
 } from '@mui/material'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 
-import { auth, db } from '../../../../firebase/client'
+import { auth } from '../../../../firebase/client'
 
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { addSupporter } from 'services/supporter/addSupporter'
 import { Supporter } from 'types/data'
 
 type FormInputs = {
@@ -61,9 +61,11 @@ const SignupPage = memo(() => {
       await createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
           const user = userCredential.user
+
           const supporter: Supporter = { name, email }
-          await setDoc(doc(db, 'supporterData', user.uid), supporter)
-          router.push('/admin/contact')
+          await addSupporter(user.uid, supporter)
+
+          await router.push('/admin/contact')
         })
         .catch((error) => {
           setError('name', {
