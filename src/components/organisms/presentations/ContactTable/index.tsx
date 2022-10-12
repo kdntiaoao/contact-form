@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
+  Avatar,
   Chip,
   Paper,
   Table,
@@ -51,15 +52,30 @@ const headCells: HeadCell[] = [
   { id: 'name', label: '氏名' },
   { id: 'tel', label: '電話番号' },
   { id: 'category', label: '製品' },
-  { id: 'submitTime', label: '日時' },
+  { id: 'submitTime', label: '日付' },
   { id: 'contents', label: 'お問い合わせ内容' },
   { id: 'supporter', label: '担当' },
 ]
 
+const formatLimitText = (letterCount: number, text: string) => {
+  // 与えられた文字列が指定された文字数以上の場合
+  if (text.length > letterCount) {
+    return text.slice(0, letterCount) + '...'
+  } else {
+    return text
+  }
+}
+
+const getInitialLetter = (text: string) => {
+  const initialLetter = text.slice(0, 1)
+  return initialLetter
+}
+
 // eslint-disable-next-line react/display-name
 export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) => {
   const theme = useTheme()
-  const matches = useMediaQuery(theme.breakpoints.up('md'))
+  const matches = useMediaQuery(theme.breakpoints.up('lg'))
+  // const matches = useMediaQuery(theme.breakpoints.up('md'))
   const [filteredList, setFilteredList] = useState<FilteredListType>([
     [
       { text: '未対応', visible: true },
@@ -88,18 +104,18 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
       }[]
     >()
 
-  const formatLimitText = useCallback(
-    (text: string) => {
-      if (matches && text.length > 100) {
-        return text.slice(0, 100) + '...'
-      } else if (!matches && text.length > 50) {
-        return text.slice(0, 50) + '...'
-      } else {
-        return text
-      }
-    },
-    [matches]
-  )
+  // const formatLimitText = useCallback(
+  //   (text: string) => {
+  //     if (matches && text.length > 100) {
+  //       return text.slice(0, 100) + '...'
+  //     } else if (!matches && text.length > 50) {
+  //       return text.slice(0, 50) + '...'
+  //     } else {
+  //       return text
+  //     }
+  //   },
+  //   [matches]
+  // )
 
   const changeFilteredStatus = useCallback((target: [number, number]) => {
     setFilteredList((prev) => {
@@ -134,22 +150,22 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
             tel,
             category,
             contents,
-            formattedContents: formatLimitText(contents),
+            formattedContents: formatLimitText(matches ? 100 : 50, contents),
             supporter,
             supporterId,
             currentStatus,
-            submitTime: format(submitTime, matches ? 'M月d日 H:mm' : 'M/d'),
+            submitTime: format(submitTime, matches ? 'M月d日 H:mm' : 'MM/dd'),
             currentStatusInfo,
             key,
           }
         }
       ),
-    [contactInfoArray, formatLimitText, matches]
+    [contactInfoArray, matches]
   )
 
   useEffect(() => {
     setFilteredContactInfoArray(initialArray)
-  }, [contactInfoArray, formatLimitText, initialArray, matches])
+  }, [initialArray])
 
   useEffect(() => {
     setFilteredContactInfoArray(
@@ -206,7 +222,11 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      <Typography noWrap>{supporter}</Typography>
+                      {supporter === '-' || matches ? (
+                        <Typography noWrap>{supporter}</Typography>
+                      ) : (
+                        <Avatar>{getInitialLetter(supporter)}</Avatar>
+                      )}
                     </TableCell>
                   </TableRow>
                 </Link>
