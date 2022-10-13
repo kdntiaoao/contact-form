@@ -2,24 +2,42 @@ import Link from 'next/link'
 import { Fragment, memo } from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemText, Toolbar } from '@mui/material'
+import {
+  Avatar,
+  Box,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Toolbar,
+} from '@mui/material'
 
 type MenuListProps = {
+  account: string | undefined
   menuList: { text: string; url: string; onClick?: () => void }[][]
   onClose: () => void
 }
 
 type MenuDrawerProps = {
+  account: string | undefined
   menuList: { text: string; url: string; onClick?: () => void }[][]
   open: boolean
   onClose: () => void
 }
 
 // eslint-disable-next-line react/display-name
-const MenuList = memo(({ menuList, onClose }: MenuListProps) => {
+const MenuList = memo(({ account, menuList, onClose }: MenuListProps) => {
   return (
     <div>
       <Toolbar>
+        {account !== undefined && (
+          <Box>
+            <Avatar>{account.slice(0, 1)}</Avatar>
+          </Box>
+        )}
         <Box ml="auto">
           <IconButton size="large" color="inherit" aria-label="メニューを閉じる" onClick={onClose}>
             <CloseIcon />
@@ -53,7 +71,7 @@ const MenuList = memo(({ menuList, onClose }: MenuListProps) => {
 })
 
 // eslint-disable-next-line react/display-name
-export const MenuDrawer = memo(({ menuList, open, onClose }: MenuDrawerProps) => {
+export const MenuDrawer = memo(({ account, menuList, open, onClose }: MenuDrawerProps) => {
   return (
     <Box component="nav">
       <Drawer
@@ -68,7 +86,7 @@ export const MenuDrawer = memo(({ menuList, open, onClose }: MenuDrawerProps) =>
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: { xs: '100%', sm: 320 } },
         }}
       >
-        <MenuList {...{ menuList, onClose }} />
+        <MenuList {...{ account, menuList, onClose }} />
       </Drawer>
     </Box>
   )

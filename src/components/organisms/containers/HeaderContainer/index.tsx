@@ -1,32 +1,26 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 
 import { signOut } from 'firebase/auth'
+import { useAuthState } from 'react-firebase-hooks/auth'
 
 import { auth } from '../../../../../firebase/client'
 
 import { Header } from 'components/organisms/presentations/Header'
+import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
+import { SupporterData } from 'types/data'
 
+const logout = () => {
+  signOut(auth)
+}
 
 // eslint-disable-next-line react/display-name
 export const HeaderContainer = memo(() => {
-  const [admin, setAdmin] = useState<boolean>(false)
-
-  const logout = () => {
-    signOut(auth)
-  }
+  const [user] = useAuthState(auth)
+  const [supporterDataList, setSupporterDataList] = useState<SupporterData>()
 
   const menuList = [
     [
       { text: 'ホーム', url: '/' },
-      // { text: 'アクセス', url: '/access' },
-      // { text: '沿革', url: '/' },
-      // { text: 'ビジョン', url: '/vision' },
-      // { text: 'サービス', url: '/service' },
-      // { text: '実績紹介', url: '/product' },
-      // { text: 'セミナー', url: '/seminar' },
-      // { text: 'お役立ち情報', url: '/info' },
-      // { text: 'IR情報', url: '/ir' },
-      // { text: '採用情報', url: '/recruit' },
       { text: 'お問い合わせ', url: '/contact' },
     ],
     [
@@ -36,16 +30,20 @@ export const HeaderContainer = memo(() => {
     ],
   ]
 
-  if (admin) {
+  if (user?.email) {
     menuList.push([
       { text: 'お問い合わせ一覧', url: '/' },
       { text: 'ログアウト', url: '/admin/login', onClick: logout },
     ])
   }
 
+  const supporterName = useMemo(() => {
+    return user?.uid && supporterDataList?.[user.uid].name
+  }, [supporterDataList, user])
+
   useEffect(() => {
-    setAdmin(false)
+    getSupporterDataList().then((dataList) => dataList && setSupporterDataList(dataList))
   }, [])
 
-  return <Header menuList={menuList} />
+  return <Header menuList={menuList} account={supporterName} />
 })
