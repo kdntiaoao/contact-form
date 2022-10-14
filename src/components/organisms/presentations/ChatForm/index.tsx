@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { BaseSyntheticEvent, memo } from 'react'
 
 import SendIcon from '@mui/icons-material/Send'
 import { Alert, Button, Snackbar, Stack, TextField } from '@mui/material'
@@ -10,7 +10,8 @@ type Props = {
   error: boolean
   onClose: () => void
   errorMessage: string | undefined
-  onSubmit: () => void
+  // eslint-disable-next-line no-unused-vars
+  onSubmit: (event?: BaseSyntheticEvent) => Promise<void>
   control: Control<ChatFormInputType>
   disabled: boolean
 }

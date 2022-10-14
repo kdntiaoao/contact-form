@@ -44,6 +44,7 @@ const ConfirmPage: NextPage = memo(() => {
         supporter: '0',
         currentStatus: 0,
         submitTime: currentDate,
+        comment: { name: '', contents: '' },
       }
       const chat: Chat = { contributor: '0', postTime: currentDate, contents: { text: queryContents } }
 

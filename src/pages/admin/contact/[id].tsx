@@ -13,11 +13,13 @@ import { ChatList } from 'components/molecules/ChatList'
 import { LinkButton } from 'components/molecules/LinkButton'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
+import { CommentAreaContainer } from 'components/organisms/containers/CommentAreaContainer'
 import { StatusSelectAreaContainer } from 'components/organisms/containers/StatusSelectAreaContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { addChat } from 'services/chat/addChat'
 import { getChatData } from 'services/chat/getChatData'
 import { getContactInfo } from 'services/contact/getContactInfo'
+import { updateContactInfo } from 'services/contact/updateContactInfo'
 import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type AdminContactChatPageProps = {
@@ -68,16 +70,36 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             currentStatus: newStatus,
             supporter: newStatus === 0 ? '0' : user.uid,
           }
+
           setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newContactInfo })
-          await fetch(`/api/contact/${contactId}`, {
-            body: JSON.stringify({ newContactInfo }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-          })
+
+          await updateContactInfo(contactId, newContactInfo)
+
           await postChat(chat)
         }
       },
       [contactId, postChat, user]
+    )
+
+    // コメントを変更する関数
+    const editComment = useCallback(
+      async (commentContents: string) => {
+        if (contactId && user) {
+          console.log(supporterDataList[user.uid].name, ' : ', commentContents)
+          // 新しいコメント情報
+          const newComment: Pick<ContactInfo, 'comment'> = {
+            comment: {
+              name: supporterDataList[user.uid].name,
+              contents: commentContents,
+            },
+          }
+
+          setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newComment })
+
+          await updateContactInfo(contactId, newComment)
+        }
+      },
+      [contactId, supporterDataList, user]
     )
 
     useEffect(() => {
@@ -109,13 +131,29 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                   <LinkButton href="/admin/contact">お問い合わせ一覧</LinkButton>
                 </Box>
 
-                <StatusSelectAreaContainer
-                  direction={matches ? 'column' : 'row'}
-                  currentStatus={contactInfo?.currentStatus}
-                  supporter={contactInfo?.supporter}
-                  uid={user.uid}
-                  changeStatus={changeStatus}
-                />
+                <Stack
+                  direction={{ xs: 'column', sm: 'row', md: 'column' }}
+                  spacing={{ xs: 2, sm: 6 }}
+                  alignItems={{ xs: 'flex-start', sm: 'stretch' }}
+                >
+                  <Box>
+                    <StatusSelectAreaContainer
+                      direction={matches ? 'column' : 'row'}
+                      currentStatus={contactInfo?.currentStatus}
+                      supporter={contactInfo?.supporter}
+                      uid={user.uid}
+                      changeStatus={changeStatus}
+                    />
+                  </Box>
+
+                  <CommentAreaContainer
+                    contributor={user.uid}
+                    currentStatus={contactInfo?.currentStatus}
+                    supporter={contactInfo?.supporter}
+                    comment={contactInfo?.comment}
+                    editComment={editComment}
+                  />
+                </Stack>
               </Box>
             </Container>
 
