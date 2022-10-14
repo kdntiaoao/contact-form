@@ -75,7 +75,6 @@ const getInitialLetter = (text: string) => {
 export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) => {
   const theme = useTheme()
   const matches = useMediaQuery(theme.breakpoints.up('lg'))
-  // const matches = useMediaQuery(theme.breakpoints.up('md'))
   const [filteredList, setFilteredList] = useState<FilteredListType>([
     [
       { text: '未対応', visible: true },
@@ -103,19 +102,6 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
         key: string
       }[]
     >()
-
-  // const formatLimitText = useCallback(
-  //   (text: string) => {
-  //     if (matches && text.length > 100) {
-  //       return text.slice(0, 100) + '...'
-  //     } else if (!matches && text.length > 50) {
-  //       return text.slice(0, 50) + '...'
-  //     } else {
-  //       return text
-  //     }
-  //   },
-  //   [matches]
-  // )
 
   const changeFilteredStatus = useCallback((target: [number, number]) => {
     setFilteredList((prev) => {

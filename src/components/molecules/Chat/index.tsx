@@ -13,6 +13,7 @@ type Props = {
 
 // eslint-disable-next-line react/display-name
 export const Chat = memo(({ reverse, text, contributor, postTime }: Props) => {
+  console.log(text)
   return (
     <Stack direction={reverse ? 'row-reverse' : 'row'} spacing={2}>
       <Avatar
@@ -26,7 +27,9 @@ export const Chat = memo(({ reverse, text, contributor, postTime }: Props) => {
           <Typography>{contributor}</Typography>
         </Box>
         <Paper elevation={0} sx={{ bgcolor: reverse ? 'primary.200' : grey[100], px: 2, py: 1, maxWidth: '80%' }}>
-          <Typography sx={{ overflowWrap: 'break-word' }}>{text}</Typography>
+          <Typography whiteSpace="pre-wrap" sx={{ overflowWrap: 'break-word' }}>
+            {text}
+          </Typography>
         </Paper>
         <Box mt={1}>
           <Typography>{postTime}</Typography>
