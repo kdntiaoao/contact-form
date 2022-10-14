@@ -20,6 +20,7 @@ import { addChat } from 'services/chat/addChat'
 import { getChatData } from 'services/chat/getChatData'
 import { getContactInfo } from 'services/contact/getContactInfo'
 import { updateContactInfo } from 'services/contact/updateContactInfo'
+import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
 import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type AdminContactChatPageProps = {
@@ -35,12 +36,13 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     contactId,
     contactInfo: initialContactInfo,
     chatData: initialChatData,
-    supporterDataList,
+    supporterDataList: initialSupporterDataList,
   }: AdminContactChatPageProps) => {
     const router = useRouter()
     const [user, loading] = useAuthState(auth)
     const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
     const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
+    const [supporterDataList, setSupporterDataList] = useState<SupporterData>(initialSupporterDataList)
     const theme = useTheme()
     const matches = useMediaQuery(theme.breakpoints.up('md'))
 
@@ -85,7 +87,6 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     const editComment = useCallback(
       async (commentContents: string) => {
         if (contactId && user) {
-          console.log(supporterDataList[user.uid].name, ' : ', commentContents)
           // 新しいコメント情報
           const newComment: Pick<ContactInfo, 'comment'> = {
             comment: {
@@ -115,6 +116,10 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
         getChatData(contactId).then((chatData) => {
           setChatData(chatData)
           scroll.scrollToBottom()
+        })
+
+        getSupporterDataList().then((data) => {
+          data && setSupporterDataList(data)
         })
       }
     }, [contactId])
@@ -226,9 +231,9 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
     const supporterDataSnap = await adminDb.collection('supporterData').get()
     const supporterDataList: SupporterData = {} // サポーターデータ
     supporterDataSnap.forEach((doc) => {
-      const { name, email } = doc.data()
-      if (typeof name === 'string' && typeof email === 'string') {
-        supporterDataList[doc.id] = { name, email }
+      const { name, email, color } = doc.data()
+      if (typeof name === 'string' && typeof email === 'string' && color === 'string') {
+        supporterDataList[doc.id] = { name, email, color }
       }
     })
 

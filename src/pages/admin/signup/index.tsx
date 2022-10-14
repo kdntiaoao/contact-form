@@ -27,6 +27,7 @@ import { auth } from '../../../../firebase/client'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { addSupporter } from 'services/supporter/addSupporter'
 import { Supporter } from 'types/data'
+import { generateRandomColor } from 'utils/generateRandomColor'
 
 type FormInputs = {
   name: string
@@ -61,8 +62,9 @@ const SignupPage = memo(() => {
       await createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
           const user = userCredential.user
+          const color = generateRandomColor()
 
-          const supporter: Supporter = { name, email }
+          const supporter: Supporter = { name, email, color }
           await addSupporter(user.uid, supporter)
 
           await router.push('/admin/contact')
@@ -118,7 +120,7 @@ const SignupPage = memo(() => {
                   {...field}
                   type="name"
                   autoComplete="username"
-                  label="メールアドレス"
+                  label="お名前"
                   variant="standard"
                   error={!!errors.name}
                   helperText={errors?.name?.message}

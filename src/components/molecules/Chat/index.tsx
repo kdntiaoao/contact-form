@@ -13,7 +13,6 @@ type Props = {
 
 // eslint-disable-next-line react/display-name
 export const Chat = memo(({ reverse, text, contributor, postTime }: Props) => {
-  console.log(text)
   return (
     <Stack direction={reverse ? 'row-reverse' : 'row'} spacing={2}>
       <Avatar
