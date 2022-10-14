@@ -21,7 +21,7 @@ import { format } from 'date-fns'
 import { TableToolBar } from 'components/molecules/TableToolBar'
 import { ContactInfo } from 'types/data'
 
-type Data = Omit<ContactInfo, 'email'>
+type Data = Omit<ContactInfo, 'email' | 'comment'>
 
 type HeadCell = {
   id: keyof Data

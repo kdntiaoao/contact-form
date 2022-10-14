@@ -1,3 +1,14 @@
+export type Comment = {
+  /**
+   * 記入者
+   */
+  name: string | ''
+  /**
+   * コメントの内容
+   */
+  contents: string | ''
+}
+
 export type ContactInfo = {
   /**
    * お客様のお名前
@@ -31,6 +42,10 @@ export type ContactInfo = {
    * フォーム送信日時(タイムスタンプ)
    */
   submitTime: number
+  /**
+   * コメント
+   */
+  comment: Comment
 }
 
 export type Chat = {
