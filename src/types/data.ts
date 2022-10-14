@@ -81,6 +81,10 @@ export type Supporter = {
    * サポーターのメールアドレス
    */
   email: string
+  /**
+   * サポーターのイメージカラー
+   */
+  color: string
 }
 
 export type SupporterData = Record<string, Supporter>

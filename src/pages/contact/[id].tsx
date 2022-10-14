@@ -127,9 +127,9 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
     const supporterDataSnap = await adminDb.collection('supporterData').get()
     const supporterDataList: SupporterData = {} // サポーターデータ
     supporterDataSnap.forEach((doc) => {
-      const { name, email } = doc.data()
-      if (typeof name === 'string' && typeof email === 'string') {
-        supporterDataList[doc.id] = { name, email }
+      const { name, email, color } = doc.data()
+      if (typeof name === 'string' && typeof email === 'string' && typeof color === 'string') {
+        supporterDataList[doc.id] = { name, email, color }
       }
     })
 

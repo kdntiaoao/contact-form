@@ -17,25 +17,27 @@ import {
 
 type MenuListProps = {
   account: string | undefined
+  avatarColor: string | undefined
   menuList: { text: string; url: string; onClick?: () => void }[][]
   onClose: () => void
 }
 
 type MenuDrawerProps = {
   account: string | undefined
+  avatarColor: string | undefined
   menuList: { text: string; url: string; onClick?: () => void }[][]
   open: boolean
   onClose: () => void
 }
 
 // eslint-disable-next-line react/display-name
-const MenuList = memo(({ account, menuList, onClose }: MenuListProps) => {
+const MenuList = memo(({ account, avatarColor, menuList, onClose }: MenuListProps) => {
   return (
     <div>
       <Toolbar>
         {account !== undefined && (
           <Box>
-            <Avatar>{account.slice(0, 1)}</Avatar>
+            <Avatar sx={{ bgcolor: avatarColor }}>{account.slice(0, 1)}</Avatar>
           </Box>
         )}
         <Box ml="auto">
@@ -71,7 +73,7 @@ const MenuList = memo(({ account, menuList, onClose }: MenuListProps) => {
 })
 
 // eslint-disable-next-line react/display-name
-export const MenuDrawer = memo(({ account, menuList, open, onClose }: MenuDrawerProps) => {
+export const MenuDrawer = memo(({ account, avatarColor, menuList, open, onClose }: MenuDrawerProps) => {
   return (
     <Box component="nav">
       <Drawer
@@ -86,7 +88,7 @@ export const MenuDrawer = memo(({ account, menuList, open, onClose }: MenuDrawer
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: { xs: '100%', sm: 320 } },
         }}
       >
-        <MenuList {...{ account, menuList, onClose }} />
+        <MenuList {...{ account, avatarColor, menuList, onClose }} />
       </Drawer>
     </Box>
   )

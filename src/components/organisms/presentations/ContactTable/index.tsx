@@ -32,6 +32,7 @@ type Props = {
   tableTitle: string
   contactInfoArray: (Data & {
     supporterId: string
+    supporterColor: string
     currentStatusInfo: {
       label: '未対応' | '対応中' | '対応完了'
       color: 'warning' | 'info' | 'success'
@@ -93,6 +94,7 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
         formattedContents: string
         supporterId: string
         supporter: string
+        supporterColor: string
         currentStatus: number
         submitTime: string
         currentStatusInfo: {
@@ -126,6 +128,7 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
           contents,
           supporter,
           supporterId,
+          supporterColor,
           currentStatus,
           submitTime,
           currentStatusInfo,
@@ -139,6 +142,7 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
             formattedContents: formatLimitText(matches ? 100 : 50, contents),
             supporter,
             supporterId,
+            supporterColor,
             currentStatus,
             submitTime: format(submitTime, matches ? 'M月d日 H:mm' : 'MM/dd'),
             currentStatusInfo,
@@ -179,7 +183,7 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
 
           <TableBody>
             {filteredContactInfoArray?.map(
-              ({ name, tel, category, contents, formattedContents, submitTime, supporter, currentStatusInfo, key }) => (
+              ({ name, tel, category, contents, formattedContents, submitTime, supporter, supporterColor, currentStatusInfo, key }) => (
                 <Link key={key} href={`/admin/contact/${key}`}>
                   <TableRow tabIndex={0} role="link" hover sx={{ cursor: 'pointer' }}>
                     <TableCell align="center">
@@ -211,7 +215,7 @@ export const ContactTable = memo(({ tableTitle, contactInfoArray, uid }: Props) 
                       {supporter === '-' || matches ? (
                         <Typography noWrap>{supporter}</Typography>
                       ) : (
-                        <Avatar>{getInitialLetter(supporter)}</Avatar>
+                        <Avatar sx={{bgcolor: supporterColor}}>{getInitialLetter(supporter)}</Avatar>
                       )}
                     </TableCell>
                   </TableRow>

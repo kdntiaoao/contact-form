@@ -24,6 +24,7 @@ export const ContactTableContainer = memo(({ tableTitle, contactInfoList, suppor
       contents,
       supporterId: supporter,
       supporter: supporter === '0' ? '-' : supporterDataList[supporter].name,
+      supporterColor: supporter && supporterDataList[supporter] && supporterDataList[supporter].color,
       currentStatus,
       currentStatusInfo: { label: currentStatusArray[currentStatus], color: currentStatusColorArray[currentStatus] },
       submitTime,

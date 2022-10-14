@@ -12,6 +12,7 @@ type HideOnScrollProps = {
 
 type HeaderProps = {
   account: string | undefined
+  avatarColor: string | undefined
   menuList: { text: string; url: string; onClick?: () => void }[][]
 }
 
@@ -26,7 +27,7 @@ const HideOnScroll = memo(({ children }: HideOnScrollProps) => {
 })
 
 // eslint-disable-next-line react/display-name
-export const Header = memo(({ account, menuList }: HeaderProps) => {
+export const Header = memo(({ account, avatarColor, menuList }: HeaderProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
 
   const handleDrawerToggle = useCallback(() => {
@@ -52,7 +53,7 @@ export const Header = memo(({ account, menuList }: HeaderProps) => {
         </AppBar>
       </HideOnScroll>
       <Toolbar />
-      <MenuDrawer account={account} menuList={menuList} open={isDrawerOpen} onClose={handleDrawerToggle} />
+      <MenuDrawer account={account} avatarColor={avatarColor} menuList={menuList} open={isDrawerOpen} onClose={handleDrawerToggle} />
     </>
   )
 })

@@ -38,12 +38,16 @@ export const HeaderContainer = memo(() => {
   }
 
   const supporterName = useMemo(() => {
-    return user?.uid && supporterDataList?.[user.uid].name
+    return user?.uid && supporterDataList?.[user.uid]?.name
+  }, [supporterDataList, user])
+
+  const supporterColor = useMemo(() => {
+    return user?.uid && supporterDataList?.[user.uid]?.color
   }, [supporterDataList, user])
 
   useEffect(() => {
     getSupporterDataList().then((dataList) => dataList && setSupporterDataList(dataList))
-  }, [])
+  }, [user])
 
-  return <Header menuList={menuList} account={supporterName} />
+  return <Header menuList={menuList} account={supporterName} avatarColor={supporterColor} />
 })
