@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, memo } from 'react'
 
 import SendIcon from '@mui/icons-material/Send'
-import { Alert, Button, Snackbar, Stack, TextField } from '@mui/material'
+import { Alert, Button, Snackbar, Stack, TextField, useMediaQuery, useTheme } from '@mui/material'
 import { Control, Controller } from 'react-hook-form'
 
 import { ChatFormInputType } from 'components/organisms/containers/ChatFormContainer'
@@ -18,6 +18,9 @@ type Props = {
 
 // eslint-disable-next-line react/display-name
 export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control, disabled }: Props) => {
+  const theme = useTheme()
+  const matches = useMediaQuery(theme.breakpoints.up('md'))
+
   return (
     <>
       {/* エラー表示 */}
@@ -34,7 +37,16 @@ export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control,
           control={control}
           rules={{ required: true, maxLength: 4000 }}
           render={({ field }) => (
-            <TextField {...field} variant="outlined" disabled={disabled} sx={{ flex: 1 }} inputProps={{ maxLength: 4000 }} />
+            <TextField
+              {...field}
+              multiline
+              maxRows={3}
+              size={matches ? 'medium' : 'small'}
+              variant="outlined"
+              disabled={disabled}
+              sx={{ flex: 1 }}
+              inputProps={{ maxLength: 4000 }}
+            />
           )}
         />
         <Button type="submit" variant="contained" disabled={disabled} endIcon={<SendIcon />}>
