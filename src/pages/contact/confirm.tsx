@@ -11,6 +11,7 @@ import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { addChat } from 'services/chat/addChat'
 import { addContactInfo } from 'services/contact/addContactInfo'
+import { sendMail } from 'services/sendMail'
 import { Chat, ContactInfo } from 'types/data'
 
 // eslint-disable-next-line react/display-name
@@ -59,18 +60,10 @@ const ConfirmPage: NextPage = memo(() => {
 
         // テスト用メールのときはメールを送信しない
         if (queryEmail.indexOf('@example.com') < 0) {
-          await fetch('/api/send', {
-            body: JSON.stringify({
-              name: queryName,
-              email: queryEmail,
-              tel: queryTel,
-              category: queryCategory,
-              contents: queryContents,
-              chatUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/contact/${docId}`,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-          })
+          await sendMail(
+            { name: queryName, email: queryEmail, tel: queryTel, category: queryCategory, contents: queryContents },
+            docId
+          )
         }
 
         await router.push(`/contact/${docId}`)
