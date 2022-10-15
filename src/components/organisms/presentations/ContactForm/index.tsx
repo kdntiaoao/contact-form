@@ -37,21 +37,10 @@ const categoryOptions = [
 // eslint-disable-next-line react/display-name
 export const ContactForm = memo(({ control, errors, isSubmitting, isSubmitSuccessful, onSubmit, setValue }: Props) => {
   return (
-    <Stack
-      component="form"
-      noValidate
-      autoComplete="off"
-      onSubmit={onSubmit}
-      // mt={{ xs: 4, sm: 6 }}
-      spacing={6}
-    >
+    <Stack component="form" noValidate autoComplete="off" onSubmit={onSubmit} spacing={6}>
       <Controller
         name="name"
         control={control}
-        rules={{
-          required: '入力してください',
-          maxLength: { value: 16, message: '16文字以内にしてください' },
-        }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -67,10 +56,6 @@ export const ContactForm = memo(({ control, errors, isSubmitting, isSubmitSucces
       <Controller
         name="email"
         control={control}
-        rules={{
-          required: '入力してください',
-          maxLength: { value: 200, message: '200文字以内にしてください' },
-        }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -87,10 +72,6 @@ export const ContactForm = memo(({ control, errors, isSubmitting, isSubmitSucces
       <Controller
         name="tel"
         control={control}
-        rules={{
-          required: '入力してください',
-          maxLength: { value: 12, message: '12文字以内にしてください' },
-        }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -107,17 +88,15 @@ export const ContactForm = memo(({ control, errors, isSubmitting, isSubmitSucces
       <Controller
         name="category"
         control={control}
-        rules={{
-          required: '入力してください',
-        }}
         render={({ field: { name, value, onBlur } }) => (
           <Autocomplete
             autoHighlight
             disableClearable
+            options={categoryOptions}
             value={value}
             onChange={(_, newValue) => newValue && setValue('category', newValue)}
             onBlur={onBlur}
-            options={categoryOptions}
+            isOptionEqualToValue={(option, value) => value === '' || option === value}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -135,10 +114,6 @@ export const ContactForm = memo(({ control, errors, isSubmitting, isSubmitSucces
       <Controller
         name="contents"
         control={control}
-        rules={{
-          required: '入力してください',
-          maxLength: { value: 2000, message: '2000文字以内にしてください' },
-        }}
         render={({ field }) => (
           <TextField
             {...field}

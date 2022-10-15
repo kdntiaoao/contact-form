@@ -2,13 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { memo, useCallback } from 'react'
 
-import {
-  Box,
-  Container,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
+import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { SubmitHandler } from 'react-hook-form'
 
 import { ContactFormContainer } from 'components/organisms/containers/ContactFormContainer'
@@ -51,7 +45,7 @@ const ContactPage: NextPage = memo(() => {
               </Typography>
             </Box>
 
-            <Box>
+            <Box mt={{ xs: 4, sm: 6 }}>
               <ContactFormContainer onSubmit={onSubmit} />
             </Box>
           </Box>
