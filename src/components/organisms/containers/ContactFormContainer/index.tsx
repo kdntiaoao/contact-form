@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { Dispatch, memo, SetStateAction } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -8,7 +8,9 @@ import { ContactForm } from 'components/organisms/presentations/ContactForm'
 import { ContactFormInputsType } from 'types/input'
 
 type Props = {
+  fieldReadonly: boolean
   onSubmit: SubmitHandler<ContactFormInputsType>
+  setFieldReadonly: Dispatch<SetStateAction<boolean>>
 }
 
 const emailRegex = /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/
@@ -30,12 +32,12 @@ const schema = z.object({
 })
 
 // eslint-disable-next-line react/display-name
-export const ContactFormContainer = memo(({ onSubmit }: Props) => {
+export const ContactFormContainer = memo(({ fieldReadonly, onSubmit, setFieldReadonly }: Props) => {
   const {
-    handleSubmit,
     control,
+    handleSubmit,
     setValue,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<ContactFormInputsType>({
     mode: 'onBlur',
     reValidateMode: 'onChange',
@@ -55,9 +57,10 @@ export const ContactFormContainer = memo(({ onSubmit }: Props) => {
       <ContactForm
         control={control}
         errors={errors}
+        fieldReadonly={fieldReadonly}
         isSubmitting={isSubmitting}
-        isSubmitSuccessful={isSubmitSuccessful}
         onSubmit={handleSubmit(onSubmit)}
+        setFieldReadonly={setFieldReadonly}
         setValue={setValue}
       />
     </>
