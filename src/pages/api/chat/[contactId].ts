@@ -14,7 +14,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const ref = adminDatabase.ref(`chatDataList/${contactId}`).push()
     await ref.set(chat)
 
-    res.status(200).end()
+    res.status(200).json({chatId: ref.key})
   }
 
   // チャットデータを取得

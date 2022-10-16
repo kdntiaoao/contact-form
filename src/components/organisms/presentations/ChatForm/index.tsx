@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, memo } from 'react'
 
 import SendIcon from '@mui/icons-material/Send'
-import { Alert, Button, Snackbar, Stack, TextField, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Button, Snackbar, Stack, TextField } from '@mui/material'
 import { Control, Controller } from 'react-hook-form'
 
 import { ChatFormInputType } from 'components/organisms/containers/ChatFormContainer'
@@ -18,9 +18,6 @@ type Props = {
 
 // eslint-disable-next-line react/display-name
 export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control, disabled }: Props) => {
-  const theme = useTheme()
-  const matches = useMediaQuery(theme.breakpoints.up('md'))
-
   return (
     <>
       {/* エラー表示 */}
@@ -31,7 +28,15 @@ export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control,
       </Snackbar>
 
       {/* 入力フォーム */}
-      <Stack direction="row" spacing={4} component="form" noValidate autoComplete="off" onSubmit={onSubmit}>
+      <Stack
+        direction="row"
+        spacing={4}
+        component="form"
+        alignItems="flex-end"
+        noValidate
+        autoComplete="off"
+        onSubmit={onSubmit}
+      >
         <Controller
           name="text"
           control={control}
@@ -39,19 +44,21 @@ export const ChatForm = memo(({ error, onClose, errorMessage, onSubmit, control,
           render={({ field }) => (
             <TextField
               {...field}
+              disabled={disabled}
               multiline
               maxRows={3}
-              size={matches ? 'medium' : 'small'}
+              size="small"
               variant="outlined"
-              disabled={disabled}
-              sx={{ flex: 1 }}
               inputProps={{ maxLength: 4000 }}
+              sx={{ flex: 1 }}
             />
           )}
         />
-        <Button type="submit" variant="contained" disabled={disabled} endIcon={<SendIcon />}>
-          送信
-        </Button>
+        <Box sx={{pb: 0.2}}>
+          <Button disabled={disabled} type="submit" variant="contained" endIcon={<SendIcon />}>
+            送信
+          </Button>
+        </Box>
       </Stack>
     </>
   )
