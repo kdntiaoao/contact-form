@@ -20,14 +20,14 @@ import { useChatData } from 'hooks/useChatData'
 import { addChat } from 'services/chat/addChat'
 import { getContactInfo } from 'services/contact/getContactInfo'
 import { updateContactInfo } from 'services/contact/updateContactInfo'
-import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
-import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
+import { getSupporterList } from 'services/supporter/getSupporterList'
+import { Chat, ChatData, ContactInfo, SupporterList } from 'types/data'
 
 type AdminContactChatPageProps = {
   contactId: string | undefined
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
-  supporterDataList: SupporterData
+  supporterList: SupporterList
 }
 
 // eslint-disable-next-line react/display-name
@@ -36,13 +36,13 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     contactId,
     contactInfo: initialContactInfo,
     chatData: initialChatData,
-    supporterDataList: initialSupporterDataList,
+    supporterList: initialSupporterList,
   }: AdminContactChatPageProps) => {
     const router = useRouter()
     const [user, loading] = useAuthState(auth)
     const matches = useMediaQuery(useTheme().breakpoints.up('md'))
     const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
-    const [supporterDataList, setSupporterDataList] = useState<SupporterData>(initialSupporterDataList)
+    const [supporterList, setSupporterList] = useState<SupporterList>(initialSupporterList)
     const { chatData, mutate } = useChatData(contactId, initialChatData)
 
     // Firebaseにチャットを保存する関数
@@ -82,11 +82,11 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     // コメントを変更する関数
     const editComment = useCallback(
       async (commentContents: string) => {
-        if (contactId && user) {
+        if (contactId && user && Object.keys(supporterList).length > 0) {
           // 新しいコメント情報
           const newComment: Pick<ContactInfo, 'comment'> = {
             comment: {
-              name: supporterDataList[user.uid].name,
+              name: supporterList[user.uid].name,
               contents: commentContents,
             },
           }
@@ -96,7 +96,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
           await updateContactInfo(contactId, newComment)
         }
       },
-      [contactId, supporterDataList, user]
+      [contactId, supporterList, user]
     )
 
     useEffect(() => {
@@ -109,8 +109,8 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
           setContactInfo(contactInfo)
         })
 
-        getSupporterDataList().then((data) => {
-          data && setSupporterDataList(data)
+        getSupporterList().then((data) => {
+          data && setSupporterList(data)
         })
       }
     }, [contactId])
@@ -157,12 +157,12 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
             <Container maxWidth="md" sx={{ flex: 1 }}>
               <Box pt={{ xs: 6, md: 4 }} pb={13}>
-                {chatData && contactInfo && supporterDataList && (
+                {chatData && contactInfo && supporterList && (
                   <ChatList
                     admin={true}
                     chatData={chatData}
                     contactInfo={contactInfo}
-                    supporterDataList={supporterDataList}
+                    supporterList={supporterList}
                   />
                 )}
 
@@ -193,7 +193,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 )
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const contactInfoListSnap = await adminDb.collection('contactInfo').get()
+  const contactInfoListSnap = await adminDb.collection('contactInfoList').get()
   const contactInfoList: Record<string, ContactInfo> = {}
   contactInfoListSnap.forEach((doc) => {
     const data = doc.data() as ContactInfo
@@ -210,7 +210,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsContext) => {
   const contactId = params?.id?.toString()
   if (contactId) {
-    const contactInfoSnap = await adminDb.collection('contactInfo').doc(contactId).get()
+    const contactInfoSnap = await adminDb.collection('contactInfoList').doc(contactId).get()
     const contactInfo = await contactInfoSnap.data() // お問い合わせ情報
 
     const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).orderByChild('postTime').once('value')
@@ -219,17 +219,17 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
       chatData.push(snap.val())
     })
 
-    const supporterDataSnap = await adminDb.collection('supporterData').get()
-    const supporterDataList: SupporterData = {} // サポーターデータ
-    supporterDataSnap.forEach((doc) => {
+    const supporterListSnap = await adminDb.collection('supporterList').get()
+    const supporterList: SupporterList = {} // サポーターデータ
+    supporterListSnap.forEach((doc) => {
       const { name, email, color } = doc.data()
       if (typeof name === 'string' && typeof email === 'string' && color === 'string') {
-        supporterDataList[doc.id] = { name, email, color }
+        supporterList[doc.id] = { name, email, color }
       }
     })
 
     return {
-      props: { contactId, contactInfo, chatData, supporterDataList },
+      props: { contactId, contactInfo, chatData, supporterList },
       revalidate: 60,
     }
   } else {

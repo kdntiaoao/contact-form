@@ -6,28 +6,31 @@ import { format } from 'date-fns'
 import { Chat } from '../Chat'
 
 import { statusList } from 'components/organisms/presentations/StatusSelectArea'
-import { ChatData, ContactInfo, SupporterData } from 'types/data'
+import { ChatData, ContactInfo, SupporterList } from 'types/data'
 
 type Props = {
   admin?: boolean
   chatData: ChatData
   contactInfo: ContactInfo
-  supporterDataList: SupporterData
+  supporterList: SupporterList
 }
 
 // eslint-disable-next-line react/display-name
-export const ChatList = memo(({ admin = false, chatData, contactInfo, supporterDataList }: Props) => {
+export const ChatList = memo(({ admin = false, chatData, contactInfo, supporterList }: Props) => {
   const contributorToName = useCallback(
     (contributor: string, index: number) => {
-      if (chatData?.[index - 1]?.contents.text && contributor === chatData?.[index - 1]?.contributor) {
+      if (
+        (chatData?.[index - 1]?.contents.text && contributor === chatData?.[index - 1]?.contributor) ||
+        Object.keys(supporterList).length === 0
+      ) {
         return ''
       } else if (contributor === '0' && contactInfo) {
         return `${contactInfo.name} 様`
       } else {
-        return supporterDataList[contributor].name
+        return supporterList[contributor].name
       }
     },
-    [chatData, contactInfo, supporterDataList]
+    [chatData, contactInfo, supporterList]
   )
 
   return (

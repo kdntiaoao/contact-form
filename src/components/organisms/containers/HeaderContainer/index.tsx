@@ -6,8 +6,10 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '../../../../../firebase/client'
 
 import { Header } from 'components/organisms/presentations/Header'
-import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
-import { SupporterData } from 'types/data'
+import { getSupporterList } from 'services/supporter/getSupporterList'
+import { SupporterList } from 'types/data'
+
+type MenuListType = { text: string; url: string; onClick?: () => void }[][]
 
 const logout = () => {
   signOut(auth)
@@ -16,37 +18,41 @@ const logout = () => {
 // eslint-disable-next-line react/display-name
 export const HeaderContainer = memo(() => {
   const [user] = useAuthState(auth)
-  const [supporterDataList, setSupporterDataList] = useState<SupporterData>()
+  const [supporterList, setSupporterList] = useState<SupporterList>()
 
-  const menuList = [
-    [
-      { text: 'ホーム', url: '/' },
-      { text: 'お問い合わせ', url: '/contact' },
-    ],
-    [
-      { text: 'ログイン', url: '/admin/login' },
-      { text: 'ログアウト', url: '/admin/login', onClick: logout },
-      { text: 'お問い合わせ一覧', url: '/admin/contact' },
-    ],
-  ]
-
-  if (user?.email) {
-    menuList.push([
-      { text: 'お問い合わせ一覧', url: '/' },
-      { text: 'ログアウト', url: '/admin/login', onClick: logout },
-    ])
-  }
+  const menuList = useMemo<MenuListType>(
+    () =>
+      user?.email
+        ? [
+            [
+              { text: 'ホーム', url: '/' },
+              { text: 'お問い合わせ', url: '/contact' },
+            ],
+            [
+              { text: 'お問い合わせ一覧', url: '/admin/contact' },
+              { text: 'ログアウト', url: '/admin/login', onClick: logout },
+            ],
+          ]
+        : [
+            [
+              { text: 'ホーム', url: '/' },
+              { text: 'お問い合わせ', url: '/contact' },
+            ],
+            [{ text: 'ログイン', url: '/admin/login' }],
+          ],
+    [user]
+  )
 
   const supporterName = useMemo(() => {
-    return user?.uid && supporterDataList?.[user.uid]?.name
-  }, [supporterDataList, user])
+    return user?.uid && supporterList?.[user.uid]?.name
+  }, [supporterList, user])
 
   const supporterColor = useMemo(() => {
-    return user?.uid && supporterDataList?.[user.uid]?.color
-  }, [supporterDataList, user])
+    return user?.uid && supporterList?.[user.uid]?.color
+  }, [supporterList, user])
 
   useEffect(() => {
-    getSupporterDataList().then((dataList) => dataList && setSupporterDataList(dataList))
+    getSupporterList().then((dataList) => dataList && setSupporterList(dataList))
   }, [user])
 
   return <Header menuList={menuList} account={supporterName} avatarColor={supporterColor} />

@@ -14,18 +14,18 @@ import { ChatFormContainer } from 'components/organisms/containers/ChatFormConta
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { useChatData } from 'hooks/useChatData'
 import { addChat } from 'services/chat/addChat'
-import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
+import { Chat, ChatData, ContactInfo, SupporterList } from 'types/data'
 
 type ContactChatPageProps = {
   contactId: string | undefined
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
-  supporterDataList: SupporterData
+  supporterList: SupporterList
 }
 
 // eslint-disable-next-line react/display-name
 const ContactChatPage: NextPage<ContactChatPageProps> = memo(
-  ({ contactId, contactInfo, chatData: initialChatData, supporterDataList }: ContactChatPageProps) => {
+  ({ contactId, contactInfo, chatData: initialChatData, supporterList }: ContactChatPageProps) => {
     const router = useRouter()
     const { chatData, mutate } = useChatData(contactId, initialChatData)
 
@@ -55,8 +55,8 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
             />
 
             <Box mt={{ xs: 4, sm: 6 }}>
-              {chatData && contactInfo && supporterDataList && (
-                <ChatList {...{ chatData, contactInfo, supporterDataList }} />
+              {chatData && contactInfo && supporterList && (
+                <ChatList {...{ chatData, contactInfo, supporterList }} />
               )}
             </Box>
 
@@ -78,7 +78,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
 )
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const contactInfoListSnap = await adminDb.collection('contactInfo').get()
+  const contactInfoListSnap = await adminDb.collection('contactInfoList').get()
   const contactInfoList: Record<string, ContactInfo> = {}
   contactInfoListSnap.forEach((doc) => {
     const data = doc.data() as ContactInfo
@@ -95,7 +95,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsContext) => {
   const contactId = params?.id?.toString()
   if (contactId) {
-    const contactInfoSnap = await adminDb.collection('contactInfo').doc(contactId).get()
+    const contactInfoSnap = await adminDb.collection('contactInfoList').doc(contactId).get()
     const contactInfo = await contactInfoSnap.data() // お問い合わせ情報
 
     const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).orderByChild('postTime').once('value')
@@ -104,17 +104,17 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
       chatData.push(snap.val())
     })
 
-    const supporterDataSnap = await adminDb.collection('supporterData').get()
-    const supporterDataList: SupporterData = {} // サポーターデータ
-    supporterDataSnap.forEach((doc) => {
+    const supporterListSnap = await adminDb.collection('supporterList').get()
+    const supporterList: SupporterList = {} // サポーターデータ
+    supporterListSnap.forEach((doc) => {
       const { name, email, color } = doc.data()
       if (typeof name === 'string' && typeof email === 'string' && typeof color === 'string') {
-        supporterDataList[doc.id] = { name, email, color }
+        supporterList[doc.id] = { name, email, color }
       }
     })
 
     return {
-      props: { contactId, contactInfo, chatData, supporterDataList },
+      props: { contactId, contactInfo, chatData, supporterList },
       revalidate: 60,
     }
   } else {

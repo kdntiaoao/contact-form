@@ -12,7 +12,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   // お問い合わせ情報を更新
   if (req.method === 'POST') {
-    const contactInfoRef = adminDb.collection('contactInfo').doc(contactId.toString())
+    const contactInfoRef = adminDb.collection('contactInfoList').doc(contactId.toString())
     await contactInfoRef.update(req.body.newContactInfo)
 
     res.status(200).end()
@@ -20,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   // お問い合わせ情報を取得
   if (req.method === 'GET') {
-    const contactInfoRef = adminDb.collection('contactInfo').doc(contactId)
+    const contactInfoRef = adminDb.collection('contactInfoList').doc(contactId)
     const doc = await contactInfoRef.get()
     const contactInfo = doc.data()
 

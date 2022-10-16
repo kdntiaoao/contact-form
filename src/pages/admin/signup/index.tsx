@@ -70,6 +70,7 @@ const SignupPage = memo(() => {
           await router.push('/admin/contact')
         })
         .catch((error) => {
+          console.log(error)
           setError('name', {
             type: error.code,
             message: '入力された値は無効です',
