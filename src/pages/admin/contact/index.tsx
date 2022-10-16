@@ -11,22 +11,22 @@ import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ContactTableContainer } from 'components/organisms/containers/ContactTableContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { getContactInfoList } from 'services/contact/getContactInfoList'
-import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
-import { ContactInfo, SupporterData } from 'types/data'
+import { getSupporterList } from 'services/supporter/getSupporterList'
+import { ContactInfo, SupporterList } from 'types/data'
 
 // eslint-disable-next-line react/display-name
 const ContactListPage: NextPage = memo(() => {
   const router = useRouter()
   const [user, loading] = useAuthState(auth)
   const [contactInfoList, setContactInfoList] = useState<Record<string, ContactInfo>>()
-  const [supporterDataList, setSupporterDataList] = useState<SupporterData>()
+  const [supporterList, setSupporterList] = useState<SupporterList>()
 
   const fetchData = useCallback(async () => {
     const contactInfoList: Record<string, ContactInfo> | null = await getContactInfoList()
-    const supporterDataList: SupporterData | null = await getSupporterDataList()
+    const supporterList: SupporterList | null = await getSupporterList()
 
     contactInfoList && setContactInfoList(contactInfoList)
-    supporterDataList && setSupporterDataList(supporterDataList)
+    supporterList && setSupporterList(supporterList)
   }, [setContactInfoList])
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const ContactListPage: NextPage = memo(() => {
     if (!loading && (!user || !user?.email)) router.push('/')
   }, [loading, router, user])
 
-  if (loading || !contactInfoList || !supporterDataList || !user) return <LoadingScreen loading />
+  if (loading || !contactInfoList || !supporterList || !user) return <LoadingScreen loading />
 
   return (
     <DefaultLayout>
@@ -48,7 +48,7 @@ const ContactListPage: NextPage = memo(() => {
           <ContactTableContainer
             tableTitle="お問い合わせ一覧"
             contactInfoList={contactInfoList}
-            supporterDataList={supporterDataList}
+            supporterList={supporterList}
             uid={user.uid}
           />
         </Box>

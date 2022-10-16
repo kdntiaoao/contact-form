@@ -54,7 +54,7 @@ export default {
         type: { summary: 'object' },
       },
     },
-    supporterDataList: {
+    supporterList: {
       control: { type: 'object' },
       defaultValue: {
         OtL4a3q2C1QzwK4sXmXp3s3ha4C2: { name: '田中太郎', email: 'tanaka.taro.0853@example.com' },

@@ -87,4 +87,4 @@ export type Supporter = {
   color: string
 }
 
-export type SupporterData = Record<string, Supporter>
+export type SupporterList = Record<string, Supporter>

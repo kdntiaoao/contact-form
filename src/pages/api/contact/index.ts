@@ -9,15 +9,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     const { contactInfo } = req.body
 
-    const firestoreRes = await adminDb.collection('contactInfo').add(contactInfo)
+    const firestoreRes = await adminDb.collection('contactInfoList').add(contactInfo)
 
     res.status(200).json(firestoreRes.id)
   }
 
   // お問い合わせ情報リストを取得
   if (req.method === 'GET') {
-    const contactInfoRef = adminDb.collection('contactInfo')
-    const snapshot = await contactInfoRef.get()
+    const snapshot = await adminDb.collection('contactInfoList').get()
 
     if (snapshot.empty) {
       res.status(404).end()
