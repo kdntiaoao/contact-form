@@ -11,14 +11,12 @@ import { DefaultLayout } from 'components/template/DefaultLayout'
 import { addChat } from 'services/chat/addChat'
 import { addContactInfo } from 'services/contact/addContactInfo'
 import { sendMail } from 'services/sendMail'
-import { Chat, ContactInfo } from 'types/data'
 import { ContactFormInputsType } from 'types/input'
 
 // eslint-disable-next-line react/display-name
 const ContactPage: NextPage = memo(() => {
   const router = useRouter()
-  const theme = useTheme()
-  const matches = useMediaQuery(theme.breakpoints.up('sm'))
+  const matches = useMediaQuery(useTheme().breakpoints.up('sm'))
   const [fieldsReadonly, setFieldReadonly] = useState<boolean>(false) // 入力フィールドのリードオンリーフラグ(確認時はtrue)
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -32,24 +30,23 @@ const ContactPage: NextPage = memo(() => {
 
   const onSubmit: SubmitHandler<ContactFormInputsType> = useCallback(
     async (data) => {
+      // 確認時
       if (fieldsReadonly) {
         const currentDate: number = Date.now()
-        const contactInfo: ContactInfo = {
-          ...data,
-          supporter: '0',
-          currentStatus: 0,
-          submitTime: currentDate,
-          comment: { name: '', contents: '' },
-        }
-        const chat: Chat = { contributor: '0', postTime: currentDate, contents: { text: data.contents } }
 
         try {
           setLoading(true)
 
           // お問い合わせ情報の保存(Firestore)
-          const docId = await addContactInfo(contactInfo)
+          const docId = await addContactInfo({
+            ...data,
+            supporter: '0',
+            currentStatus: 0,
+            submitTime: currentDate,
+            comment: { name: '', contents: '' },
+          })
           // チャットデータの追加(Realtime Database)
-          await addChat(docId, chat)
+          await addChat(docId, { contributor: '0', postTime: currentDate, contents: { text: data.contents } })
           // テスト用メールのときはメールを送信しない
           if (data.email.indexOf('@example.com') < 0) {
             await sendMail(data, docId)
@@ -60,6 +57,7 @@ const ContactPage: NextPage = memo(() => {
           setLoading(false)
         }
       } else {
+        // 入力時
         setFieldReadonly(true)
       }
     },
@@ -85,7 +83,11 @@ const ContactPage: NextPage = memo(() => {
             </Box>
 
             <Box mt={{ xs: 4, sm: 6 }}>
-              <ContactFormContainer fieldReadonly={fieldsReadonly} onSubmit={onSubmit} setFieldReadonly={setFieldReadonly} />
+              <ContactFormContainer
+                fieldReadonly={fieldsReadonly}
+                onSubmit={onSubmit}
+                setFieldReadonly={setFieldReadonly}
+              />
             </Box>
           </Box>
         </Container>

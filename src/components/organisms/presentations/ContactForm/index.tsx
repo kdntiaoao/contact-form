@@ -5,6 +5,7 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import { Autocomplete, Box, Button, Stack, TextField } from '@mui/material'
 import { Control, Controller, FieldErrorsImpl } from 'react-hook-form'
 
+import { ContactTextField } from 'components/molecules/ContactTextField'
 import { ContactFormInputsType } from 'types/input'
 
 type Props = {
@@ -38,67 +39,38 @@ const categoryOptions = [
 
 // eslint-disable-next-line react/display-name
 export const ContactForm = memo(
-  ({
-    control,
-    errors,
-    fieldReadonly,
-    isSubmitting,
-    onSubmit,
-    setFieldReadonly,
-    setValue,
-  }: Props) => {
+  ({ control, errors, fieldReadonly, isSubmitting, onSubmit, setFieldReadonly, setValue }: Props) => {
     const submitButtonText = useMemo(() => (!fieldReadonly ? '確認する' : '送信する'), [fieldReadonly])
 
     const handleClickFixButton = useCallback(() => setFieldReadonly(false), [setFieldReadonly])
 
     return (
       <Stack component="form" noValidate autoComplete="off" onSubmit={onSubmit} spacing={6}>
-        <Controller
+        <ContactTextField
+          control={control}
+          error={errors?.name}
+          fieldReadonly={fieldReadonly}
+          label="お名前"
+          maxLength={16}
           name="name"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="お名前"
-              variant="standard"
-              error={!!errors.name}
-              helperText={errors?.name?.message}
-              inputProps={{ maxLength: 16, readOnly: fieldReadonly }}
-              fullWidth
-            />
-          )}
         />
-        <Controller
+        <ContactTextField
+          control={control}
+          error={errors?.email}
+          fieldReadonly={fieldReadonly}
+          label="メールアドレス"
+          maxLength={200}
           name="email"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="email"
-              label="メールアドレス"
-              variant="standard"
-              error={!!errors.email}
-              helperText={errors?.email?.message}
-              inputProps={{ maxLength: 200, readOnly: fieldReadonly }}
-              fullWidth
-            />
-          )}
+          type="email"
         />
-        <Controller
-          name="tel"
+        <ContactTextField
           control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="tel"
-              label="電話番号"
-              variant="standard"
-              error={!!errors.tel}
-              helperText={errors?.tel?.message}
-              inputProps={{ maxLength: 12, readOnly: fieldReadonly }}
-              fullWidth
-            />
-          )}
+          error={errors?.tel}
+          fieldReadonly={fieldReadonly}
+          label="電話番号"
+          maxLength={12}
+          name="tel"
+          type="tel"
         />
         <Controller
           name="category"
@@ -110,7 +82,7 @@ export const ContactForm = memo(
               readOnly={fieldReadonly}
               options={categoryOptions}
               value={value}
-              onChange={(_, newValue) => newValue && setValue('category', newValue)}
+              onChange={(_, newValue) => setValue('category', newValue)}
               onBlur={onBlur}
               isOptionEqualToValue={(option, value) => value === '' || option === value}
               renderInput={(params) => (
@@ -127,22 +99,14 @@ export const ContactForm = memo(
             />
           )}
         />
-        <Controller
-          name="contents"
+        <ContactTextField
           control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="お問い合わせ内容"
-              variant="outlined"
-              error={!!errors.contents}
-              helperText={errors?.contents?.message}
-              inputProps={{ maxLength: 2000, readOnly: fieldReadonly }}
-              minRows={2}
-              fullWidth
-              multiline
-            />
-          )}
+          error={errors?.contents}
+          fieldReadonly={fieldReadonly}
+          label="お問い合わせ内容"
+          maxLength={2000}
+          multiline
+          name="contents"
         />
 
         <Stack
