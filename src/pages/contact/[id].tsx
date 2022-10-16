@@ -1,6 +1,6 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback,  } from 'react'
 
 import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { animateScroll as scroll } from 'react-scroll'
@@ -11,8 +11,8 @@ import { ChatList } from 'components/molecules/ChatList'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { useChatData } from 'hooks/useChatData'
 import { addChat } from 'services/chat/addChat'
-import { getChatData } from 'services/chat/getChatData'
 import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
 
 type ContactChatPageProps = {
@@ -26,37 +26,22 @@ type ContactChatPageProps = {
 const ContactChatPage: NextPage<ContactChatPageProps> = memo(
   ({ contactId, contactInfo, chatData: initialChatData, supporterDataList }: ContactChatPageProps) => {
     const router = useRouter()
-    const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
-    const theme = useTheme()
-    const matches = useMediaQuery(theme.breakpoints.up('sm'))
+    const matches = useMediaQuery(useTheme().breakpoints.up('sm'))
+    const { chatData, mutate } = useChatData(contactId, initialChatData)
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
       async (chat: Chat) => {
         if (contactId) {
+          // Firebaseにチャットを追加
           await addChat(contactId, chat)
-
-          const chatData = await getChatData(contactId)
-
-          if (chatData) {
-            setChatData(chatData)
-            scroll.scrollToBottom()
-          }
+          // ローカルにあるチャットデータを更新
+          chatData && mutate([...chatData, chat])
+          scroll.scrollToBottom()
         }
       },
-      [contactId]
+      [chatData, contactId, mutate]
     )
-
-    useEffect(() => {
-      if (contactId) {
-        getChatData(contactId).then((chatData) => {
-          if (chatData) {
-            setChatData(chatData)
-            scroll.scrollToBottom()
-          }
-        })
-      }
-    }, [contactId])
 
     if (router.isFallback) return <LoadingScreen loading />
 
@@ -65,7 +50,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
         <Container maxWidth="md">
           <Box pt={{ xs: 6, sm: 10 }} pb={13}>
             <Box>
-              <Typography variant={matches ? 'h4' : 'h5'} component="h1">
+              <Typography variant={matches ? 'h4' : 'h5'} component="h2">
                 お問い合わせチャット
               </Typography>
             </Box>

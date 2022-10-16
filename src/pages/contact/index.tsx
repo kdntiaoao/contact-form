@@ -72,7 +72,7 @@ const ContactPage: NextPage = memo(() => {
         <Container maxWidth="md">
           <Box py={{ xs: 6, sm: 10 }}>
             <Box>
-              <Typography variant={matches ? 'h4' : 'h5'} component="h1">
+              <Typography variant={matches ? 'h4' : 'h5'} component="h2">
                 お問い合わせ
               </Typography>
             </Box>

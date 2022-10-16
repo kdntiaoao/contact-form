@@ -16,8 +16,8 @@ import { ChatFormContainer } from 'components/organisms/containers/ChatFormConta
 import { CommentAreaContainer } from 'components/organisms/containers/CommentAreaContainer'
 import { StatusSelectAreaContainer } from 'components/organisms/containers/StatusSelectAreaContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { useChatData } from 'hooks/useChatData'
 import { addChat } from 'services/chat/addChat'
-import { getChatData } from 'services/chat/getChatData'
 import { getContactInfo } from 'services/contact/getContactInfo'
 import { updateContactInfo } from 'services/contact/updateContactInfo'
 import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
@@ -40,27 +40,23 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
   }: AdminContactChatPageProps) => {
     const router = useRouter()
     const [user, loading] = useAuthState(auth)
-    const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
+    const matches = useMediaQuery(useTheme().breakpoints.up('md'))
     const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
     const [supporterDataList, setSupporterDataList] = useState<SupporterData>(initialSupporterDataList)
-    const theme = useTheme()
-    const matches = useMediaQuery(theme.breakpoints.up('md'))
+    const { chatData, mutate } = useChatData(contactId, initialChatData)
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
       async (chat: Chat) => {
         if (contactId) {
+          // Firebaseにチャットを追加
           await addChat(contactId, chat)
-
-          const chatData = await getChatData(contactId)
-
-          if (chatData) {
-            setChatData(chatData)
-            scroll.scrollToBottom()
-          }
+          // ローカルにあるチャットデータを更新
+          chatData && mutate([...chatData, chat])
+          scroll.scrollToBottom()
         }
       },
-      [contactId]
+      [chatData, contactId, mutate]
     )
 
     // 対応状況を変更する関数
@@ -111,11 +107,6 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
       if (contactId) {
         getContactInfo(contactId).then((contactInfo) => {
           setContactInfo(contactInfo)
-        })
-
-        getChatData(contactId).then((chatData) => {
-          setChatData(chatData)
-          scroll.scrollToBottom()
         })
 
         getSupporterDataList().then((data) => {
