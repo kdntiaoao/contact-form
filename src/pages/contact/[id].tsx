@@ -1,14 +1,15 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useCallback,  } from 'react'
+import { memo, useCallback } from 'react'
 
-import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Container, Stack } from '@mui/material'
 import { animateScroll as scroll } from 'react-scroll'
 
 import { adminDatabase, adminDb } from '../../../firebase/server'
 
 import { ChatList } from 'components/molecules/ChatList'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
+import { PageHeading } from 'components/molecules/PageHeading'
 import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { useChatData } from 'hooks/useChatData'
@@ -26,7 +27,6 @@ type ContactChatPageProps = {
 const ContactChatPage: NextPage<ContactChatPageProps> = memo(
   ({ contactId, contactInfo, chatData: initialChatData, supporterDataList }: ContactChatPageProps) => {
     const router = useRouter()
-    const matches = useMediaQuery(useTheme().breakpoints.up('sm'))
     const { chatData, mutate } = useChatData(contactId, initialChatData)
 
     // Firebaseにチャットを保存する関数
@@ -49,16 +49,11 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
       <DefaultLayout>
         <Container maxWidth="md">
           <Box pt={{ xs: 6, sm: 10 }} pb={13}>
-            <Box>
-              <Typography variant={matches ? 'h4' : 'h5'} component="h2">
-                お問い合わせチャット
-              </Typography>
-            </Box>
-            <Box mt={1}>
-              <Typography>
-                商品についてご不明点やご質問等ございましたら、こちらのチャットにてお気軽にご相談ください。
-              </Typography>
-            </Box>
+            <PageHeading
+              title="お問い合わせチャット"
+              description="商品についてご不明点やご質問等ございましたら、こちらのチャットにてお気軽にご相談ください。"
+            />
+
             <Box mt={{ xs: 4, sm: 6 }}>
               {chatData && contactInfo && supporterDataList && (
                 <ChatList {...{ chatData, contactInfo, supporterDataList }} />
