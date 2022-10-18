@@ -23,10 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const contactInfoList: ContactInfoList = {}
-    snapshot.forEach((doc) => {
-      const contactInfo = doc.data() as ContactInfo
-      contactInfoList[doc.id] = contactInfo
-    })
+    snapshot.forEach((doc) => (contactInfoList[doc.id] = doc.data() as ContactInfo))
 
     res.status(200).json(contactInfoList)
   }

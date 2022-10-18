@@ -16,8 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   // サポーターを取得
   if (req.method === 'GET') {
-    const supporterListRef = adminDb.collection('supporterList')
-    const snapshot = await supporterListRef.get()
+    const snapshot = await adminDb.collection('supporterList').get()
 
     if (snapshot.empty) {
       res.status(404).json({})
@@ -25,10 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const supporterList: SupporterList = {}
-    snapshot.forEach((doc) => {
-      const supporter = doc.data() as Supporter
-      supporterList[doc.id] = supporter
-    })
+    snapshot.forEach((doc) => (supporterList[doc.id] = doc.data() as Supporter))
 
     res.status(200).json(supporterList)
   }
