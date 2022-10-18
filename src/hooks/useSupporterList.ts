@@ -4,7 +4,7 @@ import { SupporterList } from 'types/data'
 import { fetcher } from 'utils/fetcher'
 
 /**
- * チャットデータのカスタムフック
+ * サポーターリストのカスタムフック
  * @param fallbackData 初期データ
  * @returns {Object} { サポーターリスト, ローディングフラグ, エラー, ミューテーション }
  */
