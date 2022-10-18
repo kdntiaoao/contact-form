@@ -3,9 +3,8 @@ import { useRouter } from 'next/router'
 import { memo, useEffect } from 'react'
 
 import { Box, Container } from '@mui/material'
-import { useAuthState } from 'react-firebase-hooks/auth'
+import { useRecoilValue } from 'recoil'
 
-import { auth } from '../../../../firebase/client'
 import { adminDb } from '../../../../firebase/server'
 
 import { LoadingScreen } from 'components/molecules'
@@ -13,6 +12,7 @@ import { ContactTableContainer } from 'components/organisms'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { useContactInfoList } from 'hooks/useContactInfoList'
 import { useSupporterList } from 'hooks/useSupporterList'
+import { userInfoState } from 'states/userInfoState'
 import { ContactInfo, ContactInfoList, Supporter, SupporterList } from 'types/data'
 
 type Props = {
@@ -24,15 +24,15 @@ type Props = {
 const ContactListPage: NextPage<Props> = memo(
   ({ contactInfoList: initialContactInfoList, supporterList: initialSupporterList }: Props) => {
     const router = useRouter()
-    const [user, authLoading] = useAuthState(auth)
+    const userInfo = useRecoilValue(userInfoState)
     const { contactInfoList } = useContactInfoList(initialContactInfoList)
     const { supporterList } = useSupporterList(initialSupporterList)
 
     useEffect(() => {
-      if (!authLoading && (!user || !user?.email)) router.push('/')
-    }, [authLoading, router, user])
+      if (userInfo && !userInfo.userId) router.push('/')
+    }, [router, userInfo])
 
-    if (authLoading || !contactInfoList || !supporterList || !user) return <LoadingScreen loading />
+    if (!contactInfoList || !supporterList || !userInfo?.userId) return <LoadingScreen loading />
 
     return (
       <DefaultLayout>
@@ -42,7 +42,7 @@ const ContactListPage: NextPage<Props> = memo(
               tableTitle="お問い合わせ一覧"
               contactInfoList={contactInfoList}
               supporterList={supporterList}
-              uid={user.uid}
+              uid={userInfo.userId}
             />
           </Box>
         </Container>

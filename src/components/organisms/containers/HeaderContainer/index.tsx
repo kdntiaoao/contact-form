@@ -1,13 +1,13 @@
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useMemo } from 'react'
 
 import { signOut } from 'firebase/auth'
-import { useAuthState } from 'react-firebase-hooks/auth'
+import { useRecoilValue } from 'recoil'
 
 import { auth } from '../../../../../firebase/client'
 
 import { Header } from 'components/organisms/presentations/Header'
-import { getSupporterList } from 'services/supporter/getSupporterList'
-import { SupporterList } from 'types/data'
+import { useSupporterList } from 'hooks/useSupporterList'
+import { userInfoState } from 'states/userInfoState'
 
 type MenuListType = { text: string; url: string; onClick?: () => void }[][]
 
@@ -17,12 +17,12 @@ const logout = () => {
 
 // eslint-disable-next-line react/display-name
 export const HeaderContainer = memo(() => {
-  const [user] = useAuthState(auth)
-  const [supporterList, setSupporterList] = useState<SupporterList>()
+  const userInfo = useRecoilValue(userInfoState)
+  const { supporterList } = useSupporterList()
 
   const menuList = useMemo<MenuListType>(
     () =>
-      user?.email
+      userInfo?.userId
         ? [
             [
               { text: 'ホーム', url: '/' },
@@ -40,20 +40,16 @@ export const HeaderContainer = memo(() => {
             ],
             [{ text: 'ログイン', url: '/admin/login' }],
           ],
-    [user]
+    [userInfo]
   )
 
   const supporterName = useMemo(() => {
-    return user?.uid && supporterList?.[user.uid]?.name
-  }, [supporterList, user])
+    return userInfo?.userId && supporterList?.[userInfo.userId]?.name
+  }, [supporterList, userInfo])
 
   const supporterColor = useMemo(() => {
-    return user?.uid && supporterList?.[user.uid]?.color
-  }, [supporterList, user])
-
-  useEffect(() => {
-    getSupporterList().then((dataList) => dataList && setSupporterList(dataList))
-  }, [user])
+    return userInfo?.userId && supporterList?.[userInfo.userId]?.color
+  }, [supporterList, userInfo])
 
   return <Header menuList={menuList} account={supporterName} avatarColor={supporterColor} />
 })

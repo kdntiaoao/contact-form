@@ -3,10 +3,9 @@ import { useRouter } from 'next/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Box, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { animateScroll as scroll } from 'react-scroll'
+import { useRecoilValue } from 'recoil'
 
-import { auth } from '../../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
 import { ChatList, LinkButton, LoadingScreen } from 'components/molecules'
@@ -17,6 +16,7 @@ import { addChat } from 'services/chat/addChat'
 import { getContactInfo } from 'services/contact/getContactInfo'
 import { updateContactInfo } from 'services/contact/updateContactInfo'
 import { getSupporterList } from 'services/supporter/getSupporterList'
+import { userInfoState } from 'states/userInfoState'
 import { Chat, ChatData, ContactInfo, ContactInfoList, SupporterList } from 'types/data'
 
 type AdminContactChatPageProps = {
@@ -35,8 +35,8 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     supporterList: initialSupporterList,
   }: AdminContactChatPageProps) => {
     const router = useRouter()
-    const [user, loading] = useAuthState(auth)
     const matches = useMediaQuery(useTheme().breakpoints.up('md'))
+    const userInfo = useRecoilValue(userInfoState)
     const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
     const [supporterList, setSupporterList] = useState<SupporterList>(initialSupporterList)
     const { chatData, mutate } = useChatData(contactId, initialChatData)
@@ -58,11 +58,11 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     // 対応状況を変更する関数
     const changeStatus = useCallback(
       async (newStatus: number, chat: Chat): Promise<void> => {
-        if (contactId && user) {
+        if (contactId && userInfo?.userId) {
           // 更新される部分だけのお問い合わせ情報
           const newContactInfo: Partial<ContactInfo> = {
             currentStatus: newStatus,
-            supporter: newStatus === 0 ? '0' : user.uid,
+            supporter: newStatus === 0 ? '0' : userInfo.userId,
           }
 
           setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newContactInfo })
@@ -72,17 +72,17 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
           await postChat(chat)
         }
       },
-      [contactId, postChat, user]
+      [contactId, postChat, userInfo]
     )
 
     // コメントを変更する関数
     const editComment = useCallback(
       async (commentContents: string) => {
-        if (contactId && user && Object.keys(supporterList).length > 0) {
+        if (contactId && userInfo?.userId && Object.keys(supporterList).length > 0) {
           // 新しいコメント情報
           const newComment: Pick<ContactInfo, 'comment'> = {
             comment: {
-              name: supporterList[user.uid].name,
+              name: supporterList[userInfo.userId].name,
               contents: commentContents,
             },
           }
@@ -92,12 +92,12 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
           await updateContactInfo(contactId, newComment)
         }
       },
-      [contactId, supporterList, user]
+      [contactId, supporterList, userInfo]
     )
 
     useEffect(() => {
-      if (!loading && (!user || !user?.email)) router.push('/')
-    }, [loading, router, user])
+      if (userInfo && !userInfo.userId) router.push('/')
+    }, [router, userInfo])
 
     useEffect(() => {
       if (contactId) {
@@ -111,7 +111,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
       }
     }, [contactId])
 
-    if (router.isFallback || loading || !user) return <LoadingScreen loading />
+    if (router.isFallback || !contactInfo || !supporterList || !userInfo?.userId) return <LoadingScreen loading />
 
     return (
       <DefaultLayout>
@@ -133,13 +133,13 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                       direction={matches ? 'column' : 'row'}
                       currentStatus={contactInfo?.currentStatus}
                       supporter={contactInfo?.supporter}
-                      uid={user.uid}
+                      uid={userInfo.userId}
                       changeStatus={changeStatus}
                     />
                   </Box>
 
                   <CommentAreaContainer
-                    contributor={user.uid}
+                    contributor={userInfo.userId}
                     currentStatus={contactInfo?.currentStatus}
                     supporter={contactInfo?.supporter}
                     comment={contactInfo?.comment}
@@ -165,7 +165,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                     <Box py={2}>
                       <ChatFormContainer
                         admin={true}
-                        contributor={user.uid}
+                        contributor={userInfo.userId}
                         contactId={contactId}
                         currentStatus={contactInfo?.currentStatus}
                         supporter={contactInfo?.supporter}
