@@ -23,3 +23,13 @@ export type ContactFormInputsType = {
    */
   contents: string
 }
+
+/**
+ * チャットフォームの入力フィールド
+ */
+export type ChatFormInputType = {
+  /**
+   * チャットテキスト
+   */
+  text: string
+}

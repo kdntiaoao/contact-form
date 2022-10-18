@@ -4,7 +4,7 @@ import SendIcon from '@mui/icons-material/Send'
 import { Alert, Box, Button, Snackbar, Stack, TextField } from '@mui/material'
 import { Control, Controller } from 'react-hook-form'
 
-import { ChatFormInputType } from 'components/organisms/containers/ChatFormContainer'
+import { ChatFormInputType } from 'types/input'
 
 type Props = {
   error: boolean

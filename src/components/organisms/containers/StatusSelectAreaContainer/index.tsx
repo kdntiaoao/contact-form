@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 
-import { AlertDialog } from 'components/molecules/AlertDialog'
+import { AlertDialog } from 'components/molecules'
 import { StatusSelectArea } from 'components/organisms/presentations/StatusSelectArea'
 import { Chat } from 'types/data'
 

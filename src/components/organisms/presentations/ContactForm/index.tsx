@@ -5,7 +5,7 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import { Autocomplete, Box, Button, Stack, TextField } from '@mui/material'
 import { Control, Controller, FieldErrorsImpl } from 'react-hook-form'
 
-import { ContactTextField } from 'components/molecules/ContactTextField'
+import { ContactTextField } from 'components/molecules'
 import { ContactFormInputsType } from 'types/input'
 
 type Props = {

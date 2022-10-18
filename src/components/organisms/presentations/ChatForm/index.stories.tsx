@@ -6,7 +6,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 
 import { ChatForm } from '.'
 
-import { ChatFormInputType } from 'components/organisms/containers/ChatFormContainer'
+import { ChatFormInputType } from 'types/input'
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
