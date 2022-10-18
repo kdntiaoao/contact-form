@@ -7,7 +7,7 @@ import { fetcher } from 'utils/fetcher'
  * チャットデータのカスタムフック
  * @param id お問い合わせID
  * @param fallbackData 初期データ
- * @returns チャットデータ
+ * @returns {Object} { チャットデータ, ローディングフラグ, エラー, ミューテーション }
  */
 export const useChatData = (id: string | undefined, fallbackData?: ChatData) => {
   const { data, error, mutate } = useSWR<ChatData>(`/api/chat/${id}`, fetcher, { fallbackData })

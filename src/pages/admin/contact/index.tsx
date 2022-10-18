@@ -1,6 +1,6 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useEffect } from 'react'
 
 import { Box, Container } from '@mui/material'
 import { useAuthState } from 'react-firebase-hooks/auth'
@@ -10,30 +10,15 @@ import { auth } from '../../../../firebase/client'
 import { LoadingScreen } from 'components/molecules/LoadingScreen'
 import { ContactTableContainer } from 'components/organisms/containers/ContactTableContainer'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { getContactInfoList } from 'services/contact/getContactInfoList'
-import { getSupporterList } from 'services/supporter/getSupporterList'
-import { ContactInfoList, SupporterList } from 'types/data'
+import { useContactInfoList } from 'hooks/useContactInfoList'
+import { useSupporterList } from 'hooks/useSupporterList'
 
 // eslint-disable-next-line react/display-name
 const ContactListPage: NextPage = memo(() => {
   const router = useRouter()
   const [user, loading] = useAuthState(auth)
-  const [contactInfoList, setContactInfoList] = useState<ContactInfoList>()
-  const [supporterList, setSupporterList] = useState<SupporterList>()
-
-  const fetchData = useCallback(async () => {
-    const contactInfoList: ContactInfoList | null = await getContactInfoList()
-    const supporterList: SupporterList | null = await getSupporterList()
-
-    contactInfoList && setContactInfoList(contactInfoList)
-    supporterList && setSupporterList(supporterList)
-  }, [setContactInfoList])
-
-  useEffect(() => {
-    if (user) {
-      fetchData()
-    }
-  }, [fetchData, user])
+  const { contactInfoList } = useContactInfoList()
+  const { supporterList } = useSupporterList()
 
   useEffect(() => {
     if (!loading && (!user || !user?.email)) router.push('/')
