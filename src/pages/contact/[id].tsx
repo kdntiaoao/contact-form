@@ -15,7 +15,7 @@ import { addChat } from 'services/chat/addChat'
 import { Chat, ChatData, ContactInfo, ContactInfoList, SupporterList } from 'types/data'
 
 type ContactChatPageProps = {
-  contactId: string | undefined
+  contactId: string
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
   supporterList: SupporterList
