@@ -14,7 +14,7 @@ import { ChatFormContainer } from 'components/organisms/containers/ChatFormConta
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { useChatData } from 'hooks/useChatData'
 import { addChat } from 'services/chat/addChat'
-import { Chat, ChatData, ContactInfo, SupporterList } from 'types/data'
+import { Chat, ChatData, ContactInfo, ContactInfoList, SupporterList } from 'types/data'
 
 type ContactChatPageProps = {
   contactId: string | undefined
@@ -79,7 +79,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const contactInfoListSnap = await adminDb.collection('contactInfoList').get()
-  const contactInfoList: Record<string, ContactInfo> = {}
+  const contactInfoList: ContactInfoList = {}
   contactInfoListSnap.forEach((doc) => {
     const data = doc.data() as ContactInfo
     contactInfoList[doc.id] = data

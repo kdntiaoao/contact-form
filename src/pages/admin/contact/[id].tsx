@@ -21,7 +21,7 @@ import { addChat } from 'services/chat/addChat'
 import { getContactInfo } from 'services/contact/getContactInfo'
 import { updateContactInfo } from 'services/contact/updateContactInfo'
 import { getSupporterList } from 'services/supporter/getSupporterList'
-import { Chat, ChatData, ContactInfo, SupporterList } from 'types/data'
+import { Chat, ChatData, ContactInfo, ContactInfoList, SupporterList } from 'types/data'
 
 type AdminContactChatPageProps = {
   contactId: string | undefined
@@ -158,12 +158,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             <Container maxWidth="md" sx={{ flex: 1 }}>
               <Box pt={{ xs: 6, md: 4 }} pb={13}>
                 {chatData && contactInfo && supporterList && (
-                  <ChatList
-                    admin={true}
-                    chatData={chatData}
-                    contactInfo={contactInfo}
-                    supporterList={supporterList}
-                  />
+                  <ChatList admin={true} chatData={chatData} contactInfo={contactInfo} supporterList={supporterList} />
                 )}
 
                 {/* 入力エリア */}
@@ -194,7 +189,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const contactInfoListSnap = await adminDb.collection('contactInfoList').get()
-  const contactInfoList: Record<string, ContactInfo> = {}
+  const contactInfoList: ContactInfoList = {}
   contactInfoListSnap.forEach((doc) => {
     const data = doc.data() as ContactInfo
     contactInfoList[doc.id] = data

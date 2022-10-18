@@ -12,17 +12,17 @@ import { ContactTableContainer } from 'components/organisms/containers/ContactTa
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { getContactInfoList } from 'services/contact/getContactInfoList'
 import { getSupporterList } from 'services/supporter/getSupporterList'
-import { ContactInfo, SupporterList } from 'types/data'
+import { ContactInfoList, SupporterList } from 'types/data'
 
 // eslint-disable-next-line react/display-name
 const ContactListPage: NextPage = memo(() => {
   const router = useRouter()
   const [user, loading] = useAuthState(auth)
-  const [contactInfoList, setContactInfoList] = useState<Record<string, ContactInfo>>()
+  const [contactInfoList, setContactInfoList] = useState<ContactInfoList>()
   const [supporterList, setSupporterList] = useState<SupporterList>()
 
   const fetchData = useCallback(async () => {
-    const contactInfoList: Record<string, ContactInfo> | null = await getContactInfoList()
+    const contactInfoList: ContactInfoList | null = await getContactInfoList()
     const supporterList: SupporterList | null = await getSupporterList()
 
     contactInfoList && setContactInfoList(contactInfoList)

@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { adminDb } from '../../../../firebase/server'
 
-import { ContactInfo } from 'types/data'
+import { ContactInfo, ContactInfoList } from 'types/data'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   // お問い合わせ情報を登録
@@ -22,7 +22,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(404).end()
     }
 
-    const contactInfoList: Record<string, ContactInfo> = {}
+    const contactInfoList: ContactInfoList = {}
     snapshot.forEach((doc) => {
       const contactInfo = doc.data() as ContactInfo
       contactInfoList[doc.id] = contactInfo
