@@ -4,6 +4,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 
 import { ChatForm } from 'components/organisms/presentations/ChatForm'
 import { Chat } from 'types/data'
+import { ChatFormInputType } from 'types/input'
 
 type Props = {
   admin: boolean
@@ -13,10 +14,6 @@ type Props = {
   supporter?: string | undefined // 現在の担当者のID
   // eslint-disable-next-line no-unused-vars
   postChat: (chat: Chat) => Promise<void>
-}
-
-export type ChatFormInputType = {
-  text: string
 }
 
 // eslint-disable-next-line react/display-name

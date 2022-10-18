@@ -18,7 +18,7 @@ import {
 } from '@mui/material'
 import { format } from 'date-fns'
 
-import { TableToolBar } from 'components/molecules/TableToolBar'
+import { TableToolBar } from 'components/molecules'
 import { ContactInfo } from 'types/data'
 
 type Data = Omit<ContactInfo, 'email' | 'comment'>

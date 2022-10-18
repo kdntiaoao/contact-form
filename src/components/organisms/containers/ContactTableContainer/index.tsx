@@ -1,11 +1,11 @@
 import { memo } from 'react'
 
 import { ContactTable } from 'components/organisms/presentations/ContactTable'
-import { ContactInfo, SupporterList } from 'types/data'
+import { ContactInfoList, SupporterList } from 'types/data'
 
 type Props = {
   tableTitle: string
-  contactInfoList: Record<string, ContactInfo>
+  contactInfoList: ContactInfoList
   supporterList: SupporterList
   uid: string
 }

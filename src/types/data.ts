@@ -48,6 +48,11 @@ export type ContactInfo = {
   comment: Comment
 }
 
+/**
+ * お問い合わせ情報リスト
+ */
+export type ContactInfoList = Record<string, ContactInfo>
+
 export type Chat = {
   /**
    * 投稿者ID(お客様の場合は"0")
@@ -70,6 +75,9 @@ export type Chat = {
   }
 }
 
+/**
+ * 1つのお問い合わせに対するすべてのチャットデータ
+ */
 export type ChatData = Chat[]
 
 export type Supporter = {
@@ -87,4 +95,7 @@ export type Supporter = {
   color: string
 }
 
+/**
+ * サポーターリスト
+ */
 export type SupporterList = Record<string, Supporter>

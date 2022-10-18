@@ -4,7 +4,7 @@ import { memo, ReactElement, useCallback, useState } from 'react'
 import MenuIcon from '@mui/icons-material/Menu'
 import { AppBar, Box, IconButton, Slide, Toolbar, Typography, useScrollTrigger } from '@mui/material'
 
-import { MenuDrawer } from 'components/molecules/MenuDrawer'
+import { MenuDrawer } from 'components/molecules'
 
 type HideOnScrollProps = {
   children: ReactElement
