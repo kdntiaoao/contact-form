@@ -1,6 +1,6 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect } from 'react'
 
 import { Box, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { animateScroll as scroll } from 'react-scroll'
@@ -12,15 +12,15 @@ import { ChatList, LinkButton, LoadingScreen } from 'components/molecules'
 import { ChatFormContainer, CommentAreaContainer, StatusSelectAreaContainer } from 'components/organisms'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { useChatData } from 'hooks/useChatData'
+import { useContactInfo } from 'hooks/useContactInfo'
+import { useSupporterList } from 'hooks/useSupporterList'
 import { addChat } from 'services/chat/addChat'
-import { getContactInfo } from 'services/contact/getContactInfo'
 import { updateContactInfo } from 'services/contact/updateContactInfo'
-import { getSupporterList } from 'services/supporter/getSupporterList'
 import { userInfoState } from 'states/userInfoState'
 import { Chat, ChatData, ContactInfo, ContactInfoList, SupporterList } from 'types/data'
 
 type AdminContactChatPageProps = {
-  contactId: string | undefined
+  contactId: string
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
   supporterList: SupporterList
@@ -37,9 +37,9 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     const router = useRouter()
     const matches = useMediaQuery(useTheme().breakpoints.up('md'))
     const userInfo = useRecoilValue(userInfoState)
-    const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
-    const [supporterList, setSupporterList] = useState<SupporterList>(initialSupporterList)
-    const { chatData, mutate } = useChatData(contactId, initialChatData)
+    const { contactInfo, mutate: mutateContactInfo } = useContactInfo(contactId, initialContactInfo)
+    const { supporterList } = useSupporterList(initialSupporterList)
+    const { chatData, mutate: mutateChatData } = useChatData(contactId, initialChatData)
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
@@ -48,11 +48,11 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
           // Firebaseにチャットを追加
           await addChat(contactId, chat)
           // ローカルにあるチャットデータを更新
-          chatData && mutate([...chatData, chat])
+          chatData && mutateChatData([...chatData, chat])
           scroll.scrollToBottom()
         }
       },
-      [chatData, contactId, mutate]
+      [chatData, contactId, mutateChatData]
     )
 
     // 対応状況を変更する関数
@@ -65,20 +65,18 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             supporter: newStatus === 0 ? '0' : userInfo.userId,
           }
 
-          setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newContactInfo })
-
           await updateContactInfo(contactId, newContactInfo)
-
-          await postChat(chat)
+          contactInfo && mutateContactInfo({ ...contactInfo, ...newContactInfo })
+          postChat(chat)
         }
       },
-      [contactId, postChat, userInfo]
+      [contactId, contactInfo, mutateContactInfo, postChat, userInfo]
     )
 
     // コメントを変更する関数
     const editComment = useCallback(
       async (commentContents: string) => {
-        if (contactId && userInfo?.userId && Object.keys(supporterList).length > 0) {
+        if (contactId && userInfo?.userId && supporterList && Object.keys(supporterList).length > 0) {
           // 新しいコメント情報
           const newComment: Pick<ContactInfo, 'comment'> = {
             comment: {
@@ -87,29 +85,16 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             },
           }
 
-          setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newComment })
-
           await updateContactInfo(contactId, newComment)
+          contactInfo && mutateContactInfo({ ...contactInfo, ...newComment })
         }
       },
-      [contactId, supporterList, userInfo]
+      [contactId, contactInfo, mutateContactInfo, supporterList, userInfo]
     )
 
     useEffect(() => {
       if (userInfo && !userInfo.userId) router.push('/')
     }, [router, userInfo])
-
-    useEffect(() => {
-      if (contactId) {
-        getContactInfo(contactId).then((contactInfo) => {
-          setContactInfo(contactInfo)
-        })
-
-        getSupporterList().then((data) => {
-          data && setSupporterList(data)
-        })
-      }
-    }, [contactId])
 
     if (router.isFallback || !contactInfo || !supporterList || !userInfo?.userId) return <LoadingScreen loading />
 
