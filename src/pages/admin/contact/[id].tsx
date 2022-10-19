@@ -10,7 +10,7 @@ import { useRecoilValue } from 'recoil'
 
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
-import { IconButtonList, LinkButton, LoadingScreen } from 'components/molecules'
+import { ContactInfoDialog, IconButtonList, LinkButton, LoadingScreen } from 'components/molecules'
 import {
   ChatFormContainer,
   ChatListContainer,
@@ -45,6 +45,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     const matches = useMediaQuery(useTheme().breakpoints.up('md'))
     const userInfo = useRecoilValue(userInfoState)
     const [commentDialogOpen, setCommentDialogOpen] = useState<boolean>(false)
+    const [contactInfoDialogOpen, setContactInfoDialogOpen] = useState<boolean>(false)
     const { contactInfo, mutate: mutateContactInfo } = useContactInfo(contactId, initialContactInfo)
     const { supporterList } = useSupporterList(initialSupporterList)
     const { chatData, mutate: mutateChatData } = useChatData(contactId, initialChatData)
@@ -53,6 +54,16 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
       () => !(contactInfo?.currentStatus === 1 && contactInfo.supporter === userInfo?.userId),
       [contactInfo, userInfo]
     )
+
+    const contactInfoData = useMemo<{title: string; content: string}[]>(() => (
+      [
+        {title: 'お名前', content: contactInfo?.name || ''},
+        {title: 'メールアドレス', content: contactInfo?.email || ''},
+        {title: '電話番号', content: contactInfo?.tel || ''},
+        {title: '商品種別', content: contactInfo?.category || ''},
+        {title: '担当者', content: contactInfo && supporterList?.[contactInfo.supporter]?.name || ''},
+      ]
+    ), [contactInfo, supporterList])
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
@@ -121,6 +132,10 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
       setCommentDialogOpen((prev) => !prev)
     }, [])
 
+    const handleToggleContactInfoDialog = useCallback(() => {
+      setContactInfoDialogOpen((prev) => !prev)
+    }, [])
+
     useEffect(() => {
       if (userInfo && !userInfo.userId) router.push('/')
     }, [router, userInfo])
@@ -155,7 +170,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                   <IconButtonList
                     list={[
                       { icon: <CreateRoundedIcon />, text: 'コメントする', onClick: handleToggleCommentDialog },
-                      { icon: <InfoRoundedIcon />, text: 'お客様情報', onClick: () => console.log('click') },
+                      { icon: <InfoRoundedIcon />, text: 'お客様情報', onClick: handleToggleContactInfoDialog },
                     ]}
                   />
 
@@ -166,6 +181,8 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                     editComment={editComment}
                     handleClose={handleToggleCommentDialog}
                   />
+
+                  <ContactInfoDialog list={contactInfoData} open={contactInfoDialogOpen} handleClose={handleToggleContactInfoDialog} />
                 </Stack>
               </Box>
             </Container>
