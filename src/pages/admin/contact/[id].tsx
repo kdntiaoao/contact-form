@@ -1,15 +1,22 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useCallback, useEffect } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
+import CreateRoundedIcon from '@mui/icons-material/CreateRounded'
+import InfoRoundedIcon from '@mui/icons-material/InfoRounded'
 import { Box, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { animateScroll as scroll } from 'react-scroll'
 import { useRecoilValue } from 'recoil'
 
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
-import { LinkButton, LoadingScreen } from 'components/molecules'
-import { ChatFormContainer, ChatListContainer, CommentAreaContainer, StatusSelectAreaContainer } from 'components/organisms'
+import { IconButtonList, LinkButton, LoadingScreen } from 'components/molecules'
+import {
+  ChatFormContainer,
+  ChatListContainer,
+  CommentDialogContainer,
+  StatusSelectAreaContainer,
+} from 'components/organisms'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { useChatData } from 'hooks/useChatData'
 import { useContactInfo } from 'hooks/useContactInfo'
@@ -37,9 +44,15 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     const router = useRouter()
     const matches = useMediaQuery(useTheme().breakpoints.up('md'))
     const userInfo = useRecoilValue(userInfoState)
+    const [commentDialogOpen, setCommentDialogOpen] = useState<boolean>(false)
     const { contactInfo, mutate: mutateContactInfo } = useContactInfo(contactId, initialContactInfo)
     const { supporterList } = useSupporterList(initialSupporterList)
     const { chatData, mutate: mutateChatData } = useChatData(contactId, initialChatData)
+
+    const disabledComment = useMemo<boolean>(
+      () => !(contactInfo?.currentStatus === 1 && contactInfo.supporter === userInfo?.userId),
+      [contactInfo, userInfo]
+    )
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
@@ -104,6 +117,10 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
       [contactId, contactInfo, mutateContactInfo, supporterList, userInfo]
     )
 
+    const handleToggleCommentDialog = useCallback(() => {
+      setCommentDialogOpen((prev) => !prev)
+    }, [])
+
     useEffect(() => {
       if (userInfo && !userInfo.userId) router.push('/')
     }, [router, userInfo])
@@ -135,12 +152,19 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                     />
                   </Box>
 
-                  <CommentAreaContainer
-                    contributor={userInfo.userId}
-                    currentStatus={contactInfo?.currentStatus}
-                    supporter={contactInfo?.supporter}
-                    comment={contactInfo?.comment}
+                  <IconButtonList
+                    list={[
+                      { icon: <CreateRoundedIcon />, text: 'コメントする', onClick: handleToggleCommentDialog },
+                      { icon: <InfoRoundedIcon />, text: 'お客様情報', onClick: () => console.log('click') },
+                    ]}
+                  />
+
+                  <CommentDialogContainer
+                    comment={contactInfo.comment}
+                    disabled={disabledComment}
+                    open={commentDialogOpen}
                     editComment={editComment}
+                    handleClose={handleToggleCommentDialog}
                   />
                 </Stack>
               </Box>
@@ -151,7 +175,12 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             <Container maxWidth="md" sx={{ flex: 1 }}>
               <Box pt={{ xs: 6, md: 4 }} pb={13}>
                 {chatData && contactInfo && supporterList && (
-                  <ChatListContainer admin={true} chatData={chatData} contactInfo={contactInfo} supporterList={supporterList} />
+                  <ChatListContainer
+                    admin={true}
+                    chatData={chatData}
+                    contactInfo={contactInfo}
+                    supporterList={supporterList}
+                  />
                 )}
 
                 {/* 入力エリア */}
