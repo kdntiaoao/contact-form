@@ -1,9 +1,8 @@
 import { memo, useCallback, useMemo } from 'react'
 
-import { format } from 'date-fns'
+import { format, getTime, startOfDay } from 'date-fns'
 
 import { ChatList } from 'components/organisms/presentations/ChatList'
-import { statusList } from 'components/organisms/presentations/StatusSelectArea'
 import { ChatData, ContactInfo, SupporterList } from 'types/data'
 
 type Props = {
@@ -12,6 +11,18 @@ type Props = {
   contactInfo: ContactInfo
   supporterList: SupporterList
 }
+
+type FormattedChatData = {
+  contributor?: string
+  contributorName?: string
+  formattedPostTime?: string
+  postTime: number
+  contents: {
+    text?: string
+    newStatus?: number
+    date?: string
+  }
+}[]
 
 // eslint-disable-next-line react/display-name
 export const ChatListContainer = memo((props: Props) => {
@@ -35,19 +46,30 @@ export const ChatListContainer = memo((props: Props) => {
   )
 
   const formattedChatData = useMemo(() => {
-    return chatData.map((chat, index) => {
-      const { contributor, postTime, contents } = chat
-      return {
-        ...chat,
-        contents: {
-          ...contents,
-          statusColor: typeof contents.newStatus !== 'undefined' ? statusList[contents.newStatus].color : undefined,
-          statusLabel: typeof contents.newStatus !== 'undefined' ? statusList[contents.newStatus].label : undefined,
-        },
-        contributorName: contributorToName(contributor, index),
-        formattedPostTime: format(postTime, 'H:mm'),
-      }
-    })
+    return chatData
+      .map((chat, index) => {
+        const { contributor, postTime } = chat
+        return {
+          ...chat,
+          contributorName: contributorToName(contributor, index),
+          formattedPostTime: format(postTime, 'H:mm'),
+        }
+      })
+      .reduce<FormattedChatData>((array, currentValue, index) => {
+        // 0時0分のタイムスタンプ
+        const startTimestamp = getTime(startOfDay(currentValue.postTime))
+        if (index === 0) {
+          return [{ postTime: startTimestamp, contents: { date: format(startTimestamp, 'M月d日') } }, currentValue]
+        }
+        if (getTime(startOfDay(array[array.length - 1].postTime)) !== getTime(startOfDay(currentValue.postTime))) {
+          return [
+            ...array,
+            { postTime: startTimestamp, contents: { date: format(startTimestamp, 'M月d日') } },
+            currentValue,
+          ]
+        }
+        return [...array, currentValue]
+      }, [])
   }, [chatData, contributorToName])
 
   return <ChatList {...props} chatData={formattedChatData} />
