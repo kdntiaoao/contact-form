@@ -1,4 +1,5 @@
 export { ChatFormContainer } from './containers/ChatFormContainer'
+export { ChatListContainer } from './containers/ChatListContainer'
 export { CommentAreaContainer } from './containers/CommentAreaContainer'
 export { ContactFormContainer } from './containers/ContactFormContainer'
 export { ContactTableContainer } from './containers/ContactTableContainer'

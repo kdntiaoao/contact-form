@@ -1,6 +1,5 @@
 export { AlertDialog } from './AlertDialog'
 export { Chat } from './Chat'
-export { ChatList } from './ChatList'
 export { ContactTextField } from './ContactTextField'
 export { FilteredListButton } from './FilteredListButton'
 export { LinkButton } from './LinkButton'

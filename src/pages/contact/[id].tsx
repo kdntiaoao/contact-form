@@ -7,8 +7,8 @@ import { animateScroll as scroll } from 'react-scroll'
 
 import { adminDatabase, adminDb } from '../../../firebase/server'
 
-import { ChatList, LoadingScreen, PageHeading } from 'components/molecules'
-import { ChatFormContainer } from 'components/organisms'
+import { LoadingScreen, PageHeading } from 'components/molecules'
+import { ChatFormContainer, ChatListContainer } from 'components/organisms'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { useChatData } from 'hooks/useChatData'
 import { addChat } from 'services/chat/addChat'
@@ -53,7 +53,7 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
             />
 
             <Box mt={{ xs: 4, sm: 6 }}>
-              {chatData && contactInfo && supporterList && <ChatList {...{ chatData, contactInfo, supporterList }} />}
+              {chatData && contactInfo && supporterList && <ChatListContainer {...{ chatData, contactInfo, supporterList }} />}
             </Box>
 
             {/* 入力エリア */}

@@ -8,8 +8,8 @@ import { useRecoilValue } from 'recoil'
 
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
-import { ChatList, LinkButton, LoadingScreen } from 'components/molecules'
-import { ChatFormContainer, CommentAreaContainer, StatusSelectAreaContainer } from 'components/organisms'
+import { LinkButton, LoadingScreen } from 'components/molecules'
+import { ChatFormContainer, ChatListContainer, CommentAreaContainer, StatusSelectAreaContainer } from 'components/organisms'
 import { DefaultLayout } from 'components/template/DefaultLayout'
 import { useChatData } from 'hooks/useChatData'
 import { useContactInfo } from 'hooks/useContactInfo'
@@ -43,7 +43,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
-      async (chat: Chat) => {
+      async (chat: Omit<Chat, 'id'>) => {
         if (contactId) {
           // Firebaseにチャットを追加
           await addChat(contactId, chat)
@@ -63,6 +63,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
         // 最新の情報に更新
         await mutateContactInfo()
+        await mutateChatData()
         // 状態変更できなければreturn
         if (
           contactInfo.currentStatus === 2 ||
@@ -81,7 +82,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
         contactInfo && mutateContactInfo({ ...contactInfo, ...newContactInfo })
         postChat(chat)
       },
-      [contactId, contactInfo, mutateContactInfo, postChat, userInfo]
+      [contactId, contactInfo, mutateChatData, mutateContactInfo, postChat, userInfo]
     )
 
     // コメントを変更する関数
@@ -150,7 +151,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
             <Container maxWidth="md" sx={{ flex: 1 }}>
               <Box pt={{ xs: 6, md: 4 }} pb={13}>
                 {chatData && contactInfo && supporterList && (
-                  <ChatList admin={true} chatData={chatData} contactInfo={contactInfo} supporterList={supporterList} />
+                  <ChatListContainer admin={true} chatData={chatData} contactInfo={contactInfo} supporterList={supporterList} />
                 )}
 
                 {/* 入力エリア */}
