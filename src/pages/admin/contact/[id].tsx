@@ -58,17 +58,28 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     // 対応状況を変更する関数
     const changeStatus = useCallback(
       async (newStatus: number, chat: Chat): Promise<void> => {
-        if (contactId && userInfo?.userId) {
-          // 更新される部分だけのお問い合わせ情報
-          const newContactInfo: Partial<ContactInfo> = {
-            currentStatus: newStatus,
-            supporter: newStatus === 0 ? '0' : userInfo.userId,
-          }
+        // お問い合わせIDまたはユーザーIDがなければreturn
+        if (!contactId || !userInfo?.userId || !contactInfo) return
 
-          await updateContactInfo(contactId, newContactInfo)
-          contactInfo && mutateContactInfo({ ...contactInfo, ...newContactInfo })
-          postChat(chat)
+        // 最新の情報に更新
+        await mutateContactInfo()
+        // 状態変更できなければreturn
+        if (
+          contactInfo.currentStatus === 2 ||
+          contactInfo.currentStatus === newStatus ||
+          (contactInfo.currentStatus === 1 && contactInfo.supporter !== userInfo.userId)
+        )
+          return
+
+        // 更新される部分だけのお問い合わせ情報
+        const newContactInfo: Partial<ContactInfo> = {
+          currentStatus: newStatus,
+          supporter: newStatus === 0 ? '0' : userInfo.userId,
         }
+
+        await updateContactInfo(contactId, newContactInfo)
+        contactInfo && mutateContactInfo({ ...contactInfo, ...newContactInfo })
+        postChat(chat)
       },
       [contactId, contactInfo, mutateContactInfo, postChat, userInfo]
     )
