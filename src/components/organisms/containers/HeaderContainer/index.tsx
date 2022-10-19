@@ -1,51 +1,55 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useMemo } from 'react'
 
 import { signOut } from 'firebase/auth'
+import { useRecoilValue } from 'recoil'
 
 import { auth } from '../../../../../firebase/client'
 
 import { Header } from 'components/organisms/presentations/Header'
+import { useSupporterList } from 'hooks/useSupporterList'
+import { userInfoState } from 'states/userInfoState'
 
+type MenuListType = { text: string; url: string; onClick?: () => void }[][]
+
+const logout = () => {
+  signOut(auth)
+}
 
 // eslint-disable-next-line react/display-name
 export const HeaderContainer = memo(() => {
-  const [admin, setAdmin] = useState<boolean>(false)
+  const userInfo = useRecoilValue(userInfoState)
+  const { supporterList } = useSupporterList()
 
-  const logout = () => {
-    signOut(auth)
-  }
+  const menuList = useMemo<MenuListType>(
+    () =>
+      userInfo?.userId
+        ? [
+            [
+              { text: 'ホーム', url: '/' },
+              { text: 'お問い合わせ', url: '/contact' },
+            ],
+            [
+              { text: 'お問い合わせ一覧', url: '/admin/contact' },
+              { text: 'ログアウト', url: '/admin/login', onClick: logout },
+            ],
+          ]
+        : [
+            [
+              { text: 'ホーム', url: '/' },
+              { text: 'お問い合わせ', url: '/contact' },
+            ],
+            [{ text: 'ログイン', url: '/admin/login' }],
+          ],
+    [userInfo]
+  )
 
-  const menuList = [
-    [
-      { text: 'ホーム', url: '/' },
-      // { text: 'アクセス', url: '/access' },
-      // { text: '沿革', url: '/' },
-      // { text: 'ビジョン', url: '/vision' },
-      // { text: 'サービス', url: '/service' },
-      // { text: '実績紹介', url: '/product' },
-      // { text: 'セミナー', url: '/seminar' },
-      // { text: 'お役立ち情報', url: '/info' },
-      // { text: 'IR情報', url: '/ir' },
-      // { text: '採用情報', url: '/recruit' },
-      { text: 'お問い合わせ', url: '/contact' },
-    ],
-    [
-      { text: 'ログイン', url: '/admin/login' },
-      { text: 'ログアウト', url: '/admin/login', onClick: logout },
-      { text: 'お問い合わせ一覧', url: '/admin/contact' },
-    ],
-  ]
+  const supporterName = useMemo(() => {
+    return userInfo?.userId && supporterList?.[userInfo.userId]?.name
+  }, [supporterList, userInfo])
 
-  if (admin) {
-    menuList.push([
-      { text: 'お問い合わせ一覧', url: '/' },
-      { text: 'ログアウト', url: '/admin/login', onClick: logout },
-    ])
-  }
+  const supporterColor = useMemo(() => {
+    return userInfo?.userId && supporterList?.[userInfo.userId]?.color
+  }, [supporterList, userInfo])
 
-  useEffect(() => {
-    setAdmin(false)
-  }, [])
-
-  return <Header menuList={menuList} />
+  return <Header menuList={menuList} account={supporterName} avatarColor={supporterColor} />
 })

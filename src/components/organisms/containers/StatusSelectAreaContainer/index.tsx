@@ -1,6 +1,5 @@
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
-import { AlertDialog } from 'components/molecules/AlertDialog'
 import { StatusSelectArea } from 'components/organisms/presentations/StatusSelectArea'
 import { Chat } from 'types/data'
 
@@ -16,24 +15,32 @@ type Props = {
 // eslint-disable-next-line react/display-name
 export const StatusSelectAreaContainer = memo(
   ({ direction = 'row', currentStatus, supporter, uid, changeStatus }: Props) => {
-    const [disabled, setDisabaled] = useState<boolean>(false)
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
 
-    const handleDialogClose = useCallback((selectOption: 0 | 1) => {
-      setDialogOpen(false)
+    const handleDialogClose = useCallback(
+      (selectOption: 0 | 1) => {
+        setDialogOpen(false)
+        // ダイアログで「キャンセル」を選択
+        if (selectOption === 0) return
+        // ダイアログで「完了する」を選択
+        const chat: Chat = { contributor: uid, postTime: Date.now(), contents: { newStatus: 2 } }
+        changeStatus(2, chat)
+      },
+      [changeStatus, uid]
+    )
 
-      if (selectOption === 0) return
-
-      setDialogOpen(false)
-      const chat: Chat = { contributor: uid, postTime: Date.now(), contents: { newStatus: 2 } }
-      changeStatus(2, chat)
-    }, [changeStatus, uid])
+    const disabled = useMemo(
+      // 対応状況が「対応完了」または他の担当が「対応中」の時、非活性
+      () => (currentStatus === 2 || (currentStatus === 1 && uid !== supporter) ? true : false),
+      [currentStatus, supporter, uid]
+    )
 
     const handleClick = useCallback(
       (newStatus: number) => {
         // すでに選択されている状態を選択した場合は処理を実行しない
         if (newStatus === currentStatus) return
 
+        // 対応完了をクリックした時は確認のダイアログを表示
         if (newStatus === 2) {
           setDialogOpen(true)
           return
@@ -45,24 +52,15 @@ export const StatusSelectAreaContainer = memo(
       [changeStatus, currentStatus, uid]
     )
 
-    useEffect(() => {
-      if (currentStatus === 2 || (currentStatus === 1 && supporter !== '0' && uid !== supporter)) {
-        setDisabaled(true)
-      } else {
-        setDisabaled(false)
-      }
-    }, [supporter, currentStatus, uid])
-
     return (
-      <>
-        <StatusSelectArea
-          direction={direction}
-          currentStatus={currentStatus}
-          disabled={disabled}
-          onClick={handleClick}
-        />
-        <AlertDialog title="対応を完了しますか？" options={['キャンセル', '完了する']} open={dialogOpen} onClose={handleDialogClose} />
-      </>
+      <StatusSelectArea
+        dialogOpen={dialogOpen}
+        direction={direction}
+        disabled={disabled}
+        currentStatus={currentStatus}
+        handleDialogClose={handleDialogClose}
+        onClick={handleClick}
+      />
     )
   }
 )

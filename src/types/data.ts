@@ -1,3 +1,14 @@
+export type Comment = {
+  /**
+   * 記入者
+   */
+  name: string | ''
+  /**
+   * コメントの内容
+   */
+  contents: string | ''
+}
+
 export type ContactInfo = {
   /**
    * お客様のお名前
@@ -31,7 +42,16 @@ export type ContactInfo = {
    * フォーム送信日時(タイムスタンプ)
    */
   submitTime: number
+  /**
+   * コメント
+   */
+  comment: Comment
 }
+
+/**
+ * お問い合わせ情報リスト
+ */
+export type ContactInfoList = Record<string, ContactInfo>
 
 export type Chat = {
   /**
@@ -55,6 +75,9 @@ export type Chat = {
   }
 }
 
+/**
+ * 1つのお問い合わせに対するすべてのチャットデータ
+ */
 export type ChatData = Chat[]
 
 export type Supporter = {
@@ -66,6 +89,13 @@ export type Supporter = {
    * サポーターのメールアドレス
    */
   email: string
+  /**
+   * サポーターのイメージカラー
+   */
+  color: string
 }
 
-export type SupporterData = Record<string, Supporter>
+/**
+ * サポーターリスト
+ */
+export type SupporterList = Record<string, Supporter>

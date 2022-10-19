@@ -1,60 +1,77 @@
-import { NextPage } from 'next'
+import { GetStaticProps, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useEffect } from 'react'
 
 import { Box, Container } from '@mui/material'
-import { useAuthState } from 'react-firebase-hooks/auth'
+import { useRecoilValue } from 'recoil'
 
-import { auth } from '../../../../firebase/client'
+import { adminDb } from '../../../../firebase/server'
 
-import { LoadingScreen } from 'components/molecules/LoadingScreen'
-import { ContactTableContainer } from 'components/organisms/containers/ContactTableContainer'
+import { LoadingScreen } from 'components/molecules'
+import { ContactTableContainer } from 'components/organisms'
 import { DefaultLayout } from 'components/template/DefaultLayout'
-import { getContactInfoList } from 'services/contact/getContactInfoList'
-import { getSupporterDataList } from 'services/supporter/getSupporterDataList'
-import { ContactInfo, SupporterData } from 'types/data'
+import { useContactInfoList } from 'hooks/useContactInfoList'
+import { useSupporterList } from 'hooks/useSupporterList'
+import { userInfoState } from 'states/userInfoState'
+import { ContactInfo, ContactInfoList, Supporter, SupporterList } from 'types/data'
+
+type Props = {
+  contactInfoList: ContactInfoList | undefined
+  supporterList: SupporterList
+}
 
 // eslint-disable-next-line react/display-name
-const ContactListPage: NextPage = memo(() => {
-  const router = useRouter()
-  const [user, loading] = useAuthState(auth)
-  const [contactInfoList, setContactInfoList] = useState<Record<string, ContactInfo>>()
-  const [supporterDataList, setSupporterDataList] = useState<SupporterData>()
+const ContactListPage: NextPage<Props> = memo(
+  ({ contactInfoList: initialContactInfoList, supporterList: initialSupporterList }: Props) => {
+    const router = useRouter()
+    const userInfo = useRecoilValue(userInfoState)
+    const { contactInfoList } = useContactInfoList(initialContactInfoList)
+    const { supporterList } = useSupporterList(initialSupporterList)
 
-  const fetchData = useCallback(async () => {
-    const contactInfoList: Record<string, ContactInfo> | null = await getContactInfoList()
-    const supporterDataList: SupporterData | null = await getSupporterDataList()
+    useEffect(() => {
+      if (userInfo && !userInfo.userId) router.push('/')
+    }, [router, userInfo])
 
-    contactInfoList && setContactInfoList(contactInfoList)
-    supporterDataList && setSupporterDataList(supporterDataList)
-  }, [setContactInfoList])
+    if (!contactInfoList || !supporterList || !userInfo?.userId) return <LoadingScreen loading />
 
-  useEffect(() => {
-    if (user) {
-      fetchData()
-    }
-  }, [fetchData, user])
+    return (
+      <DefaultLayout>
+        <Container maxWidth="xl">
+          <Box py={{ xs: 6, sm: 10 }}>
+            <ContactTableContainer
+              tableTitle="お問い合わせ一覧"
+              contactInfoList={contactInfoList}
+              supporterList={supporterList}
+              uid={userInfo.userId}
+            />
+          </Box>
+        </Container>
+      </DefaultLayout>
+    )
+  }
+)
 
-  useEffect(() => {
-    if (!loading && (!user || !user?.email)) router.push('/')
-  }, [loading, router, user])
+export const getStaticProps: GetStaticProps = async () => {
+  const contactInfoListSnapshot = await adminDb.collection('contactInfoList').get()
+  const contactInfoList: ContactInfoList = {}
+  const supporterListSnapshot = await adminDb.collection('supporterList').get()
+  const supporterList: SupporterList = {}
 
-  if (loading || !contactInfoList || !supporterDataList || !user) return <LoadingScreen loading />
+  if (!contactInfoListSnapshot.empty) {
+    contactInfoListSnapshot.forEach((doc) => (contactInfoList[doc.id] = doc.data() as ContactInfo))
+  }
 
-  return (
-    <DefaultLayout>
-      <Container maxWidth="xl">
-        <Box py={{ xs: 6, sm: 10 }}>
-          <ContactTableContainer
-            tableTitle="お問い合わせ一覧"
-            contactInfoList={contactInfoList}
-            supporterDataList={supporterDataList}
-            uid={user.uid}
-          />
-        </Box>
-      </Container>
-    </DefaultLayout>
-  )
-})
+  if (!supporterListSnapshot.empty) {
+    supporterListSnapshot.forEach((doc) => (supporterList[doc.id] = doc.data() as Supporter))
+  }
+
+  return {
+    props: {
+      contactInfoList: Object.keys(contactInfoList).length > 0 ? contactInfoList : undefined,
+      supporterList: Object.keys(supporterList).length > 0 ? supporterList : undefined,
+    },
+    revalidate: 60,
+  }
+}
 
 export default ContactListPage

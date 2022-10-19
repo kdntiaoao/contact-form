@@ -13,7 +13,7 @@ type Props = {
 export const LinkButton = memo(({ href, children }: Props) => {
   return (
     <Link href={href}>
-      <Button component="a" variant="text" endIcon={<ArrowForwardIosRoundedIcon />}>
+      <Button component="a" fullWidth variant="text" endIcon={<ArrowForwardIosRoundedIcon />}>
         {children}
       </Button>
     </Link>

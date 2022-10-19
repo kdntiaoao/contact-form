@@ -1,62 +1,45 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback } from 'react'
 
-import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Container, Stack } from '@mui/material'
 import { animateScroll as scroll } from 'react-scroll'
 
 import { adminDatabase, adminDb } from '../../../firebase/server'
 
-import { ChatList } from 'components/molecules/ChatList'
-import { LoadingScreen } from 'components/molecules/LoadingScreen'
-import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
+import { LoadingScreen, PageHeading } from 'components/molecules'
+import { ChatFormContainer, ChatListContainer } from 'components/organisms'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { useChatData } from 'hooks/useChatData'
 import { addChat } from 'services/chat/addChat'
-import { getChatData } from 'services/chat/getChatData'
-import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
+import { Chat, ChatData, ContactInfo, ContactInfoList, SupporterList } from 'types/data'
 
 type ContactChatPageProps = {
-  contactId: string | undefined
+  contactId: string
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
-  supporterDataList: SupporterData
+  supporterList: SupporterList
 }
 
 // eslint-disable-next-line react/display-name
 const ContactChatPage: NextPage<ContactChatPageProps> = memo(
-  ({ contactId, contactInfo, chatData: initialChatData, supporterDataList }: ContactChatPageProps) => {
+  ({ contactId, contactInfo, chatData: initialChatData, supporterList }: ContactChatPageProps) => {
     const router = useRouter()
-    const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
-    const theme = useTheme()
-    const matches = useMediaQuery(theme.breakpoints.up('sm'))
+    const { chatData, mutate } = useChatData(contactId, initialChatData)
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
       async (chat: Chat) => {
         if (contactId) {
+          // Firebaseにチャットを追加
           await addChat(contactId, chat)
-
-          const chatData = await getChatData(contactId)
-
-          if (chatData) {
-            setChatData(chatData)
-            scroll.scrollToBottom()
-          }
+          // ローカルにあるチャットデータを更新
+          chatData && mutate([...chatData, chat])
+          scroll.scrollToBottom()
         }
       },
-      [contactId]
+      [chatData, contactId, mutate]
     )
-
-    useEffect(() => {
-      if (contactId) {
-        getChatData(contactId).then((chatData) => {
-          if (chatData) {
-            setChatData(chatData)
-            scroll.scrollToBottom()
-          }
-        })
-      }
-    }, [contactId])
 
     if (router.isFallback) return <LoadingScreen loading />
 
@@ -64,20 +47,13 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
       <DefaultLayout>
         <Container maxWidth="md">
           <Box pt={{ xs: 6, sm: 10 }} pb={13}>
-            <Box>
-              <Typography variant={matches ? 'h4' : 'h5'} component="h1">
-                お問い合わせチャット
-              </Typography>
-            </Box>
-            <Box mt={1}>
-              <Typography>
-                商品についてご不明点やご質問等ございましたら、こちらのチャットにてお気軽にご相談ください。
-              </Typography>
-            </Box>
+            <PageHeading
+              title="お問い合わせチャット"
+              description="商品についてご不明点やご質問等ございましたら、こちらのチャットにてお気軽にご相談ください。"
+            />
+
             <Box mt={{ xs: 4, sm: 6 }}>
-              {chatData && contactInfo && supporterDataList && (
-                <ChatList {...{ chatData, contactInfo, supporterDataList }} />
-              )}
+              {chatData && contactInfo && supporterList && <ChatListContainer {...{ chatData, contactInfo, supporterList }} />}
             </Box>
 
             {/* 入力エリア */}
@@ -98,8 +74,8 @@ const ContactChatPage: NextPage<ContactChatPageProps> = memo(
 )
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const contactInfoListSnap = await adminDb.collection('contactInfo').get()
-  const contactInfoList: Record<string, ContactInfo> = {}
+  const contactInfoListSnap = await adminDb.collection('contactInfoList').get()
+  const contactInfoList: ContactInfoList = {}
   contactInfoListSnap.forEach((doc) => {
     const data = doc.data() as ContactInfo
     contactInfoList[doc.id] = data
@@ -115,7 +91,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsContext) => {
   const contactId = params?.id?.toString()
   if (contactId) {
-    const contactInfoSnap = await adminDb.collection('contactInfo').doc(contactId).get()
+    const contactInfoSnap = await adminDb.collection('contactInfoList').doc(contactId).get()
     const contactInfo = await contactInfoSnap.data() // お問い合わせ情報
 
     const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).orderByChild('postTime').once('value')
@@ -124,17 +100,17 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
       chatData.push(snap.val())
     })
 
-    const supporterDataSnap = await adminDb.collection('supporterData').get()
-    const supporterDataList: SupporterData = {} // サポーターデータ
-    supporterDataSnap.forEach((doc) => {
-      const { name, email } = doc.data()
-      if (typeof name === 'string' && typeof email === 'string') {
-        supporterDataList[doc.id] = { name, email }
+    const supporterListSnap = await adminDb.collection('supporterList').get()
+    const supporterList: SupporterList = {} // サポーターデータ
+    supporterListSnap.forEach((doc) => {
+      const { name, email, color } = doc.data()
+      if (typeof name === 'string' && typeof email === 'string' && typeof color === 'string') {
+        supporterList[doc.id] = { name, email, color }
       }
     })
 
     return {
-      props: { contactId, contactInfo, chatData, supporterDataList },
+      props: { contactId, contactInfo, chatData, supporterList },
       revalidate: 60,
     }
   } else {

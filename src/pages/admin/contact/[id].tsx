@@ -1,30 +1,36 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
+import CreateRoundedIcon from '@mui/icons-material/CreateRounded'
+import InfoRoundedIcon from '@mui/icons-material/InfoRounded'
 import { Box, Container, Divider, Stack, useMediaQuery, useTheme } from '@mui/material'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { animateScroll as scroll } from 'react-scroll'
+import { useRecoilValue } from 'recoil'
 
-import { auth } from '../../../../firebase/client'
 import { adminDatabase, adminDb } from '../../../../firebase/server'
 
-import { ChatList } from 'components/molecules/ChatList'
-import { LinkButton } from 'components/molecules/LinkButton'
-import { LoadingScreen } from 'components/molecules/LoadingScreen'
-import { ChatFormContainer } from 'components/organisms/containers/ChatFormContainer'
-import { StatusSelectAreaContainer } from 'components/organisms/containers/StatusSelectAreaContainer'
+import { ContactInfoDialog, IconButtonList, LinkButton, LoadingScreen } from 'components/molecules'
+import {
+  ChatFormContainer,
+  ChatListContainer,
+  CommentDialogContainer,
+  StatusSelectAreaContainer,
+} from 'components/organisms'
 import { DefaultLayout } from 'components/template/DefaultLayout'
+import { useChatData } from 'hooks/useChatData'
+import { useContactInfo } from 'hooks/useContactInfo'
+import { useSupporterList } from 'hooks/useSupporterList'
 import { addChat } from 'services/chat/addChat'
-import { getChatData } from 'services/chat/getChatData'
-import { getContactInfo } from 'services/contact/getContactInfo'
-import { Chat, ChatData, ContactInfo, SupporterData } from 'types/data'
+import { updateContactInfo } from 'services/contact/updateContactInfo'
+import { userInfoState } from 'states/userInfoState'
+import { Chat, ChatData, ContactInfo, ContactInfoList, SupporterList } from 'types/data'
 
 type AdminContactChatPageProps = {
-  contactId: string | undefined
+  contactId: string
   contactInfo: ContactInfo | undefined
   chatData: ChatData | undefined
-  supporterDataList: SupporterData
+  supporterList: SupporterList
 }
 
 // eslint-disable-next-line react/display-name
@@ -33,71 +39,108 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     contactId,
     contactInfo: initialContactInfo,
     chatData: initialChatData,
-    supporterDataList,
+    supporterList: initialSupporterList,
   }: AdminContactChatPageProps) => {
     const router = useRouter()
-    const [user, loading] = useAuthState(auth)
-    const [chatData, setChatData] = useState<ChatData | undefined>(initialChatData)
-    const [contactInfo, setContactInfo] = useState<ContactInfo | undefined>(initialContactInfo)
-    const theme = useTheme()
-    const matches = useMediaQuery(theme.breakpoints.up('md'))
+    const matches = useMediaQuery(useTheme().breakpoints.up('md'))
+    const userInfo = useRecoilValue(userInfoState)
+    const [commentDialogOpen, setCommentDialogOpen] = useState<boolean>(false)
+    const [contactInfoDialogOpen, setContactInfoDialogOpen] = useState<boolean>(false)
+    const { contactInfo, mutate: mutateContactInfo } = useContactInfo(contactId, initialContactInfo)
+    const { supporterList } = useSupporterList(initialSupporterList)
+    const { chatData, mutate: mutateChatData } = useChatData(contactId, initialChatData)
+
+    const disabledComment = useMemo<boolean>(
+      () => !(contactInfo?.currentStatus === 1 && contactInfo.supporter === userInfo?.userId),
+      [contactInfo, userInfo]
+    )
+
+    const contactInfoData = useMemo<{title: string; content: string}[]>(() => (
+      [
+        {title: 'お名前', content: contactInfo?.name || ''},
+        {title: 'メールアドレス', content: contactInfo?.email || ''},
+        {title: '電話番号', content: contactInfo?.tel || ''},
+        {title: '商品種別', content: contactInfo?.category || ''},
+        {title: '担当者', content: contactInfo && supporterList?.[contactInfo.supporter]?.name || ''},
+      ]
+    ), [contactInfo, supporterList])
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
-      async (chat: Chat) => {
+      async (chat: Omit<Chat, 'id'>) => {
         if (contactId) {
+          // Firebaseにチャットを追加
           await addChat(contactId, chat)
-
-          const chatData = await getChatData(contactId)
-
-          if (chatData) {
-            setChatData(chatData)
-            scroll.scrollToBottom()
-          }
+          // ローカルにあるチャットデータを更新
+          chatData && mutateChatData([...chatData, chat])
+          scroll.scrollToBottom()
         }
       },
-      [contactId]
+      [chatData, contactId, mutateChatData]
     )
 
     // 対応状況を変更する関数
     const changeStatus = useCallback(
       async (newStatus: number, chat: Chat): Promise<void> => {
-        if (contactId && user) {
-          // 更新される部分だけのお問い合わせ情報
-          const newContactInfo: Partial<ContactInfo> = {
-            currentStatus: newStatus,
-            supporter: newStatus === 0 ? '0' : user.uid,
-          }
-          setContactInfo((contactInfo) => contactInfo && { ...contactInfo, ...newContactInfo })
-          await fetch(`/api/contact/${contactId}`, {
-            body: JSON.stringify({ newContactInfo }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-          })
-          await postChat(chat)
+        // お問い合わせIDまたはユーザーIDがなければreturn
+        if (!contactId || !userInfo?.userId || !contactInfo) return
+
+        // 最新の情報に更新
+        await mutateContactInfo()
+        await mutateChatData()
+        // 状態変更できなければreturn
+        if (
+          contactInfo.currentStatus === 2 ||
+          contactInfo.currentStatus === newStatus ||
+          (contactInfo.currentStatus === 1 && contactInfo.supporter !== userInfo.userId)
+        )
+          return
+
+        // 更新される部分だけのお問い合わせ情報
+        const newContactInfo: Partial<ContactInfo> = {
+          currentStatus: newStatus,
+          supporter: newStatus === 0 ? '0' : userInfo.userId,
         }
+
+        await updateContactInfo(contactId, newContactInfo)
+        contactInfo && mutateContactInfo({ ...contactInfo, ...newContactInfo })
+        postChat(chat)
       },
-      [contactId, postChat, user]
+      [contactId, contactInfo, mutateChatData, mutateContactInfo, postChat, userInfo]
     )
 
-    useEffect(() => {
-      if (!loading && (!user || !user?.email)) router.push('/')
-    }, [loading, router, user])
+    // コメントを変更する関数
+    const editComment = useCallback(
+      async (commentContents: string) => {
+        if (contactId && userInfo?.userId && supporterList && Object.keys(supporterList).length > 0) {
+          // 新しいコメント情報
+          const newComment: Pick<ContactInfo, 'comment'> = {
+            comment: {
+              name: supporterList[userInfo.userId].name,
+              contents: commentContents,
+            },
+          }
+
+          await updateContactInfo(contactId, newComment)
+          contactInfo && mutateContactInfo({ ...contactInfo, ...newComment })
+        }
+      },
+      [contactId, contactInfo, mutateContactInfo, supporterList, userInfo]
+    )
+
+    const handleToggleCommentDialog = useCallback(() => {
+      setCommentDialogOpen((prev) => !prev)
+    }, [])
+
+    const handleToggleContactInfoDialog = useCallback(() => {
+      setContactInfoDialogOpen((prev) => !prev)
+    }, [])
 
     useEffect(() => {
-      if (contactId) {
-        getContactInfo(contactId).then((contactInfo) => {
-          setContactInfo(contactInfo)
-        })
+      if (userInfo && !userInfo.userId) router.push('/')
+    }, [router, userInfo])
 
-        getChatData(contactId).then((chatData) => {
-          setChatData(chatData)
-          scroll.scrollToBottom()
-        })
-      }
-    }, [contactId])
-
-    if (router.isFallback || loading || !user) return <LoadingScreen loading />
+    if (router.isFallback || !contactInfo || !supporterList || !userInfo?.userId) return <LoadingScreen loading />
 
     return (
       <DefaultLayout>
@@ -109,13 +152,38 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                   <LinkButton href="/admin/contact">お問い合わせ一覧</LinkButton>
                 </Box>
 
-                <StatusSelectAreaContainer
-                  direction={matches ? 'column' : 'row'}
-                  currentStatus={contactInfo?.currentStatus}
-                  supporter={contactInfo?.supporter}
-                  uid={user.uid}
-                  changeStatus={changeStatus}
-                />
+                <Stack
+                  direction={{ xs: 'column', sm: 'row', md: 'column' }}
+                  spacing={{ xs: 2, sm: 6 }}
+                  alignItems={{ xs: 'flex-start', sm: 'stretch' }}
+                >
+                  <Box>
+                    <StatusSelectAreaContainer
+                      direction={matches ? 'column' : 'row'}
+                      currentStatus={contactInfo?.currentStatus}
+                      supporter={contactInfo?.supporter}
+                      uid={userInfo.userId}
+                      changeStatus={changeStatus}
+                    />
+                  </Box>
+
+                  <IconButtonList
+                    list={[
+                      { icon: <CreateRoundedIcon />, text: 'コメントする', onClick: handleToggleCommentDialog },
+                      { icon: <InfoRoundedIcon />, text: 'お客様情報', onClick: handleToggleContactInfoDialog },
+                    ]}
+                  />
+
+                  <CommentDialogContainer
+                    comment={contactInfo.comment}
+                    disabled={disabledComment}
+                    open={commentDialogOpen}
+                    editComment={editComment}
+                    handleClose={handleToggleCommentDialog}
+                  />
+
+                  <ContactInfoDialog list={contactInfoData} open={contactInfoDialogOpen} handleClose={handleToggleContactInfoDialog} />
+                </Stack>
               </Box>
             </Container>
 
@@ -123,12 +191,12 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
             <Container maxWidth="md" sx={{ flex: 1 }}>
               <Box pt={{ xs: 6, md: 4 }} pb={13}>
-                {chatData && contactInfo && supporterDataList && (
-                  <ChatList
+                {chatData && contactInfo && supporterList && (
+                  <ChatListContainer
                     admin={true}
                     chatData={chatData}
                     contactInfo={contactInfo}
-                    supporterDataList={supporterDataList}
+                    supporterList={supporterList}
                   />
                 )}
 
@@ -140,7 +208,7 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                     <Box py={2}>
                       <ChatFormContainer
                         admin={true}
-                        contributor={user.uid}
+                        contributor={userInfo.userId}
                         contactId={contactId}
                         currentStatus={contactInfo?.currentStatus}
                         supporter={contactInfo?.supporter}
@@ -159,8 +227,8 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 )
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const contactInfoListSnap = await adminDb.collection('contactInfo').get()
-  const contactInfoList: Record<string, ContactInfo> = {}
+  const contactInfoListSnap = await adminDb.collection('contactInfoList').get()
+  const contactInfoList: ContactInfoList = {}
   contactInfoListSnap.forEach((doc) => {
     const data = doc.data() as ContactInfo
     contactInfoList[doc.id] = data
@@ -176,7 +244,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsContext) => {
   const contactId = params?.id?.toString()
   if (contactId) {
-    const contactInfoSnap = await adminDb.collection('contactInfo').doc(contactId).get()
+    const contactInfoSnap = await adminDb.collection('contactInfoList').doc(contactId).get()
     const contactInfo = await contactInfoSnap.data() // お問い合わせ情報
 
     const chatDataSnap = await adminDatabase.ref(`chatDataList/${contactId}`).orderByChild('postTime').once('value')
@@ -185,17 +253,17 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
       chatData.push(snap.val())
     })
 
-    const supporterDataSnap = await adminDb.collection('supporterData').get()
-    const supporterDataList: SupporterData = {} // サポーターデータ
-    supporterDataSnap.forEach((doc) => {
-      const { name, email } = doc.data()
-      if (typeof name === 'string' && typeof email === 'string') {
-        supporterDataList[doc.id] = { name, email }
+    const supporterListSnap = await adminDb.collection('supporterList').get()
+    const supporterList: SupporterList = {} // サポーターデータ
+    supporterListSnap.forEach((doc) => {
+      const { name, email, color } = doc.data()
+      if (typeof name === 'string' && typeof email === 'string' && color === 'string') {
+        supporterList[doc.id] = { name, email, color }
       }
     })
 
     return {
-      props: { contactId, contactInfo, chatData, supporterDataList },
+      props: { contactId, contactInfo, chatData, supporterList },
       revalidate: 60,
     }
   } else {

@@ -1,12 +1,12 @@
 import { memo } from 'react'
 
 import { ContactTable } from 'components/organisms/presentations/ContactTable'
-import { ContactInfo, SupporterData } from 'types/data'
+import { ContactInfoList, SupporterList } from 'types/data'
 
 type Props = {
   tableTitle: string
-  contactInfoList: Record<string, ContactInfo>
-  supporterDataList: SupporterData
+  contactInfoList: ContactInfoList
+  supporterList: SupporterList
   uid: string
 }
 
@@ -14,7 +14,7 @@ const currentStatusArray: ['未対応', '対応中', '対応完了'] = ['未対�
 const currentStatusColorArray: ['warning', 'info', 'success'] = ['warning', 'info', 'success']
 
 // eslint-disable-next-line react/display-name
-export const ContactTableContainer = memo(({ tableTitle, contactInfoList, supporterDataList, uid }: Props) => {
+export const ContactTableContainer = memo(({ tableTitle, contactInfoList, supporterList, uid }: Props) => {
   const contactInfoArray = Object.keys(contactInfoList).map((key) => {
     const { name, tel, category, contents, supporter, currentStatus, submitTime } = contactInfoList[key]
     return {
@@ -23,7 +23,8 @@ export const ContactTableContainer = memo(({ tableTitle, contactInfoList, suppor
       category,
       contents,
       supporterId: supporter,
-      supporter: supporter === '0' ? '-' : supporterDataList[supporter].name,
+      supporter: supporter === '0' ? '-' : supporterList[supporter].name,
+      supporterColor: supporter && supporterList[supporter] && supporterList[supporter].color,
       currentStatus,
       currentStatusInfo: { label: currentStatusArray[currentStatus], color: currentStatusColorArray[currentStatus] },
       submitTime,

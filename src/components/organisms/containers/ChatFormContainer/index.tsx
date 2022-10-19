@@ -4,6 +4,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 
 import { ChatForm } from 'components/organisms/presentations/ChatForm'
 import { Chat } from 'types/data'
+import { ChatFormInputType } from 'types/input'
 
 type Props = {
   admin: boolean
@@ -12,11 +13,7 @@ type Props = {
   currentStatus?: number | undefined
   supporter?: string | undefined // 現在の担当者のID
   // eslint-disable-next-line no-unused-vars
-  postChat: (chat: Chat) => Promise<void>
-}
-
-export type ChatFormInputType = {
-  text: string
+  postChat: (chat: Omit<Chat, 'id'>) => Promise<void>
 }
 
 // eslint-disable-next-line react/display-name
@@ -47,7 +44,7 @@ export const ChatFormContainer = memo(
           if (typeof contributor === 'undefined') throw new Error('contributor is undefined.')
           if (typeof contactId === 'undefined') throw new Error('contactId is undefined.')
 
-          const chat: Chat = { contributor, postTime: Date.now(), contents: { text } }
+          const chat: Omit<Chat, 'id'> = { contributor, postTime: Date.now(), contents: { text } }
 
           reset()
 
