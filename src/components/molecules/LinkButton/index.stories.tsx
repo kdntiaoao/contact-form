@@ -18,6 +18,14 @@ export default {
         type: { summary: 'string' },
       },
     },
+    reverse: {
+      control: { type: 'boolean' },
+      defaultValue: false,
+      description: 'リバースフラグ',
+      table: {
+        type: { summary: 'boolean' },
+      },
+    },
     children: {
       control: { type: 'text' },
       defaultValue: 'お問い合わせ一覧',
