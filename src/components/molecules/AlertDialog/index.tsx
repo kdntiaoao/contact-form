@@ -1,11 +1,6 @@
 import { memo } from 'react'
 
-import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, styled } from '@mui/material'
 
 type Props = {
   title?: string
@@ -16,13 +11,21 @@ type Props = {
   onClose: (selectOption: 0 | 1) => void
 }
 
+const CustomizedDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(3),
+  },
+}))
+
 // eslint-disable-next-line react/display-name
 export const AlertDialog = memo(({ title, description, options, open, onClose }: Props) => {
   return (
     <div>
-      <Dialog
+      <CustomizedDialog
         open={open}
         onClose={() => onClose(0)}
+        fullWidth
+        maxWidth="xs"
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
@@ -34,9 +37,11 @@ export const AlertDialog = memo(({ title, description, options, open, onClose }:
           <Button onClick={() => onClose(0)} autoFocus>
             {options[0]}
           </Button>
-          <Button onClick={() => onClose(1)}>{options[1]}</Button>
+          <Button variant="contained" onClick={() => onClose(1)}>
+            {options[1]}
+          </Button>
         </DialogActions>
-      </Dialog>
+      </CustomizedDialog>
     </div>
   )
 })
