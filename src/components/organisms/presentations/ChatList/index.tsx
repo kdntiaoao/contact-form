@@ -25,7 +25,7 @@ export const ChatList = memo(({ admin = false, chatData }: Props) => {
   return (
     <Stack spacing={2}>
       {chatData?.map(
-        ({ contributor, contributorName, postTime, formattedPostTime, contents: { text, newStatus, date } }) => {
+        ({ contributor, contributorName, postTime, formattedPostTime, contents: { text, newStatus, date } }, index) => {
           if (formattedPostTime && typeof contributorName !== 'undefined' && typeof text !== 'undefined') {
             return (
               <Chat
@@ -33,7 +33,7 @@ export const ChatList = memo(({ admin = false, chatData }: Props) => {
                 reverse={admin ? contributor !== '0' : contributor === '0'}
                 contributor={contributorName}
                 text={text}
-                postTime={formattedPostTime}
+                postTime={formattedPostTime === chatData[index + 1]?.formattedPostTime ? '' : formattedPostTime}
               />
             )
           }
@@ -47,9 +47,7 @@ export const ChatList = memo(({ admin = false, chatData }: Props) => {
           if (date) {
             return (
               <Box key={`${postTime}-${date}`} textAlign="center" pb={2}>
-                <Typography color='gray'>
-                  {date}
-                </Typography>
+                <Typography color="gray">{date}</Typography>
               </Box>
             )
           }
