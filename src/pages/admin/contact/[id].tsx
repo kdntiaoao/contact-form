@@ -55,15 +55,16 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
       [contactInfo, userInfo]
     )
 
-    const contactInfoData = useMemo<{title: string; content: string}[]>(() => (
-      [
-        {title: 'お名前', content: contactInfo?.name || ''},
-        {title: 'メールアドレス', content: contactInfo?.email || ''},
-        {title: '電話番号', content: contactInfo?.tel || ''},
-        {title: '商品種別', content: contactInfo?.category || ''},
-        {title: '担当者', content: contactInfo && supporterList?.[contactInfo.supporter]?.name || ''},
-      ]
-    ), [contactInfo, supporterList])
+    const contactInfoData = useMemo<{ title: string; content: string }[]>(
+      () => [
+        { title: 'お名前', content: contactInfo?.name || '' },
+        { title: 'メールアドレス', content: contactInfo?.email || '' },
+        { title: '電話番号', content: contactInfo?.tel || '' },
+        { title: '商品種別', content: contactInfo?.category || '' },
+        { title: '担当者', content: (contactInfo && supporterList?.[contactInfo.supporter]?.name) || '' },
+      ],
+      [contactInfo, supporterList]
+    )
 
     // Firebaseにチャットを保存する関数
     const postChat = useCallback(
@@ -145,17 +146,20 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
     return (
       <DefaultLayout>
         <Box sx={{ position: 'absolute', inset: 0 }}>
-          <Stack direction={matches ? 'row' : 'column'} height="100%">
+          <Stack direction={{ xs: 'column', md: 'row' }} height="100%">
             <Container maxWidth="md" sx={{ width: { xs: '100%', md: 'fit-content' } }}>
               <Box py={matches ? 4 : 2}>
                 <Box mb={matches ? 4 : 2}>
-                  <LinkButton href="/admin/contact">お問い合わせ一覧</LinkButton>
+                  <LinkButton href="/admin/contact" fullWidth={matches} reverse>
+                    お問い合わせ一覧
+                  </LinkButton>
                 </Box>
 
                 <Stack
+                  alignItems={{ xs: 'flex-start', sm: 'center', md: 'stretch' }}
                   direction={{ xs: 'column', sm: 'row', md: 'column' }}
+                  flexWrap={{ xs: 'wrap' }}
                   spacing={{ xs: 2, sm: 6 }}
-                  alignItems={{ xs: 'flex-start', sm: 'stretch' }}
                 >
                   <Box>
                     <StatusSelectAreaContainer
@@ -169,8 +173,8 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
 
                   <IconButtonList
                     list={[
-                      { icon: <CreateRoundedIcon />, text: 'コメントする', onClick: handleToggleCommentDialog },
-                      { icon: <InfoRoundedIcon />, text: 'お客様情報', onClick: handleToggleContactInfoDialog },
+                      { text: 'コメントする', icon: <CreateRoundedIcon />, onClick: handleToggleCommentDialog },
+                      { text: 'お客様情報', icon: <InfoRoundedIcon />, onClick: handleToggleContactInfoDialog },
                     ]}
                   />
 
@@ -182,7 +186,11 @@ const AdminContactChatPage: NextPage<AdminContactChatPageProps> = memo(
                     handleClose={handleToggleCommentDialog}
                   />
 
-                  <ContactInfoDialog list={contactInfoData} open={contactInfoDialogOpen} handleClose={handleToggleContactInfoDialog} />
+                  <ContactInfoDialog
+                    list={contactInfoData}
+                    open={contactInfoDialogOpen}
+                    handleClose={handleToggleContactInfoDialog}
+                  />
                 </Stack>
               </Box>
             </Container>

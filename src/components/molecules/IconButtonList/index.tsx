@@ -1,11 +1,22 @@
 import { memo, ReactNode } from 'react'
 
-import { alpha, List, ListItem, ListItemButton, ListItemIcon, ListItemText, styled } from '@mui/material'
+import {
+  alpha,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  styled,
+} from '@mui/material'
 
 type Props = {
+  horizontal?: boolean
   list: {
-    icon: ReactNode
     text: string
+    icon: ReactNode
     onClick: () => void
   }[]
 }
@@ -20,7 +31,7 @@ const CustomizedList = styled(List)(({ theme }) => ({
   },
   '& .MuiListItemIcon-root': {
     minWidth: 0,
-    marginRight: 16,
+    marginRight: 10,
     color: theme.palette.primary.main,
   },
   '& .MuiSvgIcon-root': {
@@ -33,8 +44,16 @@ const CustomizedList = styled(List)(({ theme }) => ({
 }))
 
 // eslint-disable-next-line react/display-name
-export const IconButtonList = memo(({ list }: Props) => {
-  return (
+export const IconButtonList = memo(({ horizontal = true, list }: Props) => {
+  return horizontal ? (
+    <Stack direction="row" spacing={1}>
+      {list.map(({ icon, text, onClick }) => (
+        <IconButton key={text} color="primary" size="large" onClick={onClick}>
+          {icon}
+        </IconButton>
+      ))}
+    </Stack>
+  ) : (
     <CustomizedList>
       {list.map(({ icon, text, onClick }) => (
         <ListItem disablePadding dense key={text}>
