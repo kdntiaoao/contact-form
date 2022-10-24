@@ -4,13 +4,15 @@ import { Button } from '@mui/material'
 
 type Props = {
   backgroundColor: 'primary' | 'secondary'
+  onClick: () => void
   children: ReactNode
 }
 
-export const PrimaryButton = ({ backgroundColor = 'primary', children }: Props) => {
+export const PrimaryButton = ({ backgroundColor = 'primary', onClick, children }: Props) => {
   return (
     <Button
       variant="contained"
+      onClick={onClick}
       sx={{
         bgcolor: `${backgroundColor}.main`,
         '&:hover': {
