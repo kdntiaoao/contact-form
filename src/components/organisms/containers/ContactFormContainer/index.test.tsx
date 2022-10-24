@@ -23,32 +23,27 @@ describe('ContactFormContainer', () => {
   it('フォーム入力後、hendleSubmitが呼ばれる', async () => {
     const nameField = screen.getByLabelText('お名前') as HTMLInputElement
     const dummyName = '田中太郎'
-    // fireEvent.change(nameField, { target: { value: dummyName } }) // 名前を入力
     userEvent.type(nameField, dummyName) // 名前を入力
     await waitFor(() => expect(nameField).toHaveValue(dummyName)) // 名前が入力されているか
 
     const emailField = screen.getByLabelText('メールアドレス') as HTMLInputElement
     const dummyEmail = 'tanaka.taro@example.com'
-    // fireEvent.change(emailField, { target: { value: dummyEmail } }) // メールアドレスを入力
     userEvent.type(emailField, dummyEmail) // メールアドレスを入力
     await waitFor(() => expect(emailField).toHaveValue(dummyEmail)) // メールアドレスが入力されているか
 
     const telField = screen.getByLabelText('電話番号') as HTMLInputElement
     const dummyTel = '08000123456'
-    // fireEvent.change(telField, { target: { value: dummyTel } }) // 電話番号を入力
     userEvent.type(telField, dummyTel) // 電話番号を入力
     await waitFor(() => expect(telField).toHaveValue(dummyTel)) // 電話番号が入力されているか
 
     const categoryField = screen.getByLabelText('商品種別') as HTMLInputElement
     const dummyCategory = 'A001'
-    // fireEvent.change(categoryField, { target: { value: dummyCategory } }) // 商品種別を入力
     userEvent.type(categoryField, `${dummyCategory}{enter}`) // 商品種別を入力
     await waitFor(() => expect(categoryField).toHaveValue(dummyCategory)) // 商品種別が入力されているか
 
     const contentsField = screen.getByLabelText('お問い合わせ内容') as HTMLInputElement
     const dummyContents =
       'ダミーテキスト。ダミーテキスト。ダミーテキスト。ダミーテキスト。ダミーテキスト。ダミーテキスト。'
-    // fireEvent.change(contentsField, { target: { value: dummyContents } }) // お問い合わせ内容を入力
     userEvent.type(contentsField, dummyContents) // お問い合わせ内容を入力
     await waitFor(() => expect(contentsField).toHaveValue(dummyContents)) // お問い合わせ内容が入力されているか
 
@@ -129,41 +124,4 @@ describe('ContactFormContainer', () => {
     const errorTextElements = screen.getAllByText('正しい値を入力してください')
     expect(errorTextElements).toHaveLength(2)
   })
-
-  // it('名前は16文字までのみ入力される', async () => {
-  //   const nameField = screen.getByLabelText('お名前') as HTMLInputElement
-  //   const dummyName = 'abc'.repeat(17)
-  //   userEvent.type(nameField, dummyName) // 名前を入力
-  //   // 名前が入力されているか
-  //   await waitFor(() => {
-  //     expect(nameField).toHaveValue(dummyName.slice(0, 16))
-  //   })
-  // })
-
-  // it('メールアドレスは200文字までのみ入力される', async () => {
-  //   const emailField = screen.getByLabelText('メールアドレス') as HTMLInputElement
-  //   const dummyEmail = 'sample@example.' + 'def'.repeat(100)
-  //   userEvent.type(emailField, dummyEmail) // メールアドレスを入力
-  //   // メールアドレスが入力されているか
-  //   await waitFor(() => {
-  //     expect(emailField).toHaveValue(dummyEmail.slice(0, 200))
-  //   })
-  // })
-
-  // it('電話番号は12文字までのみ入力される', async () => {
-  //   const telField = screen.getByLabelText('電話番号') as HTMLInputElement
-  //   const dummyTel = '01234'.repeat(13).toString()
-  //   userEvent.type(telField, dummyTel) // 電話番号を入力
-  //   // 電話番号が入力されているか
-  //   await waitFor(() => {
-  //     expect(telField).toHaveValue(dummyTel.slice(0, 12))
-  //   })
-  // })
-
-  // it('お問い合わせ内容は2001文字までのみ入力される', async () => {
-  //   const contentsField = screen.getByLabelText('お問い合わせ内容') as HTMLTextAreaElement
-  //   const dummyContents = 'a'.repeat(2001)
-  //   userEvent.type(contentsField, dummyContents) // お問い合わせ内容を入力
-  //   await waitFor(() => expect(contentsField).toHaveValue(dummyContents.slice(0, 2000))) // お問い合わせ内容が入力されているか
-  // })
 })
