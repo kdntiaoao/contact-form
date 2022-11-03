@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent, Dispatch, memo, SetStateAction, useCallback, useMemo } from 'react'
+import { BaseSyntheticEvent, memo, useMemo } from 'react'
 
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
@@ -15,7 +15,7 @@ type Props = {
   isSubmitting: boolean
   // eslint-disable-next-line no-unused-vars
   onSubmit: (event?: BaseSyntheticEvent) => Promise<void>
-  setFieldReadonly: Dispatch<SetStateAction<boolean>>
+  handleClickFixButton: () => void
   // eslint-disable-next-line no-unused-vars
   setValue: (key: keyof ContactFormInputsType, value: ContactFormInputsType[typeof key]) => void
 }
@@ -39,13 +39,11 @@ const categoryOptions = [
 
 // eslint-disable-next-line react/display-name
 export const ContactForm = memo(
-  ({ control, errors, fieldReadonly, isSubmitting, onSubmit, setFieldReadonly, setValue }: Props) => {
+  ({ control, errors, fieldReadonly, isSubmitting, onSubmit, handleClickFixButton, setValue }: Props) => {
     const submitButtonText = useMemo(() => (!fieldReadonly ? '確認する' : '送信する'), [fieldReadonly])
 
-    const handleClickFixButton = useCallback(() => setFieldReadonly(false), [setFieldReadonly])
-
     return (
-      <Stack component="form" noValidate autoComplete="off" onSubmit={onSubmit} spacing={6}>
+      <Stack component="form" onSubmit={onSubmit} spacing={6}>
         <ContactTextField
           control={control}
           error={errors?.name}
@@ -78,6 +76,7 @@ export const ContactForm = memo(
           render={({ field: { name, value, onBlur } }) => (
             <Autocomplete
               autoHighlight
+              autoSelect
               disableClearable
               readOnly={fieldReadonly}
               options={categoryOptions}

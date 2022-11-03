@@ -1,4 +1,4 @@
-import { Dispatch, memo, SetStateAction } from 'react'
+import { Dispatch, memo, SetStateAction, useCallback } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -20,7 +20,7 @@ const schema = z.object({
   email: z
     .string()
     .min(1, { message: '入力してください' })
-    .max(200, { message: '12文字以内にしてください' })
+    .max(200, { message: '200文字以内にしてください' })
     .refine((value) => emailRegex.test(value), { message: '正しい値を入力してください' }),
   tel: z
     .string()
@@ -43,14 +43,15 @@ export const ContactFormContainer = memo(({ fieldReadonly, onSubmit, setFieldRea
     reValidateMode: 'onChange',
     resolver: zodResolver(schema),
     defaultValues: {
-      name: '田中太郎',
-      email: 'sample@example.com',
-      tel: '08000121234',
-      category: 'A001',
-      contents:
-        '私は当時しばしばどんな講演院というのの以上と信じうです。けっして生涯を落第者はよほどその修養あるただけとするばみますのは意味するだないが、あくまでには退けなかっましたない。個人に明らめでつもりはまあ今日にまあましありた。正しく向さんが関係道少し手続きに散らかすう各人その廃墟私か影響がという今品評ならたですんて、このたくさんもあなたか一般本にたべが、岡田さんの事に肉のそれにとにかくご想像としがあなた骨とご撲殺が甘んじように断然お運動をいでなけれと、たといよし運動が掴むたばくれたものが減っでだ。もっともそれから大力で賑わすのはそう窮屈としなて、その角度にはありなてという世の中を認めば来ですます。',
+      name: '',
+      email: '',
+      tel: '',
+      category: '',
+      contents: '',
     },
   })
+
+  const handleClickFixButton = useCallback(() => setFieldReadonly(false), [setFieldReadonly])
 
   return (
     <>
@@ -60,7 +61,7 @@ export const ContactFormContainer = memo(({ fieldReadonly, onSubmit, setFieldRea
         fieldReadonly={fieldReadonly}
         isSubmitting={isSubmitting}
         onSubmit={handleSubmit(onSubmit)}
-        setFieldReadonly={setFieldReadonly}
+        handleClickFixButton={handleClickFixButton}
         setValue={setValue}
       />
     </>
