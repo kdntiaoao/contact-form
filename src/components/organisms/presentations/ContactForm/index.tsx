@@ -43,7 +43,7 @@ export const ContactForm = memo(
     const submitButtonText = useMemo(() => (!fieldReadonly ? '確認する' : '送信する'), [fieldReadonly])
 
     return (
-      <Stack component="form" noValidate autoComplete="off" onSubmit={onSubmit} spacing={6}>
+      <Stack component="form" onSubmit={onSubmit} spacing={6}>
         <ContactTextField
           control={control}
           error={errors?.name}
